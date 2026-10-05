@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pds-tools"
+version = "0.1.0"
+description = "Read-only helpers and MCP server behind the PDS course AI plugins (rules, git state, GHDL, pins, topic pages)"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [{name = "Faculty of Electrical Engineering, University of Banja Luka"}]
+dependencies = ["mcp>=2.3,<3"]
+
+[project.optional-dependencies]
+# The style check of the course; pinned to the version used by the course CI
+style = ["vhdl-style-tools @ git+https://github.com/etf-unibl/vhdl-style-tools@v1.1.0"]
+test = ["pytest>=8"]
+
+[project.urls]
+Homepage = "https://github.com/etf-unibl/pds-plugins"
+
+[project.scripts]
+pds-mcp = "pds_tools.mcp_server:main"
+pds-tools = "pds_tools.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+pds_tools = ["data/*.csv", "data/*.json"]
