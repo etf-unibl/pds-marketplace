@@ -11,6 +11,11 @@ on:
 permissions:
   contents: write
 
+# one publish at a time: overlapping runs force-push the same branches
+concurrency:
+  group: publish-gemini
+  cancel-in-progress: false
+
 jobs:
   publish:
     runs-on: ubuntu-24.04
