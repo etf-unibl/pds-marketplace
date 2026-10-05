@@ -49,7 +49,7 @@ def parse_messages(output):
                 result.append({"file": None, "line": None, "column": None, "severity": "error", "message": raw.strip()[len("ghdl:"):].strip()})
             continue
         rest = m.group("rest")
-        entry = {"file": os.path.basename(m.group("file")), "line": int(m.group("line")), "column": int(m.group("col"))}
+        entry = {"file": os.path.basename(m.group("file").replace("\\", "/")),"line": int(m.group("line")), "column": int(m.group("col"))}
         a = ASSERTION.match(rest)
         if a:
             entry.update(severity=a.group("severity").lower(), message=a.group("text"), time=a.group("time"), kind=a.group("kind").lower())
