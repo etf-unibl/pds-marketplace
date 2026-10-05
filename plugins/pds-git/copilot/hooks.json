@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "hooks": {
+    "preToolUse": [
+      {
+        "type": "command",
+        "bash": "for p in python3 python py; do if \"$p\" -c \"\" >/dev/null 2>&1; then exec \"$p\" \"${COPILOT_PLUGIN_ROOT:-$PLUGIN_ROOT}/scripts/guard.py\" copilot; fi; done; exit 0",
+        "powershell": "$r = if ($env:COPILOT_PLUGIN_ROOT) { $env:COPILOT_PLUGIN_ROOT } else { $env:PLUGIN_ROOT }; foreach ($p in 'python','py','python3') { if (Get-Command $p -ErrorAction SilentlyContinue) { $input | & $p \"$r/scripts/guard.py\" copilot; exit 0 } }; exit 0",
+        "timeoutSec": 10
+      }
+    ]
+  }
+}

@@ -9,10 +9,14 @@ tool starts it in, normally the student's course repository.
 """
 
 import argparse
+import functools
+import inspect
 import os
+import re
 import sys
+import urllib.parse
 
-from mcp.server.mcpserver import MCPServer
+from mcp.server.mcpserver import Context, MCPServer
 from mcp.types import ToolAnnotations
 
 from . import __version__, env, explain, github, hdl, pins, quartus, repo, rules, topics
@@ -30,32 +34,44 @@ def _read(path):
 
 def env_check() -> dict:
     """Checks the student's environment: git, GHDL, vhdl-style, gh, Quartus and ModelSim/Questa on PATH, git identity (noreply e-mail) and course hooks."""
-    return env.env_check(os.getcwd())
+    return env.env_check(base())
 
 
 def task_context(issue: int | None = None) -> dict:
     """Context of a course issue (default: the issue of the current branch): title, kind (test/graded), group, deadline, folder, expected branch prefix, commit subject and PR title."""
-    return github.task_context(issue, os.getcwd())
+    return github.task_context(issue, base())
 
 
 def pr_status(pr: int | None = None) -> dict:
     """Pull request of the current branch (or number pr): the course rule checks (title, branch, assignee, files, commits, description) and the CI results with error annotations."""
-    return github.pr_status(pr, os.getcwd())
+    return github.pr_status(pr, base())
+
+
+def time_summary(issue: int | None = None) -> dict:
+    """Time logged with /spent comments on an issue (default: the issue of the current branch), per author, with invalid lines, as the time tracking workflow counts it."""
+    return github.time_summary(issue, base())
+
+
+def spent_check(text: str) -> dict:
+    """Checks a /spent comment draft: which lines are valid entries (hours, note) and which would be rejected."""
+    valid, invalid = rules.spent_entries(text)
+    return {"ok": bool(valid) and not invalid, "entries": valid, "invalid": invalid,
+            "format": "/spent <duration> <description>, duration like 2h, 1.5h, 1,5h, 1h30m, 90m, 45min (at most 24h per line)"}
 
 
 def course_doc(name: str | None = None) -> dict:
     """A course guide from docs/ (e.g. assignment-submission, simulation-and-testing, vhdl-code-style); without a name, the list of guides."""
-    return topics.course_doc(name, os.getcwd())
+    return topics.course_doc(name, base())
 
 
 def repo_state() -> dict:
     """State of the working copy: branch, issue, staged/unstaged/untracked files, files outside assignments/<N>/, upstream ahead/behind, merge/rebase in progress, hooks and identity."""
-    return repo.repo_state(os.getcwd())
+    return repo.repo_state(base())
 
 
 def commit_check(message: str, issue: int | None = None, issue_title: str | None = None) -> dict:
     """Checks a commit message draft against the course format (and the exact issue title if given). The sign-off is checked against the git identity of the repository."""
-    root = repo.find_root(os.getcwd())
+    root = repo.find_root(base())
     name = repo.git(["config", "--get", "user.name"], cwd=root, check=False) if root else None
     email = repo.git(["config", "--get", "user.email"], cwd=root, check=False) if root else None
     branch = repo.git(["branch", "--show-current"], cwd=root, check=False) if root else None
@@ -65,7 +81,7 @@ def commit_check(message: str, issue: int | None = None, issue_title: str | None
 
 def branch_check(issue_title: str | None = None, base: str = "origin/assignments") -> dict:
     """Checks the commits of the current branch that are not on base, like the CI pr-checks job (format, sign-off, issue number)."""
-    return repo.check_branch_commits(os.getcwd(), base, issue_title)
+    return repo.check_branch_commits(base(), base, issue_title)
 
 
 def explain_command(command: str, lang: str = "en") -> dict:
@@ -90,7 +106,7 @@ def run_testbenches(folder: str, testbenches: list[str] | None = None, stop_time
 
 def style_report(target: str) -> dict:
     """Runs the course style check (vhdl-style, never with --fix) on an issue number, folder or file and returns the violations."""
-    return hdl.style_report(target, os.getcwd())
+    return hdl.style_report(target, base())
 
 
 def synth_summary(project_dir: str = ".", revision: str | None = None) -> dict:
@@ -115,51 +131,58 @@ def pin_plan(vhdl_file: str) -> dict:
 
 def topics_list() -> dict:
     """Topic pages of the course (one per video lecture): number, title, video link, length and example code folder."""
-    return topics.list_topics(os.getcwd())
+    return topics.list_topics(base())
 
 
 def topics_search(query: str, limit: int = 8) -> dict:
     """Searches the topic pages (and the timestamped video contents) for a question or term; returns the matching paragraphs and video moments."""
-    return topics.search_topics(query, os.getcwd(), limit)
+    return topics.search_topics(query, base(), limit)
 
 
 def topic_get(number: int, section: str | None = None) -> dict:
     """A topic page or one of its sections (contents, key_terms, explanation, example, common_mistakes, self_check, further_material)."""
-    return topics.get_topic(number, section, os.getcwd())
+    return topics.get_topic(number, section, base())
 
 
 def glossary(term: str | None = None) -> dict:
     """Key terms of all topic pages with their explanations (Serbian or English, depending on the course repository); filter by term."""
-    return topics.glossary(term, os.getcwd())
+    return topics.glossary(term, base())
 
 
 def quiz(topic: int | None = None, reveal_answers: bool = False) -> dict:
     """Self-check questions of the topic pages (one topic or all). Answers are included only with reveal_answers=True, after the student has answered."""
-    return topics.self_check(topic, os.getcwd(), reveal_answers)
+    return topics.self_check(topic, base(), reveal_answers)
 
 
 def video_notes() -> dict:
     """Notes on errors in the videos and on outdated tools, per topic (the course code and pages contain the corrections)."""
-    return topics.video_notes(os.getcwd())
+    return topics.video_notes(base())
 
 
 def tutorial_examples(topic: int | None = None) -> dict:
     """Example code of the video lectures (video-tutorials/); verified code, corrections of video errors are marked with NOTE comments."""
-    return topics.examples(topic, os.getcwd())
+    return topics.examples(topic, base())
 
 
 def tutorial_example_read(file: str) -> dict:
     """Reads one file from video-tutorials/ (path as returned by tutorial_examples)."""
-    return topics.read_example(file, os.getcwd())
+    return topics.read_example(file, base())
+
+
+def tutorial_example_run(folder: str) -> dict:
+    """Analyses and simulates (with GHDL, like CI) an example folder of video-tutorials/ from the course repository, without changing the working copy; examples with *_tb.vhd are simulated, others analysed."""
+    return topics.run_example(folder, base())
 
 
 PROFILES = {
-    "course": [(env_check, READ_ONLY), (task_context, READ_ONLY_REMOTE), (pr_status, READ_ONLY_REMOTE), (course_doc, READ_ONLY)],
+    "course": [(env_check, READ_ONLY), (task_context, READ_ONLY_REMOTE), (pr_status, READ_ONLY_REMOTE), (time_summary, READ_ONLY_REMOTE),
+               (spent_check, READ_ONLY), (course_doc, READ_ONLY)],
     "git": [(repo_state, READ_ONLY), (commit_check, READ_ONLY), (branch_check, READ_ONLY), (explain_command, READ_ONLY)],
     "design": [(style_report, READ_ONLY), (synth_summary, READ_ONLY), (vhdl_analyze, READ_ONLY), (board_pins, READ_ONLY), (pin_check, READ_ONLY), (pin_plan, READ_ONLY)],
     "testing": [(list_testbenches, READ_ONLY), (vhdl_analyze, READ_ONLY), (run_testbenches, READ_ONLY)],
     "learning": [(topics_list, READ_ONLY), (topics_search, READ_ONLY), (topic_get, READ_ONLY), (glossary, READ_ONLY), (quiz, READ_ONLY),
-                 (video_notes, READ_ONLY), (tutorial_examples, READ_ONLY), (tutorial_example_read, READ_ONLY), (course_doc, READ_ONLY)],
+                 (video_notes, READ_ONLY), (tutorial_examples, READ_ONLY), (tutorial_example_read, READ_ONLY), (tutorial_example_run, READ_ONLY),
+                 (course_doc, READ_ONLY)],
 }
 PROFILES["all"] = list({f.__name__: (f, a) for p in PROFILES.values() for f, a in p}.values())
 
@@ -168,12 +191,120 @@ INSTRUCTIONS = ("Tools of the PDS (Projektovanje digitalnih sistema) course. All
                 "(explain_command), let the student run it, then check the result with repo_state.")
 
 
+_workdir = None
+
+
+def base():
+    """The student's course repository: PDS_REPO, the server's working directory if it is a git
+    repository, or the workspace root reported by the AI tool (resolved by the first tool call)."""
+    return _workdir or os.environ.get("PDS_REPO") or os.getcwd()
+
+
+async def resolve_workdir(ctx):
+    global _workdir
+    if _workdir:
+        return
+    if os.environ.get("PDS_REPO"):
+        _workdir = os.environ["PDS_REPO"]
+        return
+    # The client's workspace roots come first: e.g. Copilot CLI starts plugin servers in the plugin
+    # folder, not in the project
+    debug = os.environ.get("PDS_DEBUG_LOG")
+    try:
+        caps = ctx.client_capabilities
+        if debug:
+            with open(debug, "a", encoding="utf-8") as f:
+                f.write(f"cwd={os.getcwd()} roots_capability={getattr(caps, 'roots', None) if caps else None}\n")
+                f.write("env names=" + ", ".join(k for k in sorted(os.environ) if any(x in k.upper() for x in ("COPILOT", "PWD", "CLAUDE", "PLUGIN", "WORKSPACE", "PROJECT", "GEMINI"))) + "\n")
+        if caps is not None and getattr(caps, "roots", None) is not None:
+            result = await ctx.session.list_roots()
+            if debug:
+                with open(debug, "a", encoding="utf-8") as f:
+                    f.write(f"roots={[str(r.uri) for r in result.roots]}\n")
+            for root in result.roots:
+                uri = str(root.uri)
+                if uri.startswith("file://"):
+                    path = urllib.parse.unquote(urllib.parse.urlparse(uri).path)
+                    if re.match(r"^/[A-Za-z]:", path):
+                        path = path[1:]  # file:///C:/x on Windows
+                    if repo.find_root(path):
+                        _workdir = path
+                        return
+    except Exception:  # noqa: BLE001 - fall back to the other sources
+        pass
+    _workdir = fallback_workdir()
+    if debug:
+        with open(debug, "a", encoding="utf-8") as f:
+            f.write(f"workdir={_workdir}\n")
+
+
+def _inside(path, folder):
+    try:
+        return bool(folder) and os.path.commonpath([os.path.abspath(path), os.path.abspath(folder)]) == os.path.abspath(folder)
+    except ValueError:
+        return False
+
+
+def fallback_workdir():
+    """Working directory when the client gives no roots: the server's own directory unless it is the
+    plugin folder (Copilot CLI starts plugin servers there), the working directory of the nearest
+    parent process (the AI tool session) that is inside a git repository, or PWD."""
+    plugin_root = os.environ.get("CLAUDE_PLUGIN_ROOT") or os.environ.get("COPILOT_PLUGIN_ROOT") or os.environ.get("PLUGIN_ROOT")
+    candidates = [os.getcwd()]
+    try:
+        import psutil
+        proc = psutil.Process().parent()
+        for _ in range(6):
+            if proc is None:
+                break
+            try:
+                candidates.append(proc.cwd())
+            except (psutil.AccessDenied, psutil.NoSuchProcess, psutil.ZombieProcess):
+                pass
+            proc = proc.parent()
+    except ImportError:
+        pass
+    # PWD last: it is inherited from whichever shell started the AI tool and may be stale
+    candidates.append(os.environ.get("PWD"))
+    for c in candidates:
+        if c and os.path.isdir(c) and not _inside(c, plugin_root) and repo.find_root(c):
+            return c
+    return os.getcwd()
+
+
+def with_workspace(func):
+    """Async tool wrapper that resolves the workspace (MCP roots) before calling the tool."""
+    params = list(inspect.signature(func).parameters.values())
+
+    async def wrapper(ctx: Context, **kwargs):
+        await resolve_workdir(ctx)
+        return func(**kwargs)
+
+    wrapper.__name__ = func.__name__
+    wrapper.__doc__ = func.__doc__
+    wrapper.__signature__ = inspect.Signature(params + [inspect.Parameter("ctx", inspect.Parameter.KEYWORD_ONLY, annotation=Context)],
+                                              return_annotation=dict)
+    wrapper.__annotations__ = {**getattr(func, "__annotations__", {}), "ctx": Context}
+    return wrapper
+
+
+def safe(func):
+    """Returns errors as {ok: false, error, message} instead of raising, so the assistant can explain them."""
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:  # noqa: BLE001 - every failure is reported to the assistant
+            return {"ok": False, "error": type(e).__name__, "message": str(e)}
+    return wrapper
+
+
 def build(profile):
     if profile not in PROFILES:
         raise SystemExit(f"Unknown profile '{profile}'. Profiles: {', '.join(PROFILES)}")
     server = MCPServer(name=f"pds-{profile}", version=__version__, instructions=INSTRUCTIONS)
     for func, annotations in PROFILES[profile]:
-        server.tool(annotations=annotations)(func)
+        server.tool(annotations=annotations)(with_workspace(safe(func)))
     return server
 
 

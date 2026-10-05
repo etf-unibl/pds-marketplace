@@ -142,3 +142,37 @@ def check_pr_body(body):
 
 def errors(findings):
     return [f for f in findings if not f.ok]
+
+
+# /spent entries of the time tracking (same as .github/scripts/time_tracking.py on main)
+SPENT_LINE = re.compile(r"^\s*/spent\b(.*)$", re.IGNORECASE)
+DURATION = re.compile(
+    r"^\s*(?:(?P<h>\d+(?:[.,]\d+)?)\s*h(?:ours?|rs?)?)?\s*(?:(?P<m>\d+)\s*m(?:in(?:utes?)?)?)?(?=\s|$)(?P<rest>.*)$",
+    re.IGNORECASE)
+MAX_ENTRY_HOURS = 24
+
+
+def parse_hours(text):
+    """(hours, note) for the text after /spent, or None if the duration is invalid."""
+    m = DURATION.match(text)
+    if not m or (m["h"] is None and m["m"] is None):
+        return None
+    hours = float((m["h"] or "0").replace(",", ".")) + int(m["m"] or 0) / 60
+    if not 0 < hours <= MAX_ENTRY_HOURS:
+        return None
+    return round(hours, 2), m["rest"].strip()
+
+
+def spent_entries(text):
+    """Valid and invalid /spent lines of a comment text."""
+    valid, invalid = [], []
+    for line in (text or "").splitlines():
+        m = SPENT_LINE.match(line)
+        if not m:
+            continue
+        parsed = parse_hours(m.group(1))
+        if parsed is None:
+            invalid.append(line.strip())
+        else:
+            valid.append({"hours": parsed[0], "note": parsed[1], "line": line.strip()})
+    return valid, invalid

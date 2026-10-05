@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "MIT"}
 authors = [{name = "Faculty of Electrical Engineering, University of Banja Luka"}]
-dependencies = ["mcp>=2.3,<3"]
+dependencies = ["mcp>=2.3,<3", "psutil>=5.9"]
 
 [project.optional-dependencies]
 # The style check of the course; pinned to the version used by the course CI

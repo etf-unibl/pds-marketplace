@@ -31,7 +31,7 @@ def main(argv=None):
     if a.tool not in tools:
         print(f"Unknown tool {a.tool}; see pds-tools --list", file=sys.stderr)
         return 2
-    func = tools[a.tool]
+    func = mcp_server.safe(tools[a.tool])
     params = list(inspect.signature(func).parameters.values())
     positional, named = [], {}
     for arg in a.args:

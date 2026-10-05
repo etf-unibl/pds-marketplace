@@ -80,3 +80,54 @@ def test_quartus_reports():
     t = r["timing"]
     assert t["fmax"][0]["fmax"] == "611.62 MHz" and t["met"] is True
     assert t["has_unconstrained"] is True and t["unconstrained"]["Unconstrained Input Ports"]["setup"] == "11"
+
+
+GUARD = os.path.join(os.path.dirname(__file__), "..", "..", "..", "src", "shared", "guard.py")
+COMMANDS = ["git status", "git -C repo status", "git -C repo commit -m x", "GIT_DIR=x git push", "/usr/bin/git.exe log",
+            "git branch -a", "git branch --contains abc", "git branch new", "git stash list", "git stash pop",
+            "git remote show origin", "git remote add x y", "git config --list", "git config core.hooksPath .githooks",
+            "gh pr checks", "gh pr merge 3", "gh api repos/a/b", "gh api -X PATCH repos/a/b", "vhdl-style 12", "vhdl-style --fix 12",
+            "ghdl -r x", "python run.py", "git", "git --version"]
+
+
+def _guard():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("guard", GUARD)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def test_guard_and_explain_classify_the_same():
+    guard = _guard()
+    for cmd in COMMANDS:
+        assert guard.is_state_changing(cmd) == explain.is_state_changing(cmd), cmd
+
+
+@pytest.mark.parametrize("data,denied", [
+    ({"tool_name": "Bash", "tool_input": {"command": "git status && git commit -s"}}, True),
+    ({"tool_name": "Bash", "tool_input": {"command": "cd x; git log --oneline -3 | head"}}, False),
+    ({"tool_name": "PowerShell", "tool_input": {"command": "powershell -Command \"git push origin 12-x\""}}, True),
+    ({"tool_name": "Bash", "tool_input": {"command": "bash -c 'git add .'"}}, True),
+    ({"tool_name": "Bash", "tool_input": {"command": "echo $(git rev-parse HEAD)"}}, False),
+    ({"toolName": "bash", "toolArgs": "{\"command\": \"git rebase main\"}"}, True),
+    ({"toolName": "powershell", "toolArgs": {"command": "ghdl -a --std=08 x.vhd"}}, False),
+    ({"tool_name": "Edit", "tool_input": {"file_path": r"C:\repo\assignments\12\x.vhd"}}, True),
+    ({"tool_name": "Write", "tool_input": {"file_path": "/repo/notes/todo.md"}}, False),
+    ({"toolName": "edit", "toolArgs": {"path": "assignments/12/x_tb.vhd"}}, True),
+])
+def test_guard_decisions(data, denied):
+    assert _guard().decide(data)[0] is denied
+
+
+def test_guard_output_formats(tmp_path):
+    import json
+    import subprocess
+    import sys
+    payload = json.dumps({"tool_name": "Bash", "tool_input": {"command": "git push"}})
+    out = subprocess.run([sys.executable, GUARD, "claude"], input=payload, capture_output=True, text=True)
+    assert json.loads(out.stdout)["hookSpecificOutput"]["permissionDecision"] == "deny" and out.returncode == 0
+    out = subprocess.run([sys.executable, GUARD, "copilot"], input=json.dumps({"toolName": "bash", "toolArgs": {"command": "git push"}}), capture_output=True, text=True)
+    assert json.loads(out.stdout)["permissionDecision"] == "deny"
+    out = subprocess.run([sys.executable, GUARD, "claude"], input=json.dumps({"tool_name": "Bash", "tool_input": {"command": "git status"}}), capture_output=True, text=True)
+    assert out.stdout == ""

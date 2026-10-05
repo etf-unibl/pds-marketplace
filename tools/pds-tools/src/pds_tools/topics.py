@@ -266,6 +266,43 @@ def read_example(file, path="."):
     return {"ok": True, "file": file, "content": text, "notes": [l.strip() for l in text.splitlines() if "NOTE:" in l]}
 
 
+def run_example(folder, path="."):
+    """Analyses and simulates a video-tutorial example folder from the course repository (taken from
+    the working copy or origin/main into a temporary folder, so the student's checkout is not touched)."""
+    import tempfile
+
+    from . import hdl
+    folder = folder.strip("/")
+    if not folder.startswith("video-tutorials/") or ".." in folder:
+        return {"ok": False, "message": "Give a folder in video-tutorials/ (see tutorial_examples)."}
+    docs = Docs(path)
+    files = [f for f in docs.list_tree(folder) if f.lower().endswith((".vhd", ".vhdl", ".csv", ".txt", ".dat"))]
+    if not files:
+        return {"ok": False, "message": f"No files in {folder}."}
+    with tempfile.TemporaryDirectory(prefix="pds-example-") as tmp:
+        for f in files:
+            dest = os.path.join(tmp, os.path.relpath(f, folder))
+            os.makedirs(os.path.dirname(dest), exist_ok=True)
+            with open(dest, "w", encoding="utf-8", newline="\n") as out:
+                out.write(docs.read(f) or "")
+        # examples are grouped in sub-folders (one design each); run each sub-folder that has VHDL files
+        results = []
+        for d, _, fs in os.walk(tmp):
+            vhdl = [x for x in fs if x.lower().endswith((".vhd", ".vhdl"))]
+            if not vhdl:
+                continue
+            rel = os.path.relpath(d, tmp).replace(os.sep, "/")
+            name = folder if rel == "." else f"{folder}/{rel}"
+            if any(os.path.splitext(x)[0].lower().endswith("_tb") for x in vhdl):
+                r = hdl.run_testbenches(d)
+                results.append({"folder": name, "kind": "testbench", "ok": r.get("ok"), "results": r.get("results"), "message": r.get("message")})
+            else:
+                r = hdl.analyze([d])
+                results.append({"folder": name, "kind": "analysis", "ok": r.get("ok"), "errors": r.get("errors"), "message": r.get("message")})
+    return {"ok": all(r["ok"] for r in results), "source": docs.source, "examples": results,
+            "note": "Examples without a testbench are only analysed (VHDL-2008). Code with NOTE comments contains corrections of errors in the video."}
+
+
 def course_doc(name=None, path="."):
     """A course guide from docs/ (e.g. assignment-submission, simulation-and-testing); without a name, the list."""
     docs = Docs(path)

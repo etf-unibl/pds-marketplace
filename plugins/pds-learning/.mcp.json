@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "pds-learning": {
+      "command": "pds-mcp",
+      "args": [
+        "--profile",
+        "learning"
+      ]
+    }
+  }
+}

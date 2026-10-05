@@ -75,6 +75,42 @@ def task_context(issue=None, path=".", repository=None):
             "required_files": ["test.vhd"] if kind == "test" else None}
 
 
+TRUSTED_ASSOCIATIONS = ("OWNER", "MEMBER", "COLLABORATOR")
+
+
+def time_summary(issue=None, path=".", repository=None):
+    """/spent entries of an issue as the time tracking workflow counts them (per author, invalid lines)."""
+    slug = _slug(path, repository)
+    if issue is None:
+        issue = repo.repo_state(path).get("issue")
+        if not issue:
+            return {"ok": False, "message": "Give the issue number (the current branch name does not start with one)."}
+    data = get(f"/repos/{slug}/issues/{issue}")
+    assignees = [a["login"] for a in data.get("assignees", [])]
+    per_author, entries, invalid, ignored = {}, [], [], 0
+    page = 1
+    while True:
+        comments = get(f"/repos/{slug}/issues/{issue}/comments", {"per_page": 100, "page": page})
+        for c in comments:
+            valid, bad = rules.spent_entries(c.get("body"))
+            if not (valid or bad):
+                continue
+            if c["user"]["type"] == "Bot" or not (c["user"]["login"] in assignees or c.get("author_association") in TRUSTED_ASSOCIATIONS):
+                ignored += 1
+                continue
+            for e in valid:
+                e.update(author=c["user"]["login"], date=c["created_at"][:10], url=c["html_url"])
+                entries.append(e)
+                per_author[e["author"]] = round(per_author.get(e["author"], 0) + e["hours"], 2)
+            invalid += [{"line": l, "url": c["html_url"]} for l in bad]
+        if len(comments) < 100:
+            break
+        page += 1
+    return {"ok": not invalid, "issue": int(issue), "title": data["title"], "logged_hours": round(sum(e["hours"] for e in entries), 2),
+            "per_author": per_author, "entries": entries, "invalid_lines": invalid, "ignored_comments": ignored,
+            "note": "This is the 'Time logged (h)' part only; 'Time spent (h)' entered on the project board is added by the weekly report."}
+
+
 def pr_status(pr=None, path=".", repository=None):
     """Pull request of the current branch (or number pr): rule checks and CI results with error annotations."""
     slug = _slug(path, repository)
@@ -113,7 +149,12 @@ def pr_status(pr=None, path=".", repository=None):
     findings += rules.check_pr_body(data.get("body"))
     checks = []
     runs = get(f"/repos/{slug}/commits/{data['head']['sha']}/check-runs", {"per_page": 100}).get("check_runs", [])
+    # Re-runs and new events (edited title, new push of the same commit) add runs; keep the latest per check name
+    latest = {}
     for run in runs:
+        if run["name"] not in latest or (run.get("started_at") or "") > (latest[run["name"]].get("started_at") or ""):
+            latest[run["name"]] = run
+    for run in latest.values():
         entry = {"name": run["name"], "status": run["status"], "conclusion": run["conclusion"], "url": run["html_url"]}
         if run["conclusion"] == "failure":
             try:

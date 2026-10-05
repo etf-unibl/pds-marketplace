@@ -140,3 +140,19 @@ def test_mcp_server_over_stdio(course):
     names, result = asyncio.run(run())
     assert "topics_search" in names and "repo_state" not in names
     assert "Leč" in result.content[0].text
+
+
+def test_fallback_workdir_skips_plugin_folder(course, tmp_path, monkeypatch):
+    # Copilot CLI starts plugin servers in the plugin folder: that folder (even inside a git repository)
+    # is skipped and PWD is used
+    from pds_tools import mcp_server
+    plugin = os.path.join(course, "plugin")
+    os.makedirs(plugin)
+    monkeypatch.chdir(plugin)
+    monkeypatch.setenv("COPILOT_PLUGIN_ROOT", plugin)
+    monkeypatch.setenv("PWD", str(course))
+    monkeypatch.delenv("CLAUDE_PLUGIN_ROOT", raising=False)
+    monkeypatch.setitem(sys.modules, "psutil", None)  # no parent processes: only the directory rules
+    assert os.path.abspath(mcp_server.fallback_workdir()) == os.path.abspath(course)
+    monkeypatch.delenv("COPILOT_PLUGIN_ROOT")
+    assert os.path.abspath(mcp_server.fallback_workdir()) == os.path.abspath(plugin)

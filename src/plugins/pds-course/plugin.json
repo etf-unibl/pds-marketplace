@@ -1,0 +1,7 @@
+{
+  "name": "pds-course",
+  "displayName": "PDS course",
+  "description": "Course workflow of PDS: setup check, task context, pull request description, failed CI checks and time tracking. Teaches the workflow, never runs it.",
+  "profile": "course",
+  "keywords": ["pds", "vhdl", "fpga", "course", "github"]
+}

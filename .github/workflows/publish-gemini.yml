@@ -1,0 +1,44 @@
+# Publishes the Gemini CLI extensions. `gemini extensions install` needs the manifest at the root of
+# a git ref, so every extension is published to its own branch gemini/<plugin>:
+#   gemini extensions install https://github.com/etf-unibl/pds-plugins --ref gemini/pds-git
+name: publish-gemini
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Check that the generated plugin files are up to date
+        run: python build/build.py --check
+
+      - name: Build
+        run: python build/build.py
+
+      - name: Publish one branch per extension
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          for dir in build/out/gemini/*/; do
+            name=$(basename "$dir")
+            tmp=$(mktemp -d)
+            cp -r "$dir". "$tmp"
+            cp LICENSE "$tmp"
+            git -C "$tmp" init -q -b "gemini/$name"
+            git -C "$tmp" add -A
+            git -C "$tmp" commit -q -m "Gemini extension $name from $GITHUB_SHA"
+            git -C "$tmp" push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" "gemini/$name"
+            echo "published gemini/$name"
+          done

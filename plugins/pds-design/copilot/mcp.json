@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "pds-design": {
+      "command": "pds-mcp",
+      "args": [
+        "--profile",
+        "design"
+      ]
+    }
+  }
+}

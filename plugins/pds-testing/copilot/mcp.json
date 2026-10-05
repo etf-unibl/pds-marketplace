@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "pds-testing": {
+      "command": "pds-mcp",
+      "args": [
+        "--profile",
+        "testing"
+      ]
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "name": "pds-design",
+  "displayName": "PDS design review",
+  "version": "0.1.0",
+  "description": "Design review for the PDS course: VHDL style rules explained, synthesis warnings (latches, sensitivity lists), resources and timing from Quartus reports, DE1-SoC pin mapping and board testing.",
+  "author": {
+    "name": "Faculty of Electrical Engineering, University of Banja Luka",
+    "url": "https://github.com/etf-unibl"
+  },
+  "homepage": "https://github.com/etf-unibl/pds-plugins",
+  "repository": "https://github.com/etf-unibl/pds-plugins",
+  "license": "MIT",
+  "keywords": [
+    "pds",
+    "vhdl",
+    "fpga",
+    "quartus",
+    "de1-soc"
+  ]
+}

@@ -5,6 +5,7 @@ this table: what it does, why it is needed in the course workflow, how to check 
 how to undo it. Texts exist in Serbian (sr) and English (en).
 """
 
+import re
 import shlex
 
 COMMANDS = {
@@ -188,35 +189,51 @@ def explain_command(command, lang="en"):
                      if entry["changes"] else "Read-only command.")}
 
 
+# Same classification as src/shared/guard.py (the guard hook of the student plugins); keep them equal
+READ_ONLY_GIT = {"status", "log", "diff", "show", "fetch", "ls-files", "ls-tree", "rev-parse", "blame", "describe",
+                 "shortlog", "reflog", "grep", "help", "version", "cat-file", "rev-list", "for-each-ref", "merge-base",
+                 "symbolic-ref", "whatchanged", "count-objects"}
+READ_ONLY_GH = ("pr view", "pr list", "pr checks", "pr diff", "pr status", "issue view", "issue list", "run view", "run list",
+                "run watch", "repo view", "auth status", "browse")
+GIT_GLOBAL_WITH_VALUE = {"-C", "-c", "--git-dir", "--work-tree", "--namespace"}
+
 def is_state_changing(command):
-    """True if the command changes the repository or GitHub (used by the student plugin guard hook)."""
+    """True if a single command changes the repository or GitHub."""
     try:
         words = shlex.split(command)
     except ValueError:
         words = command.split()
+    while words and re.match(r"^[A-Za-z_][A-Za-z0-9_]*=", words[0]):
+        words = words[1:]  # VAR=value prefixes
     if not words:
         return False
-    if words[0] == "git":
-        sub = next((w for w in words[1:] if not w.startswith("-")), "")
-        if sub in ("status", "log", "diff", "show", "fetch", "ls-files", "ls-tree", "rev-parse", "blame", "describe", "shortlog", "reflog", "grep", "help", "version"):
+    exe = words[0].replace("\\", "/").rsplit("/", 1)[-1].lower()
+    exe = exe[:-4] if exe.endswith(".exe") else exe
+    if exe == "git":
+        rest, i = words[1:], 0
+        while i < len(rest) and rest[i].startswith("-"):
+            i += 2 if rest[i] in GIT_GLOBAL_WITH_VALUE else 1
+        if i >= len(rest):
             return False
-        if sub == "branch" and all(w.startswith("-") and w in ("--show-current", "-a", "-r", "-v", "-vv", "--list", "--all") for w in words[2:]):
+        sub, args = rest[i], rest[i + 1:]
+        if sub in READ_ONLY_GIT:
             return False
-        if sub == "remote" and (len(words) == 2 or words[2] in ("-v", "show", "get-url")):
+        if sub == "branch" and all(a in ("--show-current", "-a", "-r", "-v", "-vv", "--list", "--all") or a.startswith("--contains") or a.startswith("--merged") for a in args):
             return False
-        if sub == "config" and any(w in ("--get", "--list", "-l", "--get-all") for w in words):
+        if sub == "remote" and (not args or args[0] in ("-v", "show", "get-url")):
             return False
-        if sub == "stash" and len(words) > 2 and words[2] in ("list", "show"):
+        if sub == "config" and any(a in ("--get", "--list", "-l", "--get-all", "--get-regexp") for a in args):
+            return False
+        if sub == "stash" and args and args[0] in ("list", "show"):
             return False
         return True
-    if words[0] == "gh":
+    if exe == "gh":
         if len(words) > 1 and words[1] == "api":
-            # gh api is read-only only as a plain GET without fields or input
             method = next((words[i + 1] for i, w in enumerate(words[:-1]) if w in ("-X", "--method")), "GET")
             writes = any(w in ("-f", "-F", "--field", "--raw-field", "--input") or w.startswith(("-f=", "-F=", "--field=", "--raw-field=", "--input=", "--method=")) for w in words)
             return method.upper() != "GET" or writes
         sub = " ".join(words[1:3])
-        return not any(sub.startswith(s) for s in ("pr view", "pr list", "pr checks", "pr diff", "pr status", "issue view", "issue list", "run view", "run list", "repo view", "auth status"))
-    if words[0] == "vhdl-style":
+        return not any(sub.startswith(s) for s in READ_ONLY_GH)
+    if exe == "vhdl-style":
         return "--fix" in words
     return False

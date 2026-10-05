@@ -83,3 +83,10 @@ def test_pr_body_unticked_and_empty_summary():
 def test_issue_from_branch():
     assert rules.issue_from_branch("12-even") == "12"
     assert rules.issue_from_branch("assignments") is None
+
+
+def test_spent_entries_like_time_tracking():
+    valid, invalid = rules.spent_entries("/spent 1h30m FSM\n/SPENT 45min tb\n/spent 1,5h docs\n/spent 2\n/spent 25h too much\ntext")
+    assert [v["hours"] for v in valid] == [1.5, 0.75, 1.5]
+    assert valid[0]["note"] == "FSM"
+    assert invalid == ["/spent 2", "/spent 25h too much"]
