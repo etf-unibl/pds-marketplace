@@ -156,3 +156,17 @@ def test_fallback_workdir_skips_plugin_folder(course, tmp_path, monkeypatch):
     assert os.path.abspath(mcp_server.fallback_workdir()) == os.path.abspath(course)
     monkeypatch.delenv("COPILOT_PLUGIN_ROOT")
     assert os.path.abspath(mcp_server.fallback_workdir()) == os.path.abspath(plugin)
+
+
+def test_parse_messages_windows_absolute_path():
+    out = r"C:\Users\x\AppData\Local\Temp\pds\inv.vhd:5:10: missing ';' at end of port clause"
+    m = hdl.parse_messages(out)
+    assert m and m[0]["file"] == "inv.vhd" and m[0]["line"] == 5 and m[0]["severity"] == "error"
+
+
+@pytest.mark.skipif(not hdl.find_ghdl(), reason="GHDL not installed")
+def test_analyze_reports_syntax_error_with_absolute_path(tmp_path):
+    bad = tmp_path / "bad.vhd"
+    bad.write_text("library ieee;\nuse ieee.std_logic_1164.all;\nentity bad is\n  port (a : in std_logic\nend bad;\n")
+    r = hdl.analyze([str(bad)])
+    assert not r["ok"] and r["errors"] and r["errors"][0]["file"] == "bad.vhd"

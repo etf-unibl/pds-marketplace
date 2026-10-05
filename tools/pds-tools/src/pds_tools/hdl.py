@@ -19,7 +19,7 @@ import tempfile
 
 from . import CI_STOP_TIME, VHDL_STD
 
-MESSAGE = re.compile(r"^(?P<file>[^:\n]+?(?:\.vhdl?|\.vhd)):(?P<line>\d+):(?P<col>\d+):\s*(?P<rest>.*)$", re.I)
+MESSAGE = re.compile(r"^(?P<file>(?:[A-Za-z]:)?[^:\n]+?(?:\.vhdl?|\.vhd)):(?P<line>\d+):(?P<col>\d+):\s*(?P<rest>.*)$", re.I)
 ASSERTION = re.compile(r"^@(?P<time>[^:]+):\((?P<kind>assertion|report) (?P<severity>note|warning|error|failure)\):\s*(?P<text>.*)$", re.I)
 
 
@@ -117,7 +117,9 @@ def analyze(paths, std=VHDL_STD):
                     errors.pop(f, None)
                 else:
                     failed.append(f)
-                    errors[f] = parse_messages(out)
+                    # a failed analysis is an error even if no message could be parsed
+                    errors[f] = parse_messages(out) or [{"file": os.path.basename(f), "line": None, "column": None,
+                                                         "severity": "error", "message": out.strip()[-500:] or f"ghdl -a exited with {code}"}]
             if len(failed) == len(pending):
                 break
             pending = failed
