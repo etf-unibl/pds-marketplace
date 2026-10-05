@@ -11,8 +11,9 @@ Sources (hand-edited):
   src/plugins/<plugin>/skills/<skill>/SKILL.md  skills
 
 Output:
-  plugins/<plugin>/                 one folder for Claude Code (.claude-plugin/, hooks/, .mcp.json) and
-                                    Copilot CLI (plugin.json, copilot/), shared skills/ and scripts/
+  plugins/<plugin>/                 one folder for Claude Code (.claude-plugin/, hooks/, .mcp.json), Copilot CLI
+                                    (plugin.json, copilot/) and Antigravity CLI (plugin.json, mcp_config.json,
+                                    hooks.json), shared skills/ and scripts/
   .claude-plugin/marketplace.json   marketplace (Claude Code and Copilot CLI)
   build/out/gemini/<plugin>/        Gemini CLI extensions (published to branches gemini/<plugin> by CI)
 """
@@ -40,6 +41,11 @@ DENIED_PREFIXES = [
     "gh pr ready", "gh issue create", "gh issue edit", "gh issue close", "gh issue comment", "gh repo", "gh api -X",
     "gh api --method", "vhdl-style --fix",
 ]
+
+# Antigravity CLI: hooks.json in the plugin root, command run in the plugin folder (sh -c / cmd /c)
+AGY_MATCHER = ("run_command|shell_exec|send_command_input|write_to_file|replace_file_content|multi_replace_file_content|"
+               "edit_notebook|file_change|write_blob|delete_directory|move|git_commit")
+AGY_GUARD = "python3 scripts/guard.py agy || python scripts/guard.py agy || py scripts/guard.py agy"
 
 GUARD_CMD = ('for p in python3 python py; do if "$p" -c "" >/dev/null 2>&1; then exec "$p" "${ROOT}/scripts/guard.py" CLIENT; fi; done; exit 0')
 
@@ -93,7 +99,9 @@ def build_files():
         # Claude Code hooks/hooks.json (different format) is not used by Copilot
         files[f"{out}/plugin.json"] = dump({
             "name": name, "description": p["description"], "version": VERSION, "author": AUTHOR, "license": "MIT",
-            "keywords": p["keywords"], "skills": "skills/", "hooks": "copilot/hooks.json", "mcpServers": "copilot/mcp.json"})
+            "keywords": p["keywords"],
+            # skills as a list: Antigravity CLI rejects the whole plugin.json (silently, no guard) when it is a string
+            "skills": ["skills/"], "hooks": "copilot/hooks.json", "mcpServers": "copilot/mcp.json"})
         files[f"{out}/copilot/mcp.json"] = dump({"mcpServers": mcp_servers(p["profile"])})
         guard_copilot = GUARD_CMD.replace("${ROOT}", "${COPILOT_PLUGIN_ROOT:-$PLUGIN_ROOT}").replace("CLIENT", "copilot")
         files[f"{out}/copilot/hooks.json"] = dump({"version": 1, "hooks": {"preToolUse": [{
@@ -102,6 +110,10 @@ def build_files():
                           "foreach ($p in 'python','py','python3') { if (Get-Command $p -ErrorAction SilentlyContinue) { "
                           "$input | & $p \"$r/scripts/guard.py\" copilot; exit 0 } }; exit 0",
             "timeoutSec": 10}]}})
+        # Antigravity CLI (agy plugin install <folder>): mcp_config.json and hooks.json in the plugin root
+        files[f"{out}/mcp_config.json"] = dump({"mcpServers": mcp_servers(p["profile"])})
+        files[f"{out}/hooks.json"] = dump({"pds-student-guard": {"PreToolUse": [{
+            "matcher": AGY_MATCHER, "hooks": [{"type": "command", "command": AGY_GUARD, "timeout": 10}]}]}})
         files[f"{out}/README.md"] = plugin_readme(p, skills)
         entries.append({"name": name, "source": f"./plugins/{name}", "description": p["description"],
                         "category": "education", "tags": p["keywords"]})

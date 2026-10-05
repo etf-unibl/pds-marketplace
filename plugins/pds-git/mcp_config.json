@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "pds-git": {
+      "command": "pds-mcp",
+      "args": [
+        "--profile",
+        "git"
+      ]
+    }
+  }
+}

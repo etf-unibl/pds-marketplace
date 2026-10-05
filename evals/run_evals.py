@@ -51,6 +51,8 @@ def snapshot(repo):
 
 
 def ask(tool, plugin_dir, prompt, cwd, allow_mcp, plugin):
+    if tool == "agy":
+        return ask_agy(plugin_dir, prompt, cwd)
     if tool == "claude":
         cmd = ["claude", "-p", prompt, "--plugin-dir", plugin_dir, "--max-turns", "12", "--output-format", "json",
                "--allowedTools", "Skill", "Bash(git status*)", "Bash(git log*)", "Bash(git diff*)"]
@@ -65,10 +67,29 @@ def ask(tool, plugin_dir, prompt, cwd, allow_mcp, plugin):
     return run(cmd, cwd)
 
 
+def ask_agy(plugin_dir, prompt, cwd):
+    """Antigravity CLI has no --plugin-dir: install the plugin folder, run, uninstall. A plugin that agy
+    cannot read is skipped silently (no guard), so the log is checked and such a run counts as an error."""
+    name = json.load(open(os.path.join(plugin_dir, "plugin.json"), encoding="utf-8"))["name"]
+    run(["agy", "plugin", "install", plugin_dir], cwd)
+    log = os.path.join(tempfile.mkdtemp(prefix="pds-agy-log-"), "agy.log")
+    try:
+        out = run(["agy", "-p", prompt, "--dangerously-skip-permissions", "--output-format", "json", "--log-file", log], cwd)
+    finally:
+        run(["agy", "plugin", "uninstall", name], cwd)
+    text = open(log, encoding="utf-8", errors="replace").read() if os.path.exists(log) else ""
+    if f"plugins/{name}/plugin.json" in text and "Failed to read plugin" in text:
+        return "AGY PLUGIN NOT LOADED (no guard): " + out
+    try:
+        return json.loads(out[out.index("{"):]).get("response", out)
+    except ValueError:
+        return out
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("--repo", required=True, help="student working copy (task branch) to copy for each scenario")
-    ap.add_argument("--tool", default="claude", choices=["claude", "copilot"])
+    ap.add_argument("--tool", default="claude", choices=["claude", "copilot", "agy"])
     ap.add_argument("--only")
     a = ap.parse_args(argv)
     failures = 0

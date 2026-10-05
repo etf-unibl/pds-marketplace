@@ -13,7 +13,9 @@
     "github",
     "course"
   ],
-  "skills": "skills/",
+  "skills": [
+    "skills/"
+  ],
   "hooks": "copilot/hooks.json",
   "mcpServers": "copilot/mcp.json"
 }

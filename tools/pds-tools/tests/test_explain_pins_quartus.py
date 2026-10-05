@@ -115,6 +115,12 @@ def test_guard_and_explain_classify_the_same():
     ({"tool_name": "Edit", "tool_input": {"file_path": r"C:\repo\assignments\12\x.vhd"}}, True),
     ({"tool_name": "Write", "tool_input": {"file_path": "/repo/notes/todo.md"}}, False),
     ({"toolName": "edit", "toolArgs": {"path": "assignments/12/x_tb.vhd"}}, True),
+    # Antigravity CLI (payloads recorded from agy 1.2.17)
+    ({"toolCall": {"name": "run_command", "args": {"CommandLine": "git commit -m x", "Cwd": "C:\\r"}}}, True),
+    ({"toolCall": {"name": "run_command", "args": {"CommandLine": "git status", "Cwd": "C:\\r"}}}, False),
+    ({"toolCall": {"name": "replace_file_content", "args": {"TargetFile": "C:\\r\\assignments\\12\\x.vhd"}}}, True),
+    ({"toolCall": {"name": "write_to_file", "args": {"TargetFile": "C:\\r\\notes.md"}}}, False),
+    ({"toolCall": {"name": "git_commit", "args": {}}}, True),
 ])
 def test_guard_decisions(data, denied):
     assert _guard().decide(data)[0] is denied
@@ -131,3 +137,10 @@ def test_guard_output_formats(tmp_path):
     assert json.loads(out.stdout)["permissionDecision"] == "deny"
     out = subprocess.run([sys.executable, GUARD, "claude"], input=json.dumps({"tool_name": "Bash", "tool_input": {"command": "git status"}}), capture_output=True, text=True)
     assert out.stdout == ""
+    # Antigravity always needs a decision: deny, or its normal permission prompt (ask)
+    agy = {"toolCall": {"name": "run_command", "args": {"CommandLine": "git push"}}}
+    out = subprocess.run([sys.executable, GUARD, "agy"], input=json.dumps(agy), capture_output=True, text=True)
+    assert json.loads(out.stdout)["decision"] == "deny" and json.loads(out.stdout)["reason"]
+    agy["toolCall"]["args"]["CommandLine"] = "ghdl -a --std=08 x.vhd"
+    out = subprocess.run([sys.executable, GUARD, "agy"], input=json.dumps(agy), capture_output=True, text=True)
+    assert json.loads(out.stdout) == {"decision": "ask"}

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Guard hook of the PDS student plugins (Claude Code PreToolUse, Copilot CLI preToolUse).
+"""Guard hook of the PDS student plugins (Claude Code PreToolUse, Copilot CLI preToolUse,
+Antigravity CLI PreToolUse in hooks.json).
 
 The student plugins teach the course workflow instead of doing it. This hook denies:
   - shell commands that change the repository or GitHub (git commit/push/..., gh pr create/...,
@@ -98,8 +99,21 @@ def segments(command):
     return out
 
 
-def decide(data):
-    """(deny, reason) for a hook input of Claude Code or Copilot CLI."""
+AGY_SHELL = ("run_command", "shell_exec", "send_command_input")
+AGY_EDIT = ("write_to_file", "replace_file_content", "multi_replace_file_content", "edit_notebook", "file_change",
+            "write_blob", "delete_directory", "move")
+
+
+def tool_call(data):
+    """(tool name, arguments) of a hook input of Claude Code, Copilot CLI or Antigravity CLI (toolCall)."""
+    if isinstance(data.get("toolCall"), dict):  # Antigravity: {"toolCall": {"name", "args": {"CommandLine" | "TargetFile"}}}
+        name = data["toolCall"].get("name") or ""
+        a = data["toolCall"].get("args") or {}
+        if name in AGY_SHELL:
+            return "shell", {"command": a.get("CommandLine") or a.get("Input") or ""}
+        if name in AGY_EDIT:
+            return "edit", {"file_path": a.get("TargetFile") or a.get("AbsolutePath") or a.get("FilePath") or a.get("DirectoryPath") or ""}
+        return name, a
     tool = data.get("tool_name") or data.get("toolName") or ""
     args = data.get("tool_input", data.get("toolArgs")) or {}
     if isinstance(args, str):
@@ -107,6 +121,14 @@ def decide(data):
             args = json.loads(args)
         except ValueError:
             args = {"command": args}
+    return tool, args
+
+
+def decide(data):
+    """(deny, reason) for a hook input of Claude Code, Copilot CLI or Antigravity CLI."""
+    tool, args = tool_call(data)
+    if tool == "git_commit":  # Antigravity's built-in commit step
+        return True, MESSAGE_COMMAND.format(cmd="git commit")
     command = args.get("command") if isinstance(args, dict) else None
     if command and tool.lower() in ("bash", "powershell", "shell", "run_shell_command", "terminal"):
         for seg in segments(command):
@@ -127,6 +149,10 @@ def main():
     except ValueError:
         return 0
     deny, reason = decide(data)
+    if client == "agy":
+        # Antigravity needs a decision for every hooked call (no output denies); 'ask' is its normal permission prompt
+        sys.stdout.write(json.dumps({"decision": "deny", "reason": reason} if deny else {"decision": "ask"}))
+        return 0
     if not deny:
         return 0
     if client == "copilot":
