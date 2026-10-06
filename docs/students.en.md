@@ -1,0 +1,145 @@
+# AI assistant plugins for PDS students
+
+The PDS plugins add the course to an AI assistant you run in your terminal: they know the course workflow, the rules the automated checks enforce, the topic pages of the video lectures and the example code. They **teach, they don't do the work for you**:
+
+- commands that change your repository or GitHub (commit, push, pull request, `vhdl-style --fix`) are shown and explained, and **you** run them;
+- files in `assignments/` (your graded work) are not edited by the assistant;
+- for graded tasks you get hints, explanations and reviews of your own code, not solutions.
+
+The plugins work in **Claude Code**, **GitHub Copilot CLI** and **Antigravity CLI**. Use the one you have access to.
+
+<!-- TODO (instructor): state the course rules on using AI assistants (what is allowed in graded tasks, whether AI use must be declared). -->
+
+## What you need
+
+| What | Needed for | Check |
+| ------ | ------ | ------ |
+| The course setup from `docs/getting-started.md` of your course repository: git, Python 3.10 or newer, GHDL, the style tool (`pip install -r requirements.txt`) | everything | `git --version`, `python --version`, `ghdl --version`, `vhdl-style --help` |
+| One AI tool: [Claude Code](https://code.claude.com/docs/en/quickstart), [GitHub Copilot CLI](https://docs.github.com/en/copilot/how-tos/copilot-cli) (free for students with [GitHub Education](https://education.github.com)) or Antigravity CLI | the assistant | `claude --version`, `copilot --version` or `agy --version` |
+| `pds-tools`, the course tools the plugins use (step 1) | the plugins' tools | `pds-mcp --list` |
+| Optional: the GitHub CLI `gh`, logged in (`gh auth login`) | pull request status and time tracking of private repositories; more GitHub requests per hour | `gh auth status` |
+
+Node.js is not needed.
+
+## 1. Install the course tools
+
+Install `pds-tools` into the same Python you use for the course (where `vhdl-style` is installed):
+
+```
+python -m pip install "pds-tools @ git+https://github.com/etf-unibl/pds-marketplace@v0.1.0#subdirectory=tools/pds-tools"
+```
+
+On Linux and macOS use `python3` instead of `python`. Check that the command `pds-mcp` is found:
+
+```
+pds-mcp --list
+```
+
+The output lists the tool sets of the five plugins (`course`, `git`, `design`, `testing`, `learning`).
+
+**Virtual environment:** if you installed the course tools in a virtual environment, activate it **before** you start the AI tool (`.venv\Scripts\Activate.ps1` on Windows, `source .venv/bin/activate` on Linux/macOS). The AI tool starts `pds-mcp` from the `PATH` of the terminal it was started in; without the environment the plugins' tools are missing.
+
+## 2. Add the plugins to your AI tool
+
+All PDS plugins come from one marketplace, `pds-marketplace`. Install the plugins you want; `pds-course`, `pds-git` and `pds-learning` are a good start.
+
+| Plugin | Helps with |
+| ------ | ------ |
+| `pds-course` | setup check, understanding a task, preparing the submission, failed checks of a pull request, time tracking |
+| `pds-git` | starting work on an issue, commits in the course format, push and sync, fixing git mistakes |
+| `pds-design` | style check results, Quartus synthesis warnings, DE1-SoC pins |
+| `pds-testing` | writing self-checking testbenches, running them like the course CI |
+| `pds-learning` | tutor for the lectures (topic pages, video moments, example code), glossary, self-check quiz |
+
+### Claude Code
+
+Start Claude Code in your course repository (`claude`) and run:
+
+```
+/plugin marketplace add etf-unibl/pds-marketplace
+/plugin install pds-course@pds-marketplace
+/plugin install pds-git@pds-marketplace
+/plugin install pds-learning@pds-marketplace
+```
+
+(`pds-design` and `pds-testing` the same way.) Then run `/reload-plugins` or restart Claude Code. The first time a plugin's tool runs, Claude Code asks for permission; the tools only read, so you can choose to allow them for the plugin.
+
+### GitHub Copilot CLI
+
+In a terminal:
+
+```
+copilot plugin marketplace add etf-unibl/pds-marketplace
+copilot plugin install pds-course@pds-marketplace
+copilot plugin install pds-git@pds-marketplace
+copilot plugin install pds-learning@pds-marketplace
+```
+
+Start `copilot` in your course repository and trust the folder when asked. Choose a capable model with `/model` instead of the automatic choice: with weaker models Copilot sometimes answers from memory instead of using the plugins' tools.
+
+### Antigravity CLI
+
+Antigravity installs plugins from a folder. Clone the marketplace once and install from it:
+
+```
+git clone https://github.com/etf-unibl/pds-marketplace.git
+agy plugin install pds-marketplace/plugins/pds-course
+agy plugin install pds-marketplace/plugins/pds-git
+agy plugin install pds-marketplace/plugins/pds-learning
+```
+
+Check with `agy plugin list`. To update later, run `git pull` in the clone and install the plugins again.
+
+## 3. Check that it works
+
+In your course repository, start the AI tool and ask:
+
+> Check my PDS course setup.
+
+The assistant runs the `pds-course` setup check (git identity with the GitHub noreply e-mail, course git hooks, Python tools, GHDL, `gh`) and tells you what to fix. If it answers without running a tool, see [Troubleshooting](#troubleshooting).
+
+## 4. Using the plugins
+
+Ask in your own words, in Serbian or English; the assistant picks the matching skill. In Claude Code you can also call a skill directly, for example `/pds-learning:tutor`.
+
+| You want to | Ask for example | Skill |
+| ------ | ------ | ------ |
+| understand a task | "I got issue #12. What do I have to do?" | `pds-course:task` |
+| start working | "How do I start working on issue #12?" | `pds-git:start` |
+| commit | "Help me commit my changes in the course format." | `pds-git:commit` |
+| fix a git mistake | "I committed to the wrong branch." | `pds-git:fix` |
+| check the style | "Will my code in assignments/12 pass the style check?" | `pds-design:style` |
+| test | "Run my testbenches like the CI does." / "How do I write a self-checking testbench?" | `pds-testing:run`, `pds-testing:testbench` |
+| submit | "Am I ready to open the pull request?" | `pds-course:submit` |
+| understand failed checks | "My pull request has failed checks. What do they mean?" | `pds-course:checks` |
+| log time | "Check my /spent comment: /spent 1h 30m" | `pds-course:time` |
+| learn | "Why does Quartus infer a latch here?" / "Quiz me on lecture 10." | `pds-learning:tutor`, `pds-learning:quiz` |
+| connect to the board | "Which pins do I use for the switches and the 7-segment displays?" | `pds-design:pins` |
+
+What the assistant does by itself: it reads files, runs GHDL and the style check (without `--fix`), reads your issues and pull requests on GitHub, and searches the course topic pages. What it leaves to you: every command that changes something. It shows the command, explains each part, says what you should see and how to undo it, and checks the result after you ran it.
+
+If the assistant tries to run such a command itself, a guard stops it with the message "PDS plugin rule (teach, don't execute)", and it shows you the command instead. That is expected.
+
+**Privacy:** the AI tool sends what it reads (your code, issues, messages) to its provider. Do not paste passwords or tokens into the conversation.
+
+## Updating
+
+| Tool | Update the plugins |
+| ------ | ------ |
+| Claude Code | `/plugin marketplace update pds-marketplace`, then `/reload-plugins` |
+| Copilot CLI | `copilot plugin marketplace update`, then `copilot plugin update` (all installed plugins) |
+| Antigravity CLI | `git pull` in the clone, then `agy plugin install` again |
+
+Update `pds-tools` with the install command of step 1 when the course announces a new version (the version tag in the command changes).
+
+## Troubleshooting
+
+| Problem | Cause and fix |
+| ------ | ------ |
+| The assistant answers without running any PDS tool; `/mcp` (Claude Code) shows no `pds-…` server or it failed | `pds-mcp` is not found: install `pds-tools` (step 1) and start the AI tool from a terminal where `pds-mcp --list` works (activate the virtual environment first) |
+| "PDS plugin rule (teach, don't execute)" | expected: run the shown command yourself |
+| The course documents or topic pages are not found | start the AI tool inside your course repository; if you cloned only the `assignments` branch, run `git fetch origin main` |
+| GitHub errors in pull request status or time tracking (403, rate limit, 404 on a private repository) | log in with `gh auth login`; the tools then use your GitHub login |
+| Copilot answers from memory instead of using the tools | choose a stronger model with `/model` and ask again, e.g. "use the pds-learning tools" |
+| Antigravity: the plugin does nothing | run `agy plugin list`; reinstall from the clone; the guard needs Python on `PATH` (`python --version`) |
+| Windows: "Python was not found; run without arguments to install from the Microsoft Store" | harmless message of the Windows `python3` shortcut; the guard then uses `python` or `py` |
