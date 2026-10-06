@@ -129,18 +129,25 @@ def build_files():
                                    + read(os.path.join(SRC, "shared", "course-context.md")))
         files[f"{g}/policies/guard.toml"] = gemini_policy()
         files[f"{g}/README.md"] = plugin_readme(p, skills)
-    # instructor plugins: listed here, files in the private repository (install needs read access to it)
+    # instructor plugins: listed here, files in the private repository (install needs read access to it).
+    # The two AI tools describe a plugin in a subdirectory of another repository differently, so the catalog
+    # is written twice with the same name: Claude Code reads .claude-plugin/marketplace.json (git-subdir),
+    # Copilot CLI reads .github/plugin/marketplace.json first (github + path; it rejects git-subdir)
     staff = json.loads(read(os.path.join(SRC, "marketplace", "instructor-plugins.json")))
+    slug = re.sub(r"^https://github\.com/|\.git$", "", staff["repository"])
+    claude_entries, copilot_entries = list(entries), [dict(e, source=e["source"][2:]) for e in entries]
     for p in staff["plugins"]:
-        entries.append({"name": p["name"], "description": p["description"], "category": "education",
-                        "tags": ["pds", "instructor"],
-                        "source": {"source": "git-subdir", "url": staff["repository"], "path": f"plugins/{p['name']}",
-                                   "ref": staff["ref"]}})
-    files[".claude-plugin/marketplace.json"] = dump({
-        "name": MARKETPLACE, "owner": AUTHOR,
-        "description": "AI assistant plugins of the PDS course (Projektovanje digitalnih sistema): student plugins that teach "
-                       "the course workflow, and instructor plugins that only the course staff can install.",
-        "version": VERSION, "plugins": entries})
+        common = {"name": p["name"], "description": p["description"], "category": "education", "tags": ["pds", "instructor"]}
+        claude_entries.append(dict(common, source={"source": "git-subdir", "url": staff["repository"],
+                                                   "path": f"plugins/{p['name']}", "ref": staff["ref"]}))
+        copilot_entries.append(dict(common, source={"source": "github", "repo": slug, "path": f"plugins/{p['name']}",
+                                                    "ref": staff["ref"]}))
+    catalog = {"name": MARKETPLACE, "owner": AUTHOR,
+               "description": "AI assistant plugins of the PDS course (Projektovanje digitalnih sistema): student plugins that "
+                              "teach the course workflow, and instructor plugins that only the course staff can install.",
+               "version": VERSION}
+    files[".claude-plugin/marketplace.json"] = dump(dict(catalog, plugins=claude_entries))
+    files[".github/plugin/marketplace.json"] = dump(dict(catalog, plugins=copilot_entries))
     return files
 
 
@@ -172,7 +179,7 @@ def dump(obj):
 def main(argv):
     check = "--check" in argv
     files = build_files()
-    managed = ["plugins", ".claude-plugin", os.path.join("build", "out")]
+    managed = ["plugins", ".claude-plugin", os.path.join(".github", "plugin"), os.path.join("build", "out")]
     stale = []
     for rel, content in files.items():
         path = os.path.join(ROOT, rel)

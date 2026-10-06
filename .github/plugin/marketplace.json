@@ -1,0 +1,165 @@
+{
+  "name": "pds-marketplace",
+  "owner": {
+    "name": "Faculty of Electrical Engineering, University of Banja Luka",
+    "url": "https://github.com/etf-unibl"
+  },
+  "description": "AI assistant plugins of the PDS course (Projektovanje digitalnih sistema): student plugins that teach the course workflow, and instructor plugins that only the course staff can install.",
+  "version": "0.1.0",
+  "plugins": [
+    {
+      "name": "pds-course",
+      "source": "plugins/pds-course",
+      "description": "Course workflow of PDS: setup check, task context, pull request description, failed CI checks and time tracking. Teaches the workflow, never runs it.",
+      "category": "education",
+      "tags": [
+        "pds",
+        "vhdl",
+        "fpga",
+        "course",
+        "github"
+      ]
+    },
+    {
+      "name": "pds-design",
+      "source": "plugins/pds-design",
+      "description": "Design review for the PDS course: VHDL style rules explained, synthesis warnings (latches, sensitivity lists), resources and timing from Quartus reports, DE1-SoC pin mapping and board testing.",
+      "category": "education",
+      "tags": [
+        "pds",
+        "vhdl",
+        "fpga",
+        "quartus",
+        "de1-soc"
+      ]
+    },
+    {
+      "name": "pds-git",
+      "source": "plugins/pds-git",
+      "description": "Git coach for the PDS course: branch from an issue, commit messages in the course format, push and sync, merge conflicts, fixing mistakes. Shows and explains every command; the student runs it.",
+      "category": "education",
+      "tags": [
+        "pds",
+        "git",
+        "github",
+        "course"
+      ]
+    },
+    {
+      "name": "pds-learning",
+      "source": "plugins/pds-learning",
+      "description": "Learning companion for the PDS course built on the course material: topic pages of the 15 video lectures with video moments, verified example code (runnable with GHDL), notes on errors in the videos, glossary (Serbian and English) and self-check questions. Hints and explanations, no solutions of graded tasks.",
+      "category": "education",
+      "tags": [
+        "pds",
+        "vhdl",
+        "fpga",
+        "learning",
+        "tutor"
+      ]
+    },
+    {
+      "name": "pds-testing",
+      "source": "plugins/pds-testing",
+      "description": "Testbenches for the PDS course: self-checking patterns, test vector tables, procedures, file-based tests, clock and reset, running them exactly like the course CI with GHDL (VHDL-2008) and reading the results.",
+      "category": "education",
+      "tags": [
+        "pds",
+        "vhdl",
+        "testbench",
+        "ghdl",
+        "simulation"
+      ]
+    },
+    {
+      "name": "pds-template",
+      "description": "PDS course staff only: course templates and syncing course repositories.",
+      "category": "education",
+      "tags": [
+        "pds",
+        "instructor"
+      ],
+      "source": {
+        "source": "github",
+        "repo": "etf-unibl/pds-instructor-plugins",
+        "path": "plugins/pds-template",
+        "ref": "main"
+      }
+    },
+    {
+      "name": "pds-admin",
+      "description": "PDS course staff only: course repository setup, issues, sprints and progress.",
+      "category": "education",
+      "tags": [
+        "pds",
+        "instructor"
+      ],
+      "source": {
+        "source": "github",
+        "repo": "etf-unibl/pds-instructor-plugins",
+        "path": "plugins/pds-admin",
+        "ref": "main"
+      }
+    },
+    {
+      "name": "pds-assignments",
+      "description": "PDS course staff only: preparing assignment texts.",
+      "category": "education",
+      "tags": [
+        "pds",
+        "instructor"
+      ],
+      "source": {
+        "source": "github",
+        "repo": "etf-unibl/pds-instructor-plugins",
+        "path": "plugins/pds-assignments",
+        "ref": "main"
+      }
+    },
+    {
+      "name": "pds-verification",
+      "description": "PDS course staff only: tests of the verification environment.",
+      "category": "education",
+      "tags": [
+        "pds",
+        "instructor"
+      ],
+      "source": {
+        "source": "github",
+        "repo": "etf-unibl/pds-instructor-plugins",
+        "path": "plugins/pds-verification",
+        "ref": "main"
+      }
+    },
+    {
+      "name": "pds-review",
+      "description": "PDS course staff only: reviewing submissions.",
+      "category": "education",
+      "tags": [
+        "pds",
+        "instructor"
+      ],
+      "source": {
+        "source": "github",
+        "repo": "etf-unibl/pds-instructor-plugins",
+        "path": "plugins/pds-review",
+        "ref": "main"
+      }
+    },
+    {
+      "name": "pds-materials",
+      "description": "PDS course staff only: teaching materials and topic pages.",
+      "category": "education",
+      "tags": [
+        "pds",
+        "instructor"
+      ],
+      "source": {
+        "source": "github",
+        "repo": "etf-unibl/pds-instructor-plugins",
+        "path": "plugins/pds-materials",
+        "ref": "main"
+      }
+    }
+  ]
+}
