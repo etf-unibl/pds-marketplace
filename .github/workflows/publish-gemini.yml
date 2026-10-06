@@ -1,6 +1,6 @@
 # Publishes the Gemini CLI extensions. `gemini extensions install` needs the manifest at the root of
 # a git ref, so every extension is published to its own branch gemini/<plugin>:
-#   gemini extensions install https://github.com/etf-unibl/pds-plugins --ref gemini/pds-git
+#   gemini extensions install https://github.com/etf-unibl/pds-marketplace --ref gemini/pds-git
 name: publish-gemini
 
 on:

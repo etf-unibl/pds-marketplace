@@ -18,7 +18,7 @@ style = ["vhdl-style-tools @ git+https://github.com/etf-unibl/vhdl-style-tools@v
 test = ["pytest>=8"]
 
 [project.urls]
-Homepage = "https://github.com/etf-unibl/pds-plugins"
+Homepage = "https://github.com/etf-unibl/pds-marketplace"
 
 [project.scripts]
 pds-mcp = "pds_tools.mcp_server:main"

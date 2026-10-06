@@ -1,10 +1,10 @@
 {
-  "name": "pds-plugins",
+  "name": "pds-marketplace",
   "owner": {
     "name": "Faculty of Electrical Engineering, University of Banja Luka",
     "url": "https://github.com/etf-unibl"
   },
-  "description": "AI assistant plugins for students of the PDS course (Projektovanje digitalnih sistema): teach the course workflow, never run it.",
+  "description": "AI assistant plugins of the PDS course (Projektovanje digitalnih sistema): student plugins that teach the course workflow, and instructor plugins that only the course staff can install.",
   "version": "0.1.0",
   "plugins": [
     {
@@ -70,6 +70,96 @@
         "ghdl",
         "simulation"
       ]
+    },
+    {
+      "name": "pds-template",
+      "description": "PDS course staff only: course templates and syncing course repositories.",
+      "category": "education",
+      "tags": [
+        "pds",
+        "instructor"
+      ],
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/etf-unibl/pds-instructor-plugins.git",
+        "path": "plugins/pds-template",
+        "ref": "main"
+      }
+    },
+    {
+      "name": "pds-admin",
+      "description": "PDS course staff only: course repository setup, issues, sprints and progress.",
+      "category": "education",
+      "tags": [
+        "pds",
+        "instructor"
+      ],
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/etf-unibl/pds-instructor-plugins.git",
+        "path": "plugins/pds-admin",
+        "ref": "main"
+      }
+    },
+    {
+      "name": "pds-assignments",
+      "description": "PDS course staff only: preparing assignment texts.",
+      "category": "education",
+      "tags": [
+        "pds",
+        "instructor"
+      ],
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/etf-unibl/pds-instructor-plugins.git",
+        "path": "plugins/pds-assignments",
+        "ref": "main"
+      }
+    },
+    {
+      "name": "pds-verification",
+      "description": "PDS course staff only: tests of the verification environment.",
+      "category": "education",
+      "tags": [
+        "pds",
+        "instructor"
+      ],
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/etf-unibl/pds-instructor-plugins.git",
+        "path": "plugins/pds-verification",
+        "ref": "main"
+      }
+    },
+    {
+      "name": "pds-review",
+      "description": "PDS course staff only: reviewing submissions.",
+      "category": "education",
+      "tags": [
+        "pds",
+        "instructor"
+      ],
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/etf-unibl/pds-instructor-plugins.git",
+        "path": "plugins/pds-review",
+        "ref": "main"
+      }
+    },
+    {
+      "name": "pds-materials",
+      "description": "PDS course staff only: teaching materials and topic pages.",
+      "category": "education",
+      "tags": [
+        "pds",
+        "instructor"
+      ],
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/etf-unibl/pds-instructor-plugins.git",
+        "path": "plugins/pds-materials",
+        "ref": "main"
+      }
     }
   ]
 }

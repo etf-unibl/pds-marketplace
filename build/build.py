@@ -27,9 +27,9 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(ROOT, "src")
 VERSION = "0.1.0"
-REPO = "https://github.com/etf-unibl/pds-plugins"
+REPO = "https://github.com/etf-unibl/pds-marketplace"
 AUTHOR = {"name": "Faculty of Electrical Engineering, University of Banja Luka", "url": "https://github.com/etf-unibl"}
-MARKETPLACE = "pds-plugins"
+MARKETPLACE = "pds-marketplace"
 
 # Commands the Gemini policy denies (Claude Code and Copilot use guard.py, which classifies every command)
 DENIED_PREFIXES = [
@@ -129,9 +129,17 @@ def build_files():
                                    + read(os.path.join(SRC, "shared", "course-context.md")))
         files[f"{g}/policies/guard.toml"] = gemini_policy()
         files[f"{g}/README.md"] = plugin_readme(p, skills)
+    # instructor plugins: listed here, files in the private repository (install needs read access to it)
+    staff = json.loads(read(os.path.join(SRC, "marketplace", "instructor-plugins.json")))
+    for p in staff["plugins"]:
+        entries.append({"name": p["name"], "description": p["description"], "category": "education",
+                        "tags": ["pds", "instructor"],
+                        "source": {"source": "git-subdir", "url": staff["repository"], "path": f"plugins/{p['name']}",
+                                   "ref": staff["ref"]}})
     files[".claude-plugin/marketplace.json"] = dump({
         "name": MARKETPLACE, "owner": AUTHOR,
-        "description": "AI assistant plugins for students of the PDS course (Projektovanje digitalnih sistema): teach the course workflow, never run it.",
+        "description": "AI assistant plugins of the PDS course (Projektovanje digitalnih sistema): student plugins that teach "
+                       "the course workflow, and instructor plugins that only the course staff can install.",
         "version": VERSION, "plugins": entries})
     return files
 

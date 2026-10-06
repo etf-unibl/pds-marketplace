@@ -1,0 +1,13 @@
+{
+  "_comment": "Instructor plugins listed in pds-marketplace. Their files are in the PRIVATE repository below: only people with read access to it (the course staff) can install them; for everyone else the install fails. The catalog itself is public, so names and descriptions stay neutral.",
+  "repository": "https://github.com/etf-unibl/pds-instructor-plugins.git",
+  "ref": "main",
+  "plugins": [
+    {"name": "pds-template", "description": "PDS course staff only: course templates and syncing course repositories."},
+    {"name": "pds-admin", "description": "PDS course staff only: course repository setup, issues, sprints and progress."},
+    {"name": "pds-assignments", "description": "PDS course staff only: preparing assignment texts."},
+    {"name": "pds-verification", "description": "PDS course staff only: tests of the verification environment."},
+    {"name": "pds-review", "description": "PDS course staff only: reviewing submissions."},
+    {"name": "pds-materials", "description": "PDS course staff only: teaching materials and topic pages."}
+  ]
+}
