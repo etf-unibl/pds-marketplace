@@ -1,6 +1,6 @@
 ---
 name: commit
-description: Help the student make a commit in the PDS course format - stage only assignments/<N>/, draft the message (Issue #<N> : <title>, empty line, "- " items) from the staged changes, check it, and explain git commit -s. Use when the student wants to commit or asks about the commit message format.
+description: Help the student make a commit in the PDS course format - stage only assignments/<N>/, draft the message (Issue #<N> : <title>, empty line, "- " items, AI-assisted-by line when an AI tool generated code) from the staged changes, check it, and explain git commit -s. Use when the student wants to commit or asks about the commit message format.
 ---
 
 # Committing
@@ -23,6 +23,13 @@ Issue #<N> : <issue title>
 ```
 
    Base the items on the actual diff and on what the student says they did; keep them short and factual. Check the draft with `commit_check` (it also checks the sign-off against the git identity).
+   **AI-generated code (course rule):** ask whether an AI tool generated any part of the code in this commit, including code the student took from an AI answer (also from this conversation). If yes, add one line per tool at the end, after an empty line, in the student's own words about how it was used:
+
+```
+AI-assisted-by: <tool> - <what it generated and what the student did with it>
+```
+
+   e.g. `AI-assisted-by: Claude Code - generated the case statement of the next-state logic; I added the reset and tested it`. Explanations only (no code taken over) need no line. `git commit -s` adds the sign-off below it. Never decide for the student that no AI code is included; ask.
 4. **Command**: show `git commit -s` and explain:
    - `-s` adds `Signed-off-by: <name> <e-mail>` from the git configuration (required by CI);
    - with the hooks enabled, `git commit -s` opens the editor with the pre-filled first line; the student pastes or writes the items;

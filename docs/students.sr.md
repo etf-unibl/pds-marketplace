@@ -8,7 +8,13 @@ Dodaci (*plugin*-ovi) PDS-a uvode kurs u AI asistenta kojeg pokrećete u termina
 
 Dodaci rade u alatima **Claude Code**, **GitHub Copilot CLI** i **Antigravity CLI**. Koristite onaj kojem imate pristup.
 
-<!-- TODO (nastavnik): navesti pravila kursa o korišćenju AI asistenata (šta je dozvoljeno u zadacima koji se ocjenjuju, da li se korišćenje mora navesti). -->
+**Pravilo kursa:** kod koji je generisao AI alat, uključujući kod preuzet iz odgovora asistenta, mora biti naveden u poruci komita u kojem se nalazi, uz objašnjenje kako je alat korišćen: linija iznad potpisa, po jedna za svaki alat, na primjer
+
+```
+AI-assisted-by: GitHub Copilot CLI - generated the testbench loop over all input combinations; I wrote the checks and verified the results
+```
+
+Ako je asistent samo objašnjavao, a kod ste pisali sami, linija nije potrebna. Detalji: „Korišćenje AI alata“ u `docs/assignment-submission.md` repozitorijuma kursa. Vještina za komit dodatka `pds-git` pita za to i pomaže da napišete liniju.
 
 ## Šta je potrebno
 

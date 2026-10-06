@@ -17,6 +17,7 @@ description: Prepare the submission of a PDS task - pre-submission checklist (lo
    - testbenches: `run_testbenches assignments/<N>` (GHDL, VHDL-2008, like the `testbench` job);
    - test assignment: `vhdl_analyze assignments/<N>/test.vhd`.
    Fix what fails before submitting (explain, do not edit the student's files).
+   - AI attribution (course rule): if an AI tool generated code in the solution, every commit containing such code must have an `AI-assisted-by: <tool> - <how it was used>` line (`docs/assignment-submission.md`, "Korišćenje AI alata" / "Using AI tools"). Ask the student; a missing line is fixed by rewording the commit (the `fix` skill of pds-git explains `git commit --amend` / `git rebase -i` and the force push it needs).
 3. **Push**: show `git push -u origin <branch>` and explain `-u` (first push of the branch).
 4. **Pull request**: give the student the exact title (`Issue #<N> : <issue title>`) and explain how to open the pull request to `assignments` (web: **Compare & pull request**, base `assignments`; or `gh pr create --base assignments`, which they run themselves). The description follows the template that GitHub fills in: write a draft of the summary section (`<!-- section:summary -->`) from the student's own explanation of their solution, and remind them to tick every check item only when it is true. The changes section is filled in by CI from the commit messages.
 5. **After opening**: `pr_status` shows the rule checks and the CI results; if something fails, use the `checks` skill.

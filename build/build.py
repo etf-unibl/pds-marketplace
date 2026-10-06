@@ -26,7 +26,7 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(ROOT, "src")
-VERSION = "0.1.0"
+VERSION = "0.1.1"
 REPO = "https://github.com/etf-unibl/pds-marketplace"
 AUTHOR = {"name": "Faculty of Electrical Engineering, University of Banja Luka", "url": "https://github.com/etf-unibl"}
 MARKETPLACE = "pds-marketplace"
