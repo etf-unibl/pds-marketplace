@@ -19,10 +19,13 @@ import urllib.parse
 from mcp.server.mcpserver import Context, MCPServer
 from mcp.types import ToolAnnotations
 
-from . import __version__, env, explain, github, hdl, pins, quartus, repo, rules, topics
+from . import __version__, env, explain, github, hdl, pins, quartus, quartus_run, repo, rules, topics
 
 READ_ONLY = ToolAnnotations(readOnlyHint=True, destructiveHint=False, idempotentHint=True, openWorldHint=False)
 READ_ONLY_REMOTE = ToolAnnotations(readOnlyHint=True, destructiveHint=False, idempotentHint=True, openWorldHint=True)
+# Quartus tools write into the Quartus project folder outside the repository; Tcl and programming the board act on the user's machine
+PROJECT_FILES = ToolAnnotations(readOnlyHint=False, destructiveHint=False, idempotentHint=False, openWorldHint=False)
+ACTS = ToolAnnotations(readOnlyHint=False, destructiveHint=True, idempotentHint=False, openWorldHint=False)
 
 
 def _read(path):
@@ -174,6 +177,49 @@ def tutorial_example_run(folder: str) -> dict:
     return topics.run_example(folder, base())
 
 
+def quartus_env() -> dict:
+    """Quartus Prime installation: bin folder, version, Cyclone V (DE1-SoC) support, available command-line tools."""
+    return quartus_run.quartus_env()
+
+
+def quartus_project_create(sources: list[str], top: str | None = None, project_dir: str | None = None,
+                           assign_pins: bool = True, clock_mhz: float = 50.0, overwrite: bool = False) -> dict:
+    """Creates a Quartus project for a task folder or VHDL files (testbenches left out): DE1-SoC device 5CSEMA5F31C6, VHDL-2008, top-level entity (detected if not given), pins for ports named like board signals (SW, KEY, LEDR, HEX0..5, CLOCK_50, GPIO) with 3.3-V LVTTL, clock constraint for a clock port. The project folder is outside the repository (default: <repository>-quartus/<task>-<top> next to it). Writes and runs create_project.tcl and returns it."""
+    return quartus_run.project_create([base_path(s) for s in sources], top, base_path(project_dir) if project_dir else None,
+                                      assign_pins=assign_pins, clock_mhz=clock_mhz, overwrite=overwrite)
+
+
+def quartus_compile(project_dir: str, flow: str = "synthesis", revision: str | None = None) -> dict:
+    """Runs Quartus on a project: flow 'synthesis' (Analysis & Synthesis), 'fit', 'timing', 'assemble' or 'full' (complete compilation, produces the .sof). Returns errors, critical warnings, the synthesis review (latches, removed registers) and the commands it ran."""
+    return quartus_run.compile(base_path(project_dir), flow, revision)
+
+
+def quartus_timing(project_dir: str, paths: int = 10, revision: str | None = None) -> dict:
+    """Timing analysis of a compiled project (quartus_sta): setup and hold slack and TNS per clock over all corners, Fmax, the worst setup and hold paths (from, to, data delay, skew), unconstrained paths, check_timing warnings. Writes pds_timing.tcl in the project folder."""
+    return quartus_run.timing_analysis(base_path(project_dir), revision, paths)
+
+
+def quartus_tcl(script: str, tool: str = "quartus_sh", project_dir: str | None = None) -> dict:
+    """Runs a Tcl script (file path or script text) with quartus_sh -t or quartus_sta -t in the Quartus project folder and returns its output."""
+    return quartus_run.tcl_run(base_path(script) if os.path.isfile(base_path(script)) else script, tool,
+                               base_path(project_dir) if project_dir else None)
+
+
+def board_cables() -> dict:
+    """Programming cables (USB-Blaster) that quartus_pgm sees."""
+    return quartus_run.program_cables()
+
+
+def board_program(sof: str, cable: str | None = None) -> dict:
+    """Programs the DE1-SoC FPGA with a .sof file over JTAG (volatile: lost when the board is switched off)."""
+    return quartus_run.program_board(base_path(sof), cable)
+
+
+def base_path(path):
+    """A path relative to the workspace (the course repository) or absolute."""
+    return path if os.path.isabs(path) else os.path.join(base(), path)
+
+
 PROFILES = {
     "course": [(env_check, READ_ONLY), (task_context, READ_ONLY_REMOTE), (pr_status, READ_ONLY_REMOTE), (time_summary, READ_ONLY_REMOTE),
                (spent_check, READ_ONLY), (course_doc, READ_ONLY)],
@@ -183,6 +229,9 @@ PROFILES = {
     "learning": [(topics_list, READ_ONLY), (topics_search, READ_ONLY), (topic_get, READ_ONLY), (glossary, READ_ONLY), (quiz, READ_ONLY),
                  (video_notes, READ_ONLY), (tutorial_examples, READ_ONLY), (tutorial_example_read, READ_ONLY), (tutorial_example_run, READ_ONLY),
                  (course_doc, READ_ONLY)],
+    "quartus": [(quartus_env, READ_ONLY), (quartus_project_create, PROJECT_FILES), (quartus_compile, PROJECT_FILES),
+                (quartus_timing, PROJECT_FILES), (synth_summary, READ_ONLY), (board_pins, READ_ONLY), (pin_check, READ_ONLY),
+                (pin_plan, READ_ONLY), (board_cables, READ_ONLY), (quartus_tcl, ACTS), (board_program, ACTS)],
 }
 PROFILES["all"] = list({f.__name__: (f, a) for p in PROFILES.values() for f, a in p}.values())
 

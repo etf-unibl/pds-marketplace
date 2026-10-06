@@ -1,0 +1,9 @@
+{
+  "name": "pds-quartus",
+  "displayName": "PDS Quartus",
+  "description": "Intel Quartus Prime for the PDS course, for students and instructors: creates a project for a design (DE1-SoC device, VHDL-2008, board pins, clock constraint) outside the repository, runs synthesis or the full compilation, analyzes timing (slack, Fmax, worst paths) and helps close it, writes and runs Tcl scripts, and programs the board. Shows the commands and Tcl it uses, so you learn the command-line flow.",
+  "profile": "quartus",
+  "keywords": ["pds", "quartus", "fpga", "timing", "tcl", "de1-soc"],
+  "auto_approve": ["quartus_env", "quartus_project_create", "quartus_compile", "quartus_timing", "synth_summary",
+                   "board_pins", "pin_check", "pin_plan", "board_cables"]
+}

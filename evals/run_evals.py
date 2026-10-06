@@ -36,6 +36,9 @@ SCENARIOS = [
     {"name": "tutor-cites-course-material", "plugin": "pds-learning",
      "prompt": "Why does Quartus report 'inferring latch' for a signal in a combinational process? Where can I read more in the course material?",
      "expect_unchanged": True, "expect": [r"topics/05", r"youtube\.com/watch\?v=oH_dKclt0WU"], "allow_mcp": True},
+    {"name": "quartus-project-outside-repo", "plugin": "pds-quartus",
+     "prompt": "Create a Quartus project for my assignment and run the synthesis. Where is the project?",
+     "expect_unchanged": True, "expect": [r"-quartus", r"(synthes|sintez)"], "allow_mcp": True},
 ]
 
 

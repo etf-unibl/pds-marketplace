@@ -1,10 +1,23 @@
 ---
-name: synthesis
-description: Review a compiled Quartus project of the PDS course - warnings that point to design errors (inferred latches, incomplete sensitivity lists, unused signals, derived clocks), resources (ALMs, registers, memory, DSP) and timing (Fmax, slack, unconstrained paths). Use after the student compiled a design in Quartus or asks about synthesis or timing results.
-allowed-tools: mcp__plugin_pds-design_pds-design__*
+name: compile
+description: Runs Intel Quartus Prime on a PDS project from the command line - Analysis & Synthesis only, or the full compilation (synthesis, fitter, assembler, timing) that produces the .sof for the board - and explains errors, critical warnings and synthesis problems (inferred latches, removed registers, incomplete sensitivity lists, truncated values). Use when the student asks to synthesize, compile, or why Quartus fails or warns.
+allowed-tools: mcp__plugin_pds-quartus_pds-quartus__quartus_env, mcp__plugin_pds-quartus_pds-quartus__quartus_project_create, mcp__plugin_pds-quartus_pds-quartus__quartus_compile, mcp__plugin_pds-quartus_pds-quartus__quartus_timing, mcp__plugin_pds-quartus_pds-quartus__synth_summary, mcp__plugin_pds-quartus_pds-quartus__board_pins, mcp__plugin_pds-quartus_pds-quartus__pin_check, mcp__plugin_pds-quartus_pds-quartus__pin_plan, mcp__plugin_pds-quartus_pds-quartus__board_cables
 ---
 
-# Synthesis and timing review
+# Compile with Quartus
+
+## Steps
+
+1. Project: the folder made by the `project` skill (`quartus_project_create`), or an existing project folder with a `.qpf`. No project yet: create one first.
+2. **Call `quartus_compile`** with
+   - `flow: "synthesis"` to check that the design synthesizes and to review it (seconds to a minute; enough for most assignments),
+   - `flow: "full"` before timing analysis or programming the board (a few minutes; produces `output_files/<top>.sof`).
+3. Explain the result in the course terms:
+   - **errors**: file and line, what Quartus means, the VHDL-2008 rule behind it; the fix is the student's to make in `assignments/<N>` (show it, do not edit graded files);
+   - **critical warnings** first (e.g. missing pin assignments, timing not met), then the synthesis review: inferred latches (incomplete assignment in a combinational process), registers removed or stuck at a constant, sensitivity-list problems, truncated values; the known harmless warnings are filtered;
+   - the topic pages explain the background (`docs/topics/05-sequential-statements.md` latches, `08-combinational-optimization.md`, `09`..`11` sequential design) - point to them.
+4. Show the commands the tool ran (`quartus_map <project>` or `quartus_sh --flow compile <project>`), so the student can run them in the project folder, and where the reports are (`output_files/*.rpt`; in the GUI **Processing > Compilation Report**; RTL schematic: **Tools > Netlist Viewers > RTL Viewer**).
+5. After a successful full compilation: `timing` skill for timing closure, `program` skill for the board.
 
 ## Teach, don't execute (mandatory)
 
@@ -31,16 +44,3 @@ You help a student of the PDS course (*Projektovanje digitalnih sistema*) learn 
 - Submission is a pull request to `assignments` with the title `Issue #<N> : <issue title>` and the description from the template. CI jobs: `classify`, `pr-checks`, `linter` (style, `vhdl-style`), `basic-test` (test assignment), `testbench` (GHDL, every `*_tb.vhd`, entity named like the file), `verif` (instructor tests, graded assignments).
 - Language: VHDL-2008 (`ghdl --std=08`); style rules: `vhdl-style-tools` (see `docs/vhdl-code-style.md`). Board: DE1-SoC (Cyclone V 5CSEMA5F31C6), Quartus Prime Lite.
 - The guides are in `docs/` of the `main` branch (`course_doc` tool lists them). Point the student to the guide and the topic page instead of repeating them at length.
-
-## Steps
-
-1. A compiled project is needed. With the `pds-quartus` plugin installed, its `project` and `compile` skills create the project (outside the repository) and compile it; without it, the student compiles in Quartus (**Processing > Start Compilation**, or `quartus_sh --flow compile <project>`). Do not start compilations from this plugin.
-2. `synth_summary <project folder>` reads the reports (project folder or `output_files/`): flow summary, `design_warnings` with explanations and the topic that covers them, and timing.
-3. Explain, most important first:
-   - **latch inferred (10631)** and **incomplete sensitivity list (10492)**: in a combinational process every output must be assigned in every branch and every read signal must be in the list (or `process(all)` in VHDL-2008); see topic 5 (`topic_get 5`) and show where in the student's file;
-   - **registers**: a purely combinational task must have `Total registers` 0; a sequential one should have the expected number (state bits, counters);
-   - **resources**: compare ALMs between architectures when the task asks for optimization (topic 8);
-   - **timing**: without an SDC file the analysis assumes 1 GHz (topic 13); with one, negative slack means the design is too slow for the clock: find the critical path (Timing Analyzer **Report Timing**) and discuss pipelining (topic 14) or a simpler next-state logic. Unconstrained input/output ports need `set_input_delay`/`set_output_delay` or a false path for asynchronous inputs.
-4. Link the topic pages and video moments with `topics_search` for the concepts the student needs.
-
-Explain causes and point to the lines; the student changes the code.

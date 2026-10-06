@@ -1,10 +1,22 @@
 ---
-name: synthesis
-description: Review a compiled Quartus project of the PDS course - warnings that point to design errors (inferred latches, incomplete sensitivity lists, unused signals, derived clocks), resources (ALMs, registers, memory, DSP) and timing (Fmax, slack, unconstrained paths). Use after the student compiled a design in Quartus or asks about synthesis or timing results.
-allowed-tools: mcp__plugin_pds-design_pds-design__*
+name: timing
+description: Timing analysis and timing closure of a PDS design with Quartus (TimeQuest, quartus_sta) - setup and hold slack per clock over all corners, Fmax, the worst paths, unconstrained paths and missing constraints - and how to fix failing paths (constraints, pipelining, restructuring logic, register balancing). Use when the student asks about timing, Fmax, slack, critical paths or the timing analysis lecture.
+allowed-tools: mcp__plugin_pds-quartus_pds-quartus__quartus_env, mcp__plugin_pds-quartus_pds-quartus__quartus_project_create, mcp__plugin_pds-quartus_pds-quartus__quartus_compile, mcp__plugin_pds-quartus_pds-quartus__quartus_timing, mcp__plugin_pds-quartus_pds-quartus__synth_summary, mcp__plugin_pds-quartus_pds-quartus__board_pins, mcp__plugin_pds-quartus_pds-quartus__pin_check, mcp__plugin_pds-quartus_pds-quartus__pin_plan, mcp__plugin_pds-quartus_pds-quartus__board_cables
 ---
 
-# Synthesis and timing review
+# Timing analysis and closure
+
+## Steps
+
+1. The project must be fully compiled (`compile` skill, `flow: "full"`).
+2. **Call `quartus_timing`** (it writes `pds_timing.tcl` in the project folder and runs `quartus_sta -t pds_timing.tcl`).
+3. Read the result with the student:
+   - **setup slack** (worst over the corners) and **TNS**: negative = a path is too slow for the clock period; **hold slack** negative = data changes too early (rare in a single-clock synchronous design; usually a constraint or clock problem);
+   - **Fmax** per clock: the highest clock frequency the design meets (restricted Fmax includes device limits); compare with the constraint (50 MHz = 20 ns for `CLOCK_50`);
+   - **worst paths**: `from_node` → `to_node`, data delay, clock skew: which logic between which registers is the critical path;
+   - **unconstrained paths / check_timing**: a clock without `create_clock`, inputs and outputs without delays; a combinational design has no clock, so there is nothing to time unless a constraint is added.
+4. **Closing timing** (explain, the student changes the VHDL): shorten the critical path - pipelining (registers between stages, more latency: lecture 14 `docs/topics/14-pipelining.md`), restructuring arithmetic or decision logic (fewer logic levels, shared operators, balanced trees: lecture 8), registering inputs and outputs, a relaxed or corrected constraint only when the requirement allows it. The timing lecture is `docs/topics/13-timing-analysis.md`.
+5. Show the Tcl the tool used (`create_timing_netlist`, `read_sdc`, `update_timing_netlist`, `create_timing_summary`, `report_timing -setup -npaths 10 -detail summary`, `report_clock_fmax_summary`) and how to open the same reports in the GUI (**Tools > Timing Analyzer**), so the student can repeat the analysis.
 
 ## Teach, don't execute (mandatory)
 
@@ -31,16 +43,3 @@ You help a student of the PDS course (*Projektovanje digitalnih sistema*) learn 
 - Submission is a pull request to `assignments` with the title `Issue #<N> : <issue title>` and the description from the template. CI jobs: `classify`, `pr-checks`, `linter` (style, `vhdl-style`), `basic-test` (test assignment), `testbench` (GHDL, every `*_tb.vhd`, entity named like the file), `verif` (instructor tests, graded assignments).
 - Language: VHDL-2008 (`ghdl --std=08`); style rules: `vhdl-style-tools` (see `docs/vhdl-code-style.md`). Board: DE1-SoC (Cyclone V 5CSEMA5F31C6), Quartus Prime Lite.
 - The guides are in `docs/` of the `main` branch (`course_doc` tool lists them). Point the student to the guide and the topic page instead of repeating them at length.
-
-## Steps
-
-1. A compiled project is needed. With the `pds-quartus` plugin installed, its `project` and `compile` skills create the project (outside the repository) and compile it; without it, the student compiles in Quartus (**Processing > Start Compilation**, or `quartus_sh --flow compile <project>`). Do not start compilations from this plugin.
-2. `synth_summary <project folder>` reads the reports (project folder or `output_files/`): flow summary, `design_warnings` with explanations and the topic that covers them, and timing.
-3. Explain, most important first:
-   - **latch inferred (10631)** and **incomplete sensitivity list (10492)**: in a combinational process every output must be assigned in every branch and every read signal must be in the list (or `process(all)` in VHDL-2008); see topic 5 (`topic_get 5`) and show where in the student's file;
-   - **registers**: a purely combinational task must have `Total registers` 0; a sequential one should have the expected number (state bits, counters);
-   - **resources**: compare ALMs between architectures when the task asks for optimization (topic 8);
-   - **timing**: without an SDC file the analysis assumes 1 GHz (topic 13); with one, negative slack means the design is too slow for the clock: find the critical path (Timing Analyzer **Report Timing**) and discuss pipelining (topic 14) or a simpler next-state logic. Unconstrained input/output ports need `set_input_delay`/`set_output_delay` or a false path for asynchronous inputs.
-4. Link the topic pages and video moments with `topics_search` for the concepts the student needs.
-
-Explain causes and point to the lines; the student changes the code.

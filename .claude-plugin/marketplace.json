@@ -5,7 +5,7 @@
     "url": "https://github.com/etf-unibl"
   },
   "description": "AI assistant plugins of the PDS course (Projektovanje digitalnih sistema): student plugins that teach the course workflow, and instructor plugins that only the course staff can install.",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "plugins": [
     {
       "name": "pds-course",
@@ -56,6 +56,20 @@
         "fpga",
         "learning",
         "tutor"
+      ]
+    },
+    {
+      "name": "pds-quartus",
+      "source": "./plugins/pds-quartus",
+      "description": "Intel Quartus Prime for the PDS course, for students and instructors: creates a project for a design (DE1-SoC device, VHDL-2008, board pins, clock constraint) outside the repository, runs synthesis or the full compilation, analyzes timing (slack, Fmax, worst paths) and helps close it, writes and runs Tcl scripts, and programs the board. Shows the commands and Tcl it uses, so you learn the command-line flow.",
+      "category": "education",
+      "tags": [
+        "pds",
+        "quartus",
+        "fpga",
+        "timing",
+        "tcl",
+        "de1-soc"
       ]
     },
     {

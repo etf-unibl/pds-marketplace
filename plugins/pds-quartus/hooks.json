@@ -1,0 +1,16 @@
+{
+  "pds-student-guard": {
+    "PreToolUse": [
+      {
+        "matcher": "run_command|shell_exec|send_command_input|write_to_file|replace_file_content|multi_replace_file_content|edit_notebook|file_change|write_blob|delete_directory|move|git_commit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 scripts/guard.py agy || python scripts/guard.py agy || py scripts/guard.py agy",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

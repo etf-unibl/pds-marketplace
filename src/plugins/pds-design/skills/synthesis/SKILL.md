@@ -11,7 +11,7 @@ description: Review a compiled Quartus project of the PDS course - warnings that
 
 ## Steps
 
-1. The student compiles the project (Quartus **Processing > Start Compilation**, or `quartus_sh --flow compile <project>`, which they run). Do not start long compilations yourself.
+1. A compiled project is needed. With the `pds-quartus` plugin installed, its `project` and `compile` skills create the project (outside the repository) and compile it; without it, the student compiles in Quartus (**Processing > Start Compilation**, or `quartus_sh --flow compile <project>`). Do not start compilations from this plugin.
 2. `synth_summary <project folder>` reads the reports (project folder or `output_files/`): flow summary, `design_warnings` with explanations and the topic that covers them, and timing.
 3. Explain, most important first:
    - **latch inferred (10631)** and **incomplete sensitivity list (10492)**: in a combinational process every output must be assigned in every branch and every read signal must be in the list (or `process(all)` in VHDL-2008); see topic 5 (`topic_get 5`) and show where in the student's file;

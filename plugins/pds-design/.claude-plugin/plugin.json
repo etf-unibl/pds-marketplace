@@ -1,7 +1,7 @@
 {
   "name": "pds-design",
   "displayName": "PDS design review",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Design review for the PDS course: VHDL style rules explained, synthesis warnings (latches, sensitivity lists), resources and timing from Quartus reports, DE1-SoC pin mapping and board testing.",
   "author": {
     "name": "Faculty of Electrical Engineering, University of Banja Luka",

@@ -23,6 +23,7 @@ If the assistant only explained and you wrote the code yourself, no line is need
 | The course setup from `docs/getting-started.md` of your course repository: git, Python 3.10 or newer, GHDL, the style tool (`pip install -r requirements.txt`) | everything | `git --version`, `python --version`, `ghdl --version`, `vhdl-style --help` |
 | One AI tool: [Claude Code](https://code.claude.com/docs/en/quickstart), [GitHub Copilot CLI](https://docs.github.com/en/copilot/how-tos/copilot-cli) (free for students with [GitHub Education](https://education.github.com)) or Antigravity CLI | the assistant | `claude --version`, `copilot --version` or `agy --version` |
 | `pds-tools`, the course tools the plugins use (step 1) | the plugins' tools | `pds-mcp --list` |
+| For `pds-quartus`: Quartus Prime Lite with Cyclone V support, `quartus/bin64` on `PATH` (`docs/tools-setup.md`) | creating projects, compiling, timing, programming | `quartus_sh --version` |
 | Optional: the GitHub CLI `gh`, logged in (`gh auth login`) | pull request status and time tracking of private repositories; more GitHub requests per hour | `gh auth status` |
 
 Node.js is not needed.
@@ -32,7 +33,7 @@ Node.js is not needed.
 Install `pds-tools` into the same Python you use for the course (where `vhdl-style` is installed):
 
 ```
-python -m pip install "pds-tools @ git+https://github.com/etf-unibl/pds-marketplace@v0.1.0#subdirectory=tools/pds-tools"
+python -m pip install "pds-tools @ git+https://github.com/etf-unibl/pds-marketplace@v0.2.0#subdirectory=tools/pds-tools"
 ```
 
 On Linux and macOS use `python3` instead of `python`. Check that the command `pds-mcp` is found:
@@ -41,7 +42,7 @@ On Linux and macOS use `python3` instead of `python`. Check that the command `pd
 pds-mcp --list
 ```
 
-The output lists the tool sets of the five plugins (`course`, `git`, `design`, `testing`, `learning`).
+The output lists the tool sets of the plugins (`course`, `git`, `design`, `testing`, `learning`, `quartus`).
 
 **Virtual environment:** if you installed the course tools in a virtual environment, activate it **before** you start the AI tool (`.venv\Scripts\Activate.ps1` on Windows, `source .venv/bin/activate` on Linux/macOS). The AI tool starts `pds-mcp` from the `PATH` of the terminal it was started in; without the environment the plugins' tools are missing.
 
@@ -56,6 +57,7 @@ All PDS plugins come from one marketplace, `pds-marketplace`. Install the plugin
 | `pds-design` | style check results, Quartus synthesis warnings, DE1-SoC pins |
 | `pds-testing` | writing self-checking testbenches, running them like the course CI |
 | `pds-learning` | tutor for the lectures (topic pages, video moments, example code), glossary, self-check quiz |
+| `pds-quartus` | Quartus from the command line: a project for your design (DE1-SoC, VHDL-2008, pins, clock) outside the repository, synthesis and full compilation, timing analysis and closure, Tcl scripts, programming the board |
 
 ### Claude Code
 
@@ -121,6 +123,7 @@ Ask in your own words, in Serbian or English; the assistant picks the matching s
 | log time | "Check my /spent comment: /spent 1h 30m" | `pds-course:time` |
 | learn | "Why does Quartus infer a latch here?" / "Quiz me on lecture 10." | `pds-learning:tutor`, `pds-learning:quiz` |
 | connect to the board | "Which pins do I use for the switches and the 7-segment displays?" | `pds-design:pins` |
+| use Quartus | "Create a Quartus project for task 12 and synthesize it." / "Compile it and tell me the Fmax." / "Program the board." / "Write a Tcl script that sets the pins." | `pds-quartus:project`, `compile`, `timing`, `program`, `tcl` |
 
 What the assistant does by itself: it reads files, runs GHDL and the style check (without `--fix`), reads your issues and pull requests on GitHub, and searches the course topic pages. What it leaves to you: every command that changes something. It shows the command, explains each part, says what you should see and how to undo it, and checks the result after you ran it.
 

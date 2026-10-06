@@ -15,6 +15,7 @@ The student plugins teach the course workflow instead of doing it: they never ru
 | `pds-design` | students | design review: style, synthesis warnings, DE1-SoC pins |
 | `pds-testing` | students | testbenches and running them like the course CI |
 | `pds-learning` | students | tutor with the course topic pages, video moments, examples, glossary and self-check quiz |
+| `pds-quartus` | students and staff | Intel Quartus Prime from the command line: project for a design (DE1-SoC, VHDL-2008, pins, clock constraint), synthesis and full compilation, timing analysis and closure, Tcl, programming the board |
 | `pds-template`, `pds-admin`, `pds-assignments`, `pds-verification`, `pds-review`, `pds-materials` | course staff | instructor plugins; their files are in a private repository, so only the course staff can install them |
 
 Add the marketplace once and install plugins by name, e.g. in Claude Code:

@@ -1,10 +1,23 @@
 ---
-name: synthesis
-description: Review a compiled Quartus project of the PDS course - warnings that point to design errors (inferred latches, incomplete sensitivity lists, unused signals, derived clocks), resources (ALMs, registers, memory, DSP) and timing (Fmax, slack, unconstrained paths). Use after the student compiled a design in Quartus or asks about synthesis or timing results.
-allowed-tools: mcp__plugin_pds-design_pds-design__*
+name: tcl
+description: Helps write, explain and run Tcl scripts for Intel Quartus Prime (quartus_sh, quartus_sta) in the PDS course - project setup and settings, pin and I/O assignments, SDC timing constraints, custom timing reports, batch flows - and runs them in the Quartus project folder after confirmation. Use when the student or instructor asks about Quartus Tcl, scripting, automating Quartus or SDC constraints.
+allowed-tools: mcp__plugin_pds-quartus_pds-quartus__quartus_env, mcp__plugin_pds-quartus_pds-quartus__quartus_project_create, mcp__plugin_pds-quartus_pds-quartus__quartus_compile, mcp__plugin_pds-quartus_pds-quartus__quartus_timing, mcp__plugin_pds-quartus_pds-quartus__synth_summary, mcp__plugin_pds-quartus_pds-quartus__board_pins, mcp__plugin_pds-quartus_pds-quartus__pin_check, mcp__plugin_pds-quartus_pds-quartus__pin_plan, mcp__plugin_pds-quartus_pds-quartus__board_cables
 ---
 
-# Synthesis and timing review
+# Quartus Tcl
+
+## Steps
+
+1. Find out the goal (a setting, assignments for many pins, a constraint, a report, a repeatable flow) and the tool it needs:
+   - `quartus_sh -t` - project and assignments: `project_open`/`project_new`, `set_global_assignment -name ...`, `set_location_assignment PIN_.. -to <port>`, `set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to <port>`, `export_assignments`, `project_close`; flows with `load_package flow` and `execute_flow -compile`;
+   - `quartus_sta -t` - timing: `project_open`, `create_timing_netlist`, `read_sdc`, `update_timing_netlist`, `report_timing`, `create_timing_summary`, `report_clock_fmax_summary`;
+   - SDC (the `.sdc` file, read by the fitter and the timing analyzer): `create_clock -period 20.0 [get_ports CLOCK_50]`, `derive_clock_uncertainty`, `set_input_delay` / `set_output_delay`, `set_false_path`.
+   The project skill's `create_project.tcl` and the timing skill's `pds_timing.tcl` in the project folder are working examples to start from.
+2. Write the script with a comment per block, explain every command and its options, and say what output to expect.
+3. Run it only when the student or instructor wants: **`quartus_tcl`** (file or text, `tool: quartus_sh|quartus_sta`, `project_dir`). Running a script asks for confirmation every time, because a script can change the project. It runs in the project folder outside the repository; for a script that changes the project, suggest keeping a copy of the `.qsf` first.
+4. Read the output with the user; for errors, explain the Tcl or Quartus message and correct the script. Show how to run the same by hand: `quartus_sh -t <script>.tcl` in the project folder.
+
+Tcl scripts are not part of the submission: the course `.gitignore` ignores `*.tcl` in the repository, and the project folder is outside it.
 
 ## Teach, don't execute (mandatory)
 
@@ -31,16 +44,3 @@ You help a student of the PDS course (*Projektovanje digitalnih sistema*) learn 
 - Submission is a pull request to `assignments` with the title `Issue #<N> : <issue title>` and the description from the template. CI jobs: `classify`, `pr-checks`, `linter` (style, `vhdl-style`), `basic-test` (test assignment), `testbench` (GHDL, every `*_tb.vhd`, entity named like the file), `verif` (instructor tests, graded assignments).
 - Language: VHDL-2008 (`ghdl --std=08`); style rules: `vhdl-style-tools` (see `docs/vhdl-code-style.md`). Board: DE1-SoC (Cyclone V 5CSEMA5F31C6), Quartus Prime Lite.
 - The guides are in `docs/` of the `main` branch (`course_doc` tool lists them). Point the student to the guide and the topic page instead of repeating them at length.
-
-## Steps
-
-1. A compiled project is needed. With the `pds-quartus` plugin installed, its `project` and `compile` skills create the project (outside the repository) and compile it; without it, the student compiles in Quartus (**Processing > Start Compilation**, or `quartus_sh --flow compile <project>`). Do not start compilations from this plugin.
-2. `synth_summary <project folder>` reads the reports (project folder or `output_files/`): flow summary, `design_warnings` with explanations and the topic that covers them, and timing.
-3. Explain, most important first:
-   - **latch inferred (10631)** and **incomplete sensitivity list (10492)**: in a combinational process every output must be assigned in every branch and every read signal must be in the list (or `process(all)` in VHDL-2008); see topic 5 (`topic_get 5`) and show where in the student's file;
-   - **registers**: a purely combinational task must have `Total registers` 0; a sequential one should have the expected number (state bits, counters);
-   - **resources**: compare ALMs between architectures when the task asks for optimization (topic 8);
-   - **timing**: without an SDC file the analysis assumes 1 GHz (topic 13); with one, negative slack means the design is too slow for the clock: find the critical path (Timing Analyzer **Report Timing**) and discuss pipelining (topic 14) or a simpler next-state logic. Unconstrained input/output ports need `set_input_delay`/`set_output_delay` or a false path for asynchronous inputs.
-4. Link the topic pages and video moments with `topics_search` for the concepts the student needs.
-
-Explain causes and point to the lines; the student changes the code.

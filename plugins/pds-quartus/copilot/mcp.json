@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "pds-quartus": {
+      "command": "pds-mcp",
+      "args": [
+        "--profile",
+        "quartus"
+      ]
+    }
+  }
+}

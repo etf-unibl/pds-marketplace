@@ -26,7 +26,7 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(ROOT, "src")
-VERSION = "0.1.1"
+VERSION = "0.1.2"
 REPO = "https://github.com/etf-unibl/pds-marketplace"
 AUTHOR = {"name": "Faculty of Electrical Engineering, University of Banja Luka", "url": "https://github.com/etf-unibl"}
 MARKETPLACE = "pds-marketplace"
@@ -84,7 +84,11 @@ def build_files():
             text = render(read(os.path.join(p["dir"], "skills", skill, "SKILL.md")))
             # the plugin's own MCP tools are read-only: allow them without a prompt (Claude Code permission rule
             # for all tools of the server; other AI tools ignore the field)
-            text = text.replace("\n---\n", f"\nallowed-tools: mcp__plugin_{name}_pds-{p['profile']}__*\n---\n", 1)
+            # a plugin whose tools also act (run a Tcl script, program the board) lists the tools that need no
+            # confirmation in "auto_approve"; the others ask every time
+            allowed = (", ".join(f"mcp__plugin_{name}_pds-{p['profile']}__{t}" for t in p["auto_approve"])
+                       if p.get("auto_approve") else f"mcp__plugin_{name}_pds-{p['profile']}__*")
+            text = text.replace("\n---\n", f"\nallowed-tools: {allowed}\n---\n", 1)
             files[f"{out}/skills/{skill}/SKILL.md"] = text
             skills.append(skill)
         files[f"{out}/scripts/guard.py"] = read(os.path.join(SRC, "shared", "guard.py"))

@@ -23,6 +23,7 @@ Ako je asistent samo objašnjavao, a kod ste pisali sami, linija nije potrebna. 
 | Podešavanje kursa iz `docs/getting-started.md` repozitorijuma kursa: *git*, *Python* 3.10 ili noviji, GHDL, alat za provjeru stila (`pip install -r requirements.txt`) | sve | `git --version`, `python --version`, `ghdl --version`, `vhdl-style --help` |
 | Jedan AI alat: [Claude Code](https://code.claude.com/docs/en/quickstart), [GitHub Copilot CLI](https://docs.github.com/en/copilot/how-tos/copilot-cli) (besplatan za studente kroz [GitHub Education](https://education.github.com)) ili Antigravity CLI | asistent | `claude --version`, `copilot --version` ili `agy --version` |
 | `pds-tools`, alati kursa koje dodaci koriste (korak 1) | alati dodataka | `pds-mcp --list` |
+| Za `pds-quartus`: *Quartus Prime Lite* sa podrškom za *Cyclone V*, `quartus/bin64` na putanji (`docs/tools-setup.md`) | kreiranje projekata, prevođenje, tajming, programiranje | `quartus_sh --version` |
 | Opciono: *GitHub CLI* `gh`, sa prijavom (`gh auth login`) | stanje *pull request*-a i evidencija vremena privatnih repozitorijuma; više zahtjeva prema *GitHub*-u na sat | `gh auth status` |
 
 *Node.js* nije potreban.
@@ -32,7 +33,7 @@ Ako je asistent samo objašnjavao, a kod ste pisali sami, linija nije potrebna. 
 Instalirajte `pds-tools` u isti *Python* koji koristite za kurs (u kojem je instaliran `vhdl-style`):
 
 ```
-python -m pip install "pds-tools @ git+https://github.com/etf-unibl/pds-marketplace@v0.1.0#subdirectory=tools/pds-tools"
+python -m pip install "pds-tools @ git+https://github.com/etf-unibl/pds-marketplace@v0.2.0#subdirectory=tools/pds-tools"
 ```
 
 Na *Linux* i *macOS* platformama umjesto `python` koristite `python3`. Provjerite da se komanda `pds-mcp` pronalazi:
@@ -41,7 +42,7 @@ Na *Linux* i *macOS* platformama umjesto `python` koristite `python3`. Provjerit
 pds-mcp --list
 ```
 
-Ispis navodi skupove alata pet dodataka (`course`, `git`, `design`, `testing`, `learning`).
+Ispis navodi skupove alata dodataka (`course`, `git`, `design`, `testing`, `learning`, `quartus`).
 
 **Virtuelno okruženje:** ako ste alate kursa instalirali u virtuelno okruženje, aktivirajte ga **prije** pokretanja AI alata (`.venv\Scripts\Activate.ps1` na *Windows*-u, `source .venv/bin/activate` na *Linux*-u i *macOS*-u). AI alat pokreće `pds-mcp` sa putanje (`PATH`) terminala u kojem je pokrenut; bez okruženja alati dodataka nedostaju.
 
@@ -56,6 +57,7 @@ Svi PDS dodaci dolaze iz jednog *marketplace*-a, `pds-marketplace`. Instalirajte
 | `pds-design` | rezultata provjere stila, upozorenja sinteze u *Quartus*-u, pinova ploče DE1-SoC |
 | `pds-testing` | pisanja *testbench*-eva sa samoprovjerom i njihovog pokretanja kao u CI-ju |
 | `pds-learning` | učenja uz predavanja (stranice tema, trenuci u videu, kod primjera), rječnika pojmova, kviza za provjeru znanja |
+| `pds-quartus` | rada sa *Quartus*-om iz komandne linije: projekat za vaš dizajn (DE1-SoC, VHDL-2008, pinovi, takt) izvan repozitorijuma, sinteza i kompletno prevođenje, vremenska analiza i zatvaranje tajminga, *Tcl* skripte, programiranje ploče |
 
 ### Claude Code
 
@@ -121,6 +123,7 @@ Pitajte svojim riječima, na srpskom ili engleskom; asistent bira odgovarajuću 
 | evidentirate vrijeme | „Provjeri moj /spent komentar: /spent 1h 30m“ | `pds-course:time` |
 | učite | „Zašto Quartus ovdje pravi leč?“ / „Ispitaj me iz predavanja 10.“ | `pds-learning:tutor`, `pds-learning:quiz` |
 | povežete dizajn sa pločom | „Koje pinove koristim za prekidače i sedmosegmentne displeje?“ | `pds-design:pins` |
+| koristite *Quartus* | „Napravi Quartus projekat za zadatak 12 i sintetizuj ga.“ / „Prevedi ga i reci mi Fmax.“ / „Isprogramiraj ploču.“ / „Napiši Tcl skriptu koja dodjeljuje pinove.“ | `pds-quartus:project`, `compile`, `timing`, `program`, `tcl` |
 
 Šta asistent radi sam: čita fajlove, pokreće GHDL i provjeru stila (bez `--fix`), čita vaše zadatke i *pull request*-ove na *GitHub*-u i pretražuje stranice tema kursa. Šta ostavlja vama: svaku komandu koja nešto mijenja. Prikazuje komandu, objašnjava svaki njen dio, kaže šta treba da vidite i kako da poništite izmjenu, a nakon što je pokrenete, provjerava rezultat.
 
