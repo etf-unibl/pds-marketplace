@@ -96,7 +96,7 @@ def main(argv=None):
     for sc in SCENARIOS:
         if a.only and sc["name"] != a.only:
             continue
-        with tempfile.TemporaryDirectory(prefix="pds-eval-") as tmp:
+        with tempfile.TemporaryDirectory(prefix="pds-eval-", ignore_cleanup_errors=True) as tmp:
             repo = os.path.join(tmp, "repo")
             shutil.copytree(a.repo, repo)
             if "stage_change" in sc.get("setup", []):
