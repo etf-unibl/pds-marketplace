@@ -33,7 +33,7 @@ Ako je asistent samo objašnjavao, a kod ste pisali sami, linija nije potrebna. 
 Instalirajte `pds-tools` u isti *Python* koji koristite za kurs (u kojem je instaliran `vhdl-style`):
 
 ```
-python -m pip install "pds-tools @ git+https://github.com/etf-unibl/pds-marketplace@v0.2.0#subdirectory=tools/pds-tools"
+python -m pip install "pds-tools @ git+https://github.com/etf-unibl/pds-marketplace@v0.2.1#subdirectory=tools/pds-tools"
 ```
 
 Na *Linux* i *macOS* platformama umjesto `python` koristite `python3`. Provjerite da se komanda `pds-mcp` pronalazi:
