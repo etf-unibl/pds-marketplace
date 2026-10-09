@@ -84,7 +84,7 @@ def commit_check(message: str, issue: int | None = None, issue_title: str | None
 
 def branch_check(issue_title: str | None = None, base: str = "origin/assignments") -> dict:
     """Checks the commits of the current branch that are not on base, like the CI pr-checks job (format, sign-off, issue number)."""
-    return repo.check_branch_commits(base(), base, issue_title)
+    return repo.check_branch_commits(_repo_base(), base, issue_title)
 
 
 def explain_command(command: str, lang: str = "en") -> dict:
@@ -247,6 +247,9 @@ def base():
     """The student's course repository: PDS_REPO, the server's working directory if it is a git
     repository, or the workspace root reported by the AI tool (resolved by the first tool call)."""
     return _workdir or os.environ.get("PDS_REPO") or os.getcwd()
+
+
+_repo_base = base  # branch_check has a parameter named base
 
 
 async def resolve_workdir(ctx):

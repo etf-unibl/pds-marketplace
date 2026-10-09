@@ -158,6 +158,15 @@ def test_fallback_workdir_skips_plugin_folder(course, tmp_path, monkeypatch):
     assert os.path.abspath(mcp_server.fallback_workdir()) == os.path.abspath(plugin)
 
 
+def test_branch_check_parameter_base_does_not_hide_repository(course, monkeypatch):
+    # the base parameter (a git ref) once shadowed base() and every call failed with 'str' object is not callable
+    from pds_tools import mcp_server
+    monkeypatch.chdir(course)
+    monkeypatch.delenv("PDS_REPO", raising=False)
+    monkeypatch.setattr(mcp_server, "_workdir", None)
+    assert isinstance(mcp_server.branch_check(base="origin/assignments"), dict)
+
+
 def test_parse_messages_windows_absolute_path():
     out = r"C:\Users\x\AppData\Local\Temp\pds\inv.vhd:5:10: missing ';' at end of port clause"
     m = hdl.parse_messages(out)
