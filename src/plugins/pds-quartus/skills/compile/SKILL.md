@@ -11,6 +11,7 @@ description: Runs Intel Quartus Prime on a PDS project from the command line - A
 2. **Call `quartus_compile`** with
    - `flow: "synthesis"` to check that the design synthesizes and to review it (seconds to a minute; enough for most assignments),
    - `flow: "full"` before timing analysis or programming the board (a few minutes; produces `output_files/<top>.sof`).
+   A run longer than about 90 s continues in the background: the result has `status: "running"`, a `job` id, the elapsed time and the finished stages. Tell the student briefly what Quartus is doing (e.g. "synthesis done, fitter running"), then **call `quartus_job` with the job id** and repeat until `status: "done"`; the done result is the same as a direct one. Do not start another compilation of the same project meanwhile.
 3. Explain the result in the course terms:
    - **errors**: file and line, what Quartus means, the VHDL-2008 rule behind it; the fix is the student's to make in `assignments/<N>` (show it, do not edit graded files);
    - **critical warnings** first (e.g. missing pin assignments, timing not met), then the synthesis review: inferred latches (incomplete assignment in a combinational process), registers removed or stuck at a constant, sensitivity-list problems, truncated values; the known harmless warnings are filtered;

@@ -190,8 +190,16 @@ def quartus_project_create(sources: list[str], top: str | None = None, project_d
 
 
 def quartus_compile(project_dir: str, flow: str = "synthesis", revision: str | None = None) -> dict:
-    """Runs Quartus on a project: flow 'synthesis' (Analysis & Synthesis), 'fit', 'timing', 'assemble' or 'full' (complete compilation, produces the .sof). Returns errors, critical warnings, the synthesis review (latches, removed registers) and the commands it ran."""
-    return quartus_run.compile(base_path(project_dir), flow, revision)
+    """Runs Quartus on a project: flow 'synthesis' (Analysis & Synthesis), 'fit', 'timing', 'assemble' or 'full' (complete compilation, produces the .sof). Returns errors, critical warnings, the synthesis review (latches, removed registers) and the commands it ran. A run longer than about 90 s continues in the background: the result is then status 'running' with a job id; call quartus_job with it until the status is 'done'."""
+    started = quartus_run.compile_start(base_path(project_dir), flow, revision)
+    if started.get("status") != "running" or not started.get("ok"):
+        return started
+    return quartus_run.job_wait(started["job"])
+
+
+def quartus_job(job: str, wait: int = 90) -> dict:
+    """Waits up to wait seconds (at most 90) for a quartus_compile run that is still in progress: status 'running' with the elapsed time and the finished stages, or status 'done' with the full compile result."""
+    return quartus_run.job_wait(job, wait)
 
 
 def quartus_timing(project_dir: str, paths: int = 10, revision: str | None = None) -> dict:
@@ -230,7 +238,7 @@ PROFILES = {
                  (video_notes, READ_ONLY), (tutorial_examples, READ_ONLY), (tutorial_example_read, READ_ONLY), (tutorial_example_run, READ_ONLY),
                  (course_doc, READ_ONLY)],
     "quartus": [(quartus_env, READ_ONLY), (quartus_project_create, PROJECT_FILES), (quartus_compile, PROJECT_FILES),
-                (quartus_timing, PROJECT_FILES), (synth_summary, READ_ONLY), (board_pins, READ_ONLY), (pin_check, READ_ONLY),
+                (quartus_job, READ_ONLY), (quartus_timing, PROJECT_FILES), (synth_summary, READ_ONLY), (board_pins, READ_ONLY), (pin_check, READ_ONLY),
                 (pin_plan, READ_ONLY), (board_cables, READ_ONLY), (quartus_tcl, ACTS), (board_program, ACTS)],
 }
 PROFILES["all"] = list({f.__name__: (f, a) for p in PROFILES.values() for f, a in p}.values())

@@ -13,6 +13,8 @@ import re
 import shutil
 import subprocess
 import tempfile
+import threading
+import time
 
 from . import pins, quartus
 
@@ -271,6 +273,67 @@ def compile(project_dir, flow="synthesis", revision=None, timeout=1800):
         result["sof"] = sof[0] if sof else None
     return result
 
+
+# A full compilation takes minutes; AI tools cancel a tool call after a few minutes (Copilot CLI: 180 s).
+# compile_start runs the flow in a background thread of the tool server and job_wait waits for it in
+# steps shorter than that, so no single tool call runs into the client's timeout.
+JOB_WAIT = 90
+_jobs = {}
+_jobs_lock = threading.Lock()
+
+
+def compile_start(project_dir, flow="synthesis", revision=None):
+    """Starts compile() in the background and returns the job id; one job per project folder at a time."""
+    if flow not in FLOWS:
+        raise ValueError(f"flow must be one of {', '.join(FLOWS)}")
+    project_dir, name, rev = _project(project_dir, revision)
+    if not find_quartus():
+        return _no_quartus()
+    with _jobs_lock:
+        for job_id, job in _jobs.items():
+            if job["project_dir"] == project_dir and job["thread"].is_alive():
+                return {"ok": False, "job": job_id, "status": "running", "flow": job["flow"],
+                        "message": f"a {job['flow']} run of this project is still in progress: wait for it with quartus_job"}
+        job_id = str(len(_jobs) + 1)
+        job = {"project_dir": project_dir, "flow": flow, "revision": rev, "started": time.time(), "finished": None, "result": None}
+
+        def work():
+            try:
+                job["result"] = compile(project_dir, flow, revision)
+            except Exception as e:  # noqa: BLE001 - reported by job_wait
+                job["result"] = {"ok": False, "error": type(e).__name__, "message": str(e)}
+            job["finished"] = time.time()
+
+        job["thread"] = threading.Thread(target=work, name=f"quartus-job-{job_id}", daemon=True)
+        _jobs[job_id] = job
+        job["thread"].start()
+    return {"ok": True, "job": job_id, "status": "running", "flow": flow, "project_dir": project_dir}
+
+
+def _stages_done(job):
+    """Quartus stages (by their report files) finished since the job started."""
+    done = []
+    for stage, ext in (("synthesis", "map"), ("fitter", "fit"), ("assembler", "asm"), ("timing", "sta")):
+        for folder in (os.path.join(job["project_dir"], "output_files"), job["project_dir"]):
+            rpt = os.path.join(folder, f"{job['revision']}.{ext}.rpt")
+            if os.path.exists(rpt) and os.path.getmtime(rpt) >= job["started"]:
+                done.append(stage)
+                break
+    return done
+
+
+def job_wait(job_id, wait=JOB_WAIT):
+    """Waits up to wait seconds (at most JOB_WAIT) for a compile job; the result of compile() once it is done."""
+    job = _jobs.get(str(job_id))
+    if not job:
+        raise ValueError(f"no compile job {job_id}: jobs last only as long as the tool server (a new AI tool "
+                         "session starts a new one); run quartus_compile again")
+    job["thread"].join(max(0, min(wait, JOB_WAIT)))
+    if job["thread"].is_alive():
+        return {"ok": True, "job": str(job_id), "status": "running", "flow": job["flow"], "project_dir": job["project_dir"],
+                "elapsed_s": round(time.time() - job["started"]), "stages_done": _stages_done(job),
+                "next": "Quartus is still running: call quartus_job with this job id again"}
+    return {**job["result"], "job": str(job_id), "status": "done", "elapsed_s": round(job["finished"] - job["started"])}
 
 STA_SCRIPT = """# Timing analysis of the PDS course (created by pds-tools); run with: quartus_sta -t {script}
 project_open {name} -revision {rev}

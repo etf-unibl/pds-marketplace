@@ -1,7 +1,7 @@
 ---
 name: compile
 description: Runs Intel Quartus Prime on a PDS project from the command line - Analysis & Synthesis only, or the full compilation (synthesis, fitter, assembler, timing) that produces the .sof for the board - and explains errors, critical warnings and synthesis problems (inferred latches, removed registers, incomplete sensitivity lists, truncated values). Use when the student asks to synthesize, compile, or why Quartus fails or warns.
-allowed-tools: mcp__plugin_pds-quartus_pds-quartus__quartus_env, mcp__plugin_pds-quartus_pds-quartus__quartus_project_create, mcp__plugin_pds-quartus_pds-quartus__quartus_compile, mcp__plugin_pds-quartus_pds-quartus__quartus_timing, mcp__plugin_pds-quartus_pds-quartus__synth_summary, mcp__plugin_pds-quartus_pds-quartus__board_pins, mcp__plugin_pds-quartus_pds-quartus__pin_check, mcp__plugin_pds-quartus_pds-quartus__pin_plan, mcp__plugin_pds-quartus_pds-quartus__board_cables
+allowed-tools: mcp__plugin_pds-quartus_pds-quartus__quartus_env, mcp__plugin_pds-quartus_pds-quartus__quartus_project_create, mcp__plugin_pds-quartus_pds-quartus__quartus_compile, mcp__plugin_pds-quartus_pds-quartus__quartus_job, mcp__plugin_pds-quartus_pds-quartus__quartus_timing, mcp__plugin_pds-quartus_pds-quartus__synth_summary, mcp__plugin_pds-quartus_pds-quartus__board_pins, mcp__plugin_pds-quartus_pds-quartus__pin_check, mcp__plugin_pds-quartus_pds-quartus__pin_plan, mcp__plugin_pds-quartus_pds-quartus__board_cables
 ---
 
 # Compile with Quartus
@@ -12,6 +12,7 @@ allowed-tools: mcp__plugin_pds-quartus_pds-quartus__quartus_env, mcp__plugin_pds
 2. **Call `quartus_compile`** with
    - `flow: "synthesis"` to check that the design synthesizes and to review it (seconds to a minute; enough for most assignments),
    - `flow: "full"` before timing analysis or programming the board (a few minutes; produces `output_files/<top>.sof`).
+   A run longer than about 90 s continues in the background: the result has `status: "running"`, a `job` id, the elapsed time and the finished stages. Tell the student briefly what Quartus is doing (e.g. "synthesis done, fitter running"), then **call `quartus_job` with the job id** and repeat until `status: "done"`; the done result is the same as a direct one. Do not start another compilation of the same project meanwhile.
 3. Explain the result in the course terms:
    - **errors**: file and line, what Quartus means, the VHDL-2008 rule behind it; the fix is the student's to make in `assignments/<N>` (show it, do not edit graded files);
    - **critical warnings** first (e.g. missing pin assignments, timing not met), then the synthesis review: inferred latches (incomplete assignment in a combinational process), registers removed or stuck at a constant, sensitivity-list problems, truncated values; the known harmless warnings are filtered;
@@ -21,7 +22,7 @@ allowed-tools: mcp__plugin_pds-quartus_pds-quartus__quartus_env, mcp__plugin_pds
 
 ## Quartus only through the tools (mandatory)
 
-- Run Quartus only through the `pds-quartus` tools: `quartus_env`, `quartus_project_create`, `quartus_compile`, `quartus_timing`, `synth_summary`, `quartus_tcl`, `board_cables`, `board_program`. They do more than the bare commands (the timing tool, for example, also reports the input-to-output delays of a combinational design, which the default compilation flow does not).
+- Run Quartus only through the `pds-quartus` tools: `quartus_env`, `quartus_project_create`, `quartus_compile`, `quartus_job`, `quartus_timing`, `synth_summary`, `quartus_tcl`, `board_cables`, `board_program`. They do more than the bare commands (the timing tool, for example, also reports the input-to-output delays of a combinational design, which the default compilation flow does not).
 - If a tool you need is not in your tool list, search for it by its exact name (e.g. `quartus_timing`) before doing anything else.
 - **Never replace a tool with `quartus_sh`, `quartus_map`, `quartus_fit`, `quartus_sta`, `quartus_pgm` or a Tcl script of your own in the shell**, not even when the tool cannot be found. If it still cannot be found, say so: no result is better than a different one presented as the tool's. Ask the student to repeat the request naming the tool ("use the pds-quartus `quartus_timing` tool"), or to start a new session if that does not help.
 - Showing the commands the tools ran, so the student can run them by hand, stays part of every answer.

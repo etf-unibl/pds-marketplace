@@ -73,3 +73,28 @@ def test_tcl_refuses_repository(task):
         pytest.skip("Quartus not installed")
     with pytest.raises(ValueError):
         q.tcl_run("puts hi", project_dir=str(repo))
+
+
+def test_compile_job_runs_in_background(tmp_path, monkeypatch):
+    # a full compilation outlasts the tool call timeout of AI tools (Copilot CLI: 180 s): it runs as a job
+    import threading
+    (tmp_path / "top.qpf").write_text("")
+    release = threading.Event()
+
+    def fake_compile(project_dir, flow, revision=None):
+        release.wait(5)
+        return {"ok": True, "project_dir": project_dir, "flow": flow, "steps": []}
+
+    monkeypatch.setattr(q, "find_quartus", lambda: "quartus")
+    monkeypatch.setattr(q, "compile", fake_compile)
+    started = q.compile_start(str(tmp_path), "full")
+    assert started["status"] == "running"
+    again = q.compile_start(str(tmp_path), "synthesis")
+    assert not again["ok"] and again["job"] == started["job"]  # one run per project folder
+    r = q.job_wait(started["job"], wait=0)
+    assert r["status"] == "running" and r["flow"] == "full" and r["stages_done"] == []
+    release.set()
+    r = q.job_wait(started["job"])
+    assert r["status"] == "done" and r["ok"] and r["flow"] == "full"
+    with pytest.raises(ValueError, match="no compile job"):
+        q.job_wait("999")
