@@ -18,6 +18,8 @@ description: Helps write, explain and run Tcl scripts for Intel Quartus Prime (q
 
 Tcl scripts are not part of the submission: the course `.gitignore` ignores `*.tcl` in the repository, and the project folder is outside it.
 
+{{include quartus-tools-rule}}
+
 {{include teach-rule}}
 
 {{include course-context}}

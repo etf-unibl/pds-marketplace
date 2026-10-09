@@ -13,6 +13,8 @@ description: Programs the DE1-SoC board with a compiled PDS design (.sof over JT
 4. Test on the board with the student: which switch drives which signal, which LED or display shows what (`board_pins` lists the names and pins; KEY buttons are active-low, the 7-segment segments are active-low). Show the GUI path too: **Tools > Programmer**, **Hardware Setup**: USB-Blaster, **Auto Detect**, select the 5CSEMA5 device, add the `.sof`, **Start**; and the command `quartus_pgm -c "<cable>" -m JTAG -o "p;output_files/<top>.sof@2"`.
 5. Behaviour differs from the simulation: check the pins and active levels first, then reset and clock (`CLOCK_50`), then latches and timing warnings of the compilation (`compile`, `timing` skills).
 
+{{include quartus-tools-rule}}
+
 {{include teach-rule}}
 
 {{include course-context}}

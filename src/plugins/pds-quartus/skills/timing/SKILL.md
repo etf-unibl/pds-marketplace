@@ -17,6 +17,8 @@ description: Timing analysis and timing closure of a PDS design with Quartus (Ti
 4. **Closing timing** (explain, the student changes the VHDL): shorten the critical path - pipelining (registers between stages, more latency: lecture 14 `docs/topics/14-pipelining.md`), restructuring arithmetic or decision logic (fewer logic levels, shared operators, balanced trees: lecture 8), registering inputs and outputs, a relaxed or corrected constraint only when the requirement allows it. The timing lecture is `docs/topics/13-timing-analysis.md`.
 5. Show the Tcl the tool used (`create_timing_netlist`, `read_sdc`, `update_timing_netlist`, `create_timing_summary`, `report_timing -setup -npaths 10 -detail summary`, `report_clock_fmax_summary`) and how to open the same reports in the GUI (**Tools > Timing Analyzer**), so the student can repeat the analysis.
 
+{{include quartus-tools-rule}}
+
 {{include teach-rule}}
 
 {{include course-context}}

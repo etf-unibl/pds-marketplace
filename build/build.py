@@ -5,7 +5,8 @@
     python build/build.py --check    # fail if the committed files are not up to date (CI)
 
 Sources (hand-edited):
-  src/shared/teach-rule.md, course-context.md   included in skills with {{include <name>}}
+  src/shared/teach-rule.md, course-context.md,
+  quartus-tools-rule.md                         included in skills with {{include <name>}}
   src/shared/guard.py                           hook script (Claude Code, Copilot CLI)
   src/plugins/<plugin>/plugin.json              name, displayName, description, profile, keywords
   src/plugins/<plugin>/skills/<skill>/SKILL.md  skills
@@ -26,7 +27,7 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(ROOT, "src")
-VERSION = "0.1.3"
+VERSION = "0.1.4"
 REPO = "https://github.com/etf-unibl/pds-marketplace"
 AUTHOR = {"name": "Faculty of Electrical Engineering, University of Banja Luka", "url": "https://github.com/etf-unibl"}
 MARKETPLACE = "pds-marketplace"

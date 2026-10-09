@@ -19,6 +19,8 @@ description: Creates an Intel Quartus Prime project for a PDS design or task fol
 - An existing project is not overwritten unless asked (`overwrite: true`).
 - For a different board or device pass the device and leave pins to the student (`assign_pins: false`).
 
+{{include quartus-tools-rule}}
+
 {{include teach-rule}}
 
 {{include course-context}}

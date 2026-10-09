@@ -18,6 +18,8 @@ description: Runs Intel Quartus Prime on a PDS project from the command line - A
 4. Show the commands the tool ran (`quartus_map <project>` or `quartus_sh --flow compile <project>`), so the student can run them in the project folder, and where the reports are (`output_files/*.rpt`; in the GUI **Processing > Compilation Report**; RTL schematic: **Tools > Netlist Viewers > RTL Viewer**).
 5. After a successful full compilation: `timing` skill for timing closure, `program` skill for the board.
 
+{{include quartus-tools-rule}}
+
 {{include teach-rule}}
 
 {{include course-context}}
