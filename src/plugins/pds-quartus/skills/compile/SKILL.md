@@ -17,7 +17,7 @@ description: Runs Intel Quartus Prime on a PDS project from the command line - A
    - **critical warnings** first (e.g. missing pin assignments, timing not met), then the synthesis review: inferred latches (incomplete assignment in a combinational process), registers removed or stuck at a constant, sensitivity-list problems, truncated values; the known harmless warnings are filtered;
    - the topic pages explain the background (`docs/topics/05-sequential-statements.md` latches, `08-combinational-optimization.md`, `09`..`11` sequential design) - point to them.
 4. Show the commands the tool ran (`quartus_map <project>` or `quartus_sh --flow compile <project>`), so the student can run them in the project folder, and where the reports are (`output_files/*.rpt`; in the GUI **Processing > Compilation Report**; RTL schematic: **Tools > Netlist Viewers > RTL Viewer**).
-5. After a successful full compilation: `timing` skill for timing closure, `program` skill for the board.
+5. After a successful full compilation: if the student asked about timing, **call `quartus_timing`** and answer from its result (`timing` skill); the timing summary of the compilation itself has no input-to-output delays of a combinational design. `program` skill for the board.
 
 {{include quartus-tools-rule}}
 

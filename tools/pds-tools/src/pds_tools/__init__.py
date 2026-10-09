@@ -6,7 +6,7 @@ rules. Commands that change state (git commit, push, vhdl-style --fix, ...) are 
 never run.
 """
 
-__version__ = "0.2.4"
+__version__ = "0.2.5"
 
 # Language standard and tool versions used by the course CI (assignments branch, verif.yml)
 VHDL_STD = "08"

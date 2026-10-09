@@ -189,7 +189,9 @@ def project_create(sources, top=None, project_dir=None, device=DEVICE, family=FA
            f"set_global_assignment -name TOP_LEVEL_ENTITY {top}",
            "set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files",
            "set_global_assignment -name VHDL_INPUT_VERSION VHDL_2008",
-           "set_global_assignment -name NUM_PARALLEL_PROCESSORS ALL"]
+           "set_global_assignment -name NUM_PARALLEL_PROCESSORS ALL",
+           "# Advanced Physical Optimization costs minutes of Fitter time even for a small design, which course designs do not need",
+           "set_global_assignment -name ADVANCED_PHYSICAL_OPTIMIZATION OFF"]
     tcl += [f"set_global_assignment -name VHDL_FILE {{{f.replace(os.sep, '/')}}}" for f in files]
     tcl.append(f"set_global_assignment -name SDC_FILE {top}.sdc")
     pin_lines = plan.get("assignments", [])
@@ -271,6 +273,9 @@ def compile(project_dir, flow="synthesis", revision=None, timeout=1800):
     if flow in ("full", "assemble"):
         sof = glob.glob(os.path.join(project_dir, "output_files", f"{rev}.sof"))
         result["sof"] = sof[0] if sof else None
+    if flow == "full" and result["ok"]:
+        result["next"] = ("for timing (slack, Fmax, worst paths, input-to-output delays) call quartus_timing: the timing "
+                          "summary of the compilation itself has no input-to-output delays of a combinational design")
     return result
 
 

@@ -53,6 +53,7 @@ def test_project_files_without_quartus(task, tmp_path):
     assert "set_global_assignment -name DEVICE 5CSEMA5F31C6" in tcl and "VHDL_INPUT_VERSION VHDL_2008" in tcl
     assert "set_location_assignment PIN_AB12 -to SW[0]" in tcl and 'IO_STANDARD "3.3-V LVTTL" -to SW[0]' in tcl
     assert "board_top_tb" not in tcl and tcl.count("VHDL_FILE") == 2
+    assert "ADVANCED_PHYSICAL_OPTIMIZATION OFF" in tcl  # minutes of Fitter time otherwise
     sdc = (tmp_path / "proj" / "board_top.sdc").read_text()
     assert "create_clock -name CLOCK_50 -period 20.0 [get_ports {CLOCK_50}]" in sdc
     (tmp_path / "proj" / "board_top.qpf").write_text("")
