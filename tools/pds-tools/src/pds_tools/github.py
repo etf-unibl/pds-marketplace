@@ -63,12 +63,12 @@ def task_context(issue=None, path=".", repository=None):
             return {"ok": False, "message": "Give the issue number (the current branch name does not start with one)."}
     data = get(f"/repos/{slug}/issues/{issue}")
     labels = [l["name"] for l in data.get("labels", [])]
-    group = next((l for l in labels if re.fullmatch(r"assignment-\d+", l)), None)
-    kind = "test" if "good first issue" in labels else "graded" if group else "other"
+    topic = next((l for l in labels if re.fullmatch(r"assignment-\d+", l)), None)
+    kind = "test" if "good first issue" in labels else "graded" if topic else "other"
     milestone = data.get("milestone") or {}
     title = data["title"]
     return {"ok": True, "repository": slug, "issue": int(issue), "title": title, "state": data["state"], "kind": kind,
-            "group": group, "labels": labels, "assignees": [a["login"] for a in data.get("assignees", [])],
+            "topic": topic, "labels": labels, "assignees": [a["login"] for a in data.get("assignees", [])],
             "milestone": milestone.get("title"), "due_on": milestone.get("due_on"), "url": data["html_url"], "body": data.get("body") or "",
             "folder": f"assignments/{issue}/", "branch_prefix": f"{issue}-",
             "commit_subject": rules.expected_title(issue, title), "pr_title": rules.expected_title(issue, title),

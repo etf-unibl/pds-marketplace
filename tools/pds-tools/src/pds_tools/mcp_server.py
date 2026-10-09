@@ -41,7 +41,7 @@ def env_check() -> dict:
 
 
 def task_context(issue: int | None = None) -> dict:
-    """Context of a course issue (default: the issue of the current branch): title, kind (test/graded), group, deadline, folder, expected branch prefix, commit subject and PR title."""
+    """Context of a course issue (default: the issue of the current branch): title, kind (test/graded), topic label, deadline, folder, expected branch prefix, commit subject and PR title."""
     return github.task_context(issue, base())
 
 

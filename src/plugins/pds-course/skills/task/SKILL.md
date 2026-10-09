@@ -11,7 +11,7 @@ description: Explain a PDS course task (GitHub issue) to the student - what to s
 
 ## Steps
 
-1. Get the issue: `task_context` with the issue number (or without it, for the issue of the current branch). It returns the title, kind (`test` = test assignment, `graded` = graded assignment of group `assignment-N`), assignees, deadline (`due_on`), the folder, the branch prefix and the exact commit and pull request title.
+1. Get the issue: `task_context` with the issue number (or without it, for the issue of the current branch). It returns the title, kind (`test` = test assignment, `graded` = graded assignment of topic `assignment-N`), assignees, deadline (`due_on`), the folder, the branch prefix and the exact commit and pull request title.
 2. Summarize for the student:
    - what the issue asks (read `body`; quote the requirements, do not invent new ones);
    - the folder `assignments/<N>/` and the required file and entity names; the instructor's tests expect exactly these names, so wrong names fail `verif` even for a correct design;

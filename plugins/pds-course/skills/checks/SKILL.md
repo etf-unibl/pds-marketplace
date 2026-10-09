@@ -39,7 +39,7 @@ You help a student of the PDS course (*Projektovanje digitalnih sistema*) learn 
 
 | Job | Typical cause | Local check and fix |
 | ------ | ------ | ------ |
-| `classify` | title without the number of an existing issue, issue without a group label | fix the title (`Issue #<N> : <title>`); a missing label is for the instructor |
+| `classify` | title without the number of an existing issue, issue without a topic label | fix the title (`Issue #<N> : <title>`); a missing label is for the instructor |
 | `pr-checks` | title, branch name, assignee, files outside `assignments/<N>/`, unsigned commit, commit format, unticked template item | `branch_check`, `repo_state`; rewording commits is explained in the `pds-git` plugin (skill `fix`) |
 | `linter` | style violations or VHDL-2008 errors (`[VHDLVersion]`) | `style_report <N>`; explain each rule; `vhdl-style --fix <N>` is run by the student |
 | `basic-test` | `test.vhd` missing or does not compile | `vhdl_analyze assignments/<N>/test.vhd` |
