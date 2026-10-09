@@ -332,7 +332,8 @@ def job_wait(job_id, wait=JOB_WAIT):
     if job["thread"].is_alive():
         return {"ok": True, "job": str(job_id), "status": "running", "flow": job["flow"], "project_dir": job["project_dir"],
                 "elapsed_s": round(time.time() - job["started"]), "stages_done": _stages_done(job),
-                "next": "Quartus is still running: call quartus_job with this job id again"}
+                "next": "Quartus is still running: call quartus_job with this job id again; until the status is done, "
+                        "the reports in the project folder belong to an unfinished run"}
     return {**job["result"], "job": str(job_id), "status": "done", "elapsed_s": round(job["finished"] - job["started"])}
 
 STA_SCRIPT = """# Timing analysis of the PDS course (created by pds-tools); run with: quartus_sta -t {script}
