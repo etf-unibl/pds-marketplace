@@ -83,7 +83,7 @@ copilot plugin install pds-git@pds-marketplace
 copilot plugin install pds-learning@pds-marketplace
 ```
 
-Pokrenite `copilot` u repozitorijumu kursa i potvrdite povjerenje u folder kada to bude zatraženo. Komandom `/model` izaberite jak model umjesto automatskog izbora: sa slabijim modelima *Copilot* ponekad odgovara napamet, bez alata dodataka.
+Pokrenite *Copilot* u repozitorijumu kursa sa najjačim automatskim podešavanjem, `copilot --model auto --auto-tier intelligence`, i potvrdite povjerenje u folder kada to bude zatraženo. Da bi to bilo podrazumijevano, jednom pokrenite `/config model` i izaberite *Auto* sa profilom *intelligence*. Ako vaš plan dozvoljava izbor modela komandom `/model`, izaberite model *Claude Sonnet*, *Claude Opus* ili *GPT-5*, a ne model sa oznakom *mini*, *flash* ili *haiku*: manji modeli češće odgovaraju napamet, bez alata dodataka.
 
 ### Antigravity CLI
 
@@ -149,6 +149,6 @@ Ako asistent pokuša sam da pokrene takvu komandu, zaštita ga zaustavlja poruko
 | „PDS plugin rule (teach, don't execute)“ | očekivano: prikazanu komandu pokrenite sami |
 | Dokumenti kursa ili stranice tema se ne pronalaze | pokrenite AI alat u repozitorijumu kursa; ako ste klonirali samo granu `assignments`, izvršite `git fetch origin main` |
 | Greške *GitHub*-a kod stanja *pull request*-a ili evidencije vremena (403, ograničenje broja zahtjeva, 404 za privatni repozitorijum) | prijavite se komandom `gh auth login`; alati tada koriste vašu *GitHub* prijavu |
-| *Copilot* odgovara napamet umjesto da koristi alate | komandom `/model` izaberite jači model i pitajte ponovo, npr. „koristi pds-learning alate“ |
+| *Copilot* odgovara napamet umjesto da koristi alate | ukucajte `/mcp`: serveri `pds-…` moraju biti navedeni i pokrenuti; ako nisu, *Copilot* ne nalazi `pds-mcp` (pokrenite ga iz terminala u kojem radi `pds-mcp --list`). Ako rade, pokrenite *Copilot* komandom `copilot --model auto --auto-tier intelligence` (odjeljak 2) i pitajte ponovo, navodeći dodatak, npr. „koristi pds-learning alate“ |
 | *Antigravity*: dodatak ništa ne radi | izvršite `agy plugin list`; ponovo instalirajte iz klona; zaštita zahtijeva *Python* na putanji (`python --version`) |
 | *Windows*: „Python was not found; run without arguments to install from the Microsoft Store“ | bezopasna poruka *Windows* prečice `python3`; zaštita tada koristi `python` ili `py` |

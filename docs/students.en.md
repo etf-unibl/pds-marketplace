@@ -83,7 +83,7 @@ copilot plugin install pds-git@pds-marketplace
 copilot plugin install pds-learning@pds-marketplace
 ```
 
-Start `copilot` in your course repository and trust the folder when asked. Choose a capable model with `/model` instead of the automatic choice: with weaker models Copilot sometimes answers from memory instead of using the plugins' tools.
+Start Copilot in your course repository with its strongest automatic setting, `copilot --model auto --auto-tier intelligence`, and trust the folder when asked. To make this the default, run `/config model` once and choose *Auto* with the profile *intelligence*. If your plan lets you choose a model with `/model`, pick a *Claude Sonnet*, *Claude Opus* or *GPT-5* model, not one marked *mini*, *flash* or *haiku*: smaller models more often answer from memory instead of using the plugins' tools.
 
 ### Antigravity CLI
 
@@ -149,6 +149,6 @@ Update `pds-tools` with the install command of step 1 when the course announces 
 | "PDS plugin rule (teach, don't execute)" | expected: run the shown command yourself |
 | The course documents or topic pages are not found | start the AI tool inside your course repository; if you cloned only the `assignments` branch, run `git fetch origin main` |
 | GitHub errors in pull request status or time tracking (403, rate limit, 404 on a private repository) | log in with `gh auth login`; the tools then use your GitHub login |
-| Copilot answers from memory instead of using the tools | choose a stronger model with `/model` and ask again, e.g. "use the pds-learning tools" |
+| Copilot answers from memory instead of using the tools | type `/mcp`: the `pds-…` servers must be listed and running; if they are not, Copilot cannot find `pds-mcp` (start it from a terminal where `pds-mcp --list` works). If they are running, start Copilot with `copilot --model auto --auto-tier intelligence` (section 2) and ask again, naming the plugin, e.g. "use the pds-learning tools" |
 | Antigravity: the plugin does nothing | run `agy plugin list`; reinstall from the clone; the guard needs Python on `PATH` (`python --version`) |
 | Windows: "Python was not found; run without arguments to install from the Microsoft Store" | harmless message of the Windows `python3` shortcut; the guard then uses `python` or `py` |
