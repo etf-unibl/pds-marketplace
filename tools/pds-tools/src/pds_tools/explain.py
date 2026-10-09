@@ -1,4 +1,4 @@
-"""Explanations of the commands used in the course workflow (git, gh, course tools).
+"""Explanations of the commands used in the course workflow (git, gh, course tools, Quartus).
 
 Student plugins never run commands that change state; they show the command and explain it with
 this table: what it does, why it is needed in the course workflow, how to check the result and
@@ -161,6 +161,96 @@ COMMANDS = {
                "check": "gh pr view i provjere na stranici pull request-a.", "undo": "gh pr close (grana ostaje)."}},
 }
 
+def _quartus(en, sr):
+    return {"changes": False, "kind": "quartus", "en": en, "sr": sr}
+
+
+# Quartus command-line tools: they work in the Quartus project folder outside the repository (course
+# rule) and never change the repository; the pds-quartus tools run them and show these command lines
+COMMANDS.update({
+    "quartus_sh -t": _quartus(
+        {"does": "Runs a Tcl script in the Quartus shell; create_project.tcl, for example, creates the project: device, top-level entity, VHDL files, pins and the SDC file.",
+         "why": "A project made from a script can be re-created exactly, and it is kept outside the repository (course rule), so nothing Quartus generates ends up in a commit.",
+         "check": "The .qpf and .qsf files appear in the project folder and quartus_sh prints 'Evaluation of Tcl script ... was successful'.",
+         "undo": "Delete the project folder: it is outside the repository and only references the VHDL files."},
+        {"does": "Pokreće Tcl skriptu u Quartus shell-u; create_project.tcl, na primjer, pravi projekat: čip, top-level entitet, VHDL fajlove, pinove i SDC fajl.",
+         "why": "Projekat napravljen skriptom može se tačno ponoviti, a drži se van repozitorijuma (pravilo kursa), pa ništa što Quartus generiše ne završi u komitu.",
+         "check": "U folderu projekta se pojave fajlovi .qpf i .qsf, a quartus_sh ispiše 'Evaluation of Tcl script ... was successful'.",
+         "undo": "Obrišite folder projekta: van repozitorijuma je i VHDL fajlove samo referencira."}),
+    "quartus_sh --flow compile": _quartus(
+        {"does": "Full compilation: Analysis & Synthesis, Fitter, Assembler and Timing Analyzer; produces output_files/<top>.sof.",
+         "why": "Needed before timing analysis and before programming the board; to check only that the design synthesizes, quartus_map is enough.",
+         "check": "'Quartus Prime Full Compilation was successful', the reports in output_files/ (flow, map, fit, sta) and the .sof file.",
+         "undo": "The repository does not change; delete output_files/, db/ and incremental_db/ in the project folder to start clean."},
+        {"does": "Kompletna kompilacija: Analysis & Synthesis, Fitter, Assembler i Timing Analyzer; pravi output_files/<top>.sof.",
+         "why": "Potrebna prije analize vremenskih parametara i prije programiranja ploče; za provjeru da li se dizajn sintetiše dovoljan je quartus_map.",
+         "check": "'Quartus Prime Full Compilation was successful', izvještaji u output_files/ (flow, map, fit, sta) i fajl .sof.",
+         "undo": "Repozitorijum se ne mijenja; za čist početak obrišite output_files/, db/ i incremental_db/ u folderu projekta."}),
+    "quartus_map": _quartus(
+        {"does": "Analysis & Synthesis: checks the VHDL, infers the hardware (registers, latches, multiplexers, adders) and maps it to the logic of the device.",
+         "why": "The fastest check that a design synthesizes; its warnings point to design errors such as inferred latches and incomplete sensitivity lists.",
+         "check": "output_files/<top>.map.rpt: the Analysis & Synthesis Summary and the warnings.",
+         "undo": "The repository does not change; the reports are rewritten by the next run."},
+        {"does": "Analysis & Synthesis: provjerava VHDL, prepoznaje hardver (registre, lečeve, multipleksere, sabirače) i preslikava ga na logiku čipa.",
+         "why": "Najbrža provjera da li se dizajn sintetiše; njena upozorenja ukazuju na greške u dizajnu, kao što su lečevi i nepotpune liste osjetljivosti.",
+         "check": "output_files/<top>.map.rpt: Analysis & Synthesis Summary i upozorenja.",
+         "undo": "Repozitorijum se ne mijenja; sljedeće pokretanje ponovo piše izvještaje."}),
+    "quartus_fit": _quartus(
+        {"does": "Fitter: places the synthesized logic in the chip, routes the connections and applies the pin assignments.",
+         "why": "Runs after synthesis; only after fitting are the real delays and the pin usage known.",
+         "check": "output_files/<top>.fit.rpt: resource usage, pins and the I/O assignment warnings.",
+         "undo": "The repository does not change."},
+        {"does": "Fitter: raspoređuje sintetisanu logiku u čipu, povezuje veze i primjenjuje dodjelu pinova.",
+         "why": "Pokreće se nakon sinteze; tek nakon raspoređivanja poznata su stvarna kašnjenja i korišćenje pinova.",
+         "check": "output_files/<top>.fit.rpt: zauzeće resursa, pinovi i upozorenja o dodjeli ulaza i izlaza.",
+         "undo": "Repozitorijum se ne mijenja."}),
+    "quartus_asm": _quartus(
+        {"does": "Assembler: writes the programming file output_files/<top>.sof from the fitted design.",
+         "why": "The .sof is what quartus_pgm loads into the FPGA.",
+         "check": "output_files/<top>.sof exists and output_files/<top>.asm.rpt reports success.",
+         "undo": "The repository does not change."},
+        {"does": "Assembler: od raspoređenog dizajna piše fajl za programiranje output_files/<top>.sof.",
+         "why": "Fajl .sof je ono što quartus_pgm upisuje u FPGA.",
+         "check": "Postoji output_files/<top>.sof, a output_files/<top>.asm.rpt prijavljuje uspjeh.",
+         "undo": "Repozitorijum se ne mijenja."}),
+    "quartus_sta -t": _quartus(
+        {"does": "Runs a Tcl script in the Timing Analyzer; pds_timing.tcl, for example, reads the SDC constraints and reports slack and Fmax per clock, the worst paths and the input-to-output delays.",
+         "why": "Timing analysis of the course: the script stays in the project folder, so it can be read, changed and run again.",
+         "check": "The pds_*.txt reports in the project folder (setup and hold summary, Fmax, paths, unconstrained paths).",
+         "undo": "The repository does not change; the script only writes reports."},
+        {"does": "Pokreće Tcl skriptu u Timing Analyzer-u; pds_timing.tcl, na primjer, čita SDC ograničenja i prijavljuje slack i Fmax po taktu, najgore putanje i kašnjenja od ulaza do izlaza.",
+         "why": "Analiza vremenskih parametara na kursu: skripta ostaje u folderu projekta, pa se može pročitati, izmijeniti i ponovo pokrenuti.",
+         "check": "Izvještaji pds_*.txt u folderu projekta (setup i hold sažetak, Fmax, putanje, neograničene putanje).",
+         "undo": "Repozitorijum se ne mijenja; skripta samo piše izvještaje."}),
+    "quartus_sta": _quartus(
+        {"does": "Timing analysis of a compiled project with the default reports (the summary per clock).",
+         "why": "Part of the full compilation; for the worst paths and the input-to-output delays use a script (quartus_sta -t pds_timing.tcl).",
+         "check": "output_files/<top>.sta.rpt and .sta.summary.",
+         "undo": "The repository does not change."},
+        {"does": "Analiza vremenskih parametara kompajliranog projekta sa podrazumijevanim izvještajima (sažetak po taktu).",
+         "why": "Dio kompletne kompilacije; za najgore putanje i kašnjenja od ulaza do izlaza koristite skriptu (quartus_sta -t pds_timing.tcl).",
+         "check": "output_files/<top>.sta.rpt i .sta.summary.",
+         "undo": "Repozitorijum se ne mijenja."}),
+    "quartus_pgm -l": _quartus(
+        {"does": "Lists the programming cables (USB-Blaster) that Quartus sees.",
+         "why": "Check before programming that the board is connected, switched on and its driver installed.",
+         "check": "A numbered line such as '1) DE-SoC [USB-1]'.",
+         "undo": "Nothing to undo."},
+        {"does": "Ispisuje kablove za programiranje (USB-Blaster) koje Quartus vidi.",
+         "why": "Provjera prije programiranja da je ploča povezana, uključena i da je drajver instaliran.",
+         "check": "Numerisana linija, na primjer '1) DE-SoC [USB-1]'.",
+         "undo": "Nema šta da se poništi."}),
+    "quartus_pgm -c": _quartus(
+        {"does": "Programs the FPGA over JTAG with a .sof file, e.g. -m JTAG -o \"p;output_files/<top>.sof@2\" (@2: on the DE1-SoC the FPGA is the second device of the chain, after the HPS).",
+         "why": "Puts the design on the board to test it with switches, keys, LEDs and displays.",
+         "check": "'Configuration succeeded' and the board behaves as designed.",
+         "undo": "Switch the board off (the configuration is volatile) or program another .sof."},
+        {"does": "Programira FPGA preko JTAG-a fajlom .sof, npr. -m JTAG -o \"p;output_files/<top>.sof@2\" (@2: na DE1-SoC ploči FPGA je drugi uređaj u lancu, poslije HPS-a).",
+         "why": "Postavlja dizajn na ploču radi testiranja prekidačima, tasterima, LED diodama i displejima.",
+         "check": "'Configuration succeeded' i ploča se ponaša kako je dizajnirano.",
+         "undo": "Isključite ploču (konfiguracija se gubi) ili programirajte drugi .sof."}),
+})
+
 
 def _resolve(key):
     entry = COMMANDS[key]
@@ -168,12 +258,21 @@ def _resolve(key):
 
 
 def explain_command(command, lang="en"):
-    """Explains a command line: the best matching course command, whether it changes anything, and how to check and undo it."""
+    """Explains a command line: the best matching course command, whether it changes anything, and how to check and undo it.
+    Commands chained with && or || are explained one by one (parts)."""
     lang = "sr" if lang == "sr" else "en"
+    chain = [c.strip() for c in re.split(r"&&|\|\||\n", command) if c.strip()]
+    if len(chain) > 1:
+        parts = [explain_command(c, lang) for c in chain]
+        return {"ok": all(p["ok"] for p in parts), "command": command, "parts": parts}
     try:
         words = shlex.split(command)
     except ValueError:
         words = command.split()
+    first = re.match(r'\s*(?:"([^"]+)"|(\S+))', command)
+    if words and first:  # "C:\...\bin64\quartus_sh.exe" -> quartus_sh (shlex drops the backslashes)
+        exe = (first.group(1) or first.group(2)).replace("\\", "/").rsplit("/", 1)[-1]
+        words = [exe[:-4] if exe.lower().endswith(".exe") else exe] + words[1:]
     best = None
     for key in COMMANDS:
         kw = key.split()
@@ -181,12 +280,17 @@ def explain_command(command, lang="en"):
             if best is None or (len(kw), len(key)) > (len(best.split()), len(best)):
                 best = key
     if not best:
-        return {"ok": False, "command": command, "message": "Not a command of the course workflow; explain it from the git documentation (git help <command>).",
+        return {"ok": False, "command": command, "message": "Not a command of the course workflow; explain it from its documentation (git help <command>, quartus_sh --help=<tool>).",
                 "known": sorted(COMMANDS)}
     entry = _resolve(best)
-    return {"ok": True, "command": command, "matched": best, "changes_repository": entry["changes"], **entry[lang],
-            "rule": ("The assistant does not run this command; run it yourself and then check the result."
-                     if entry["changes"] else "Read-only command.")}
+    if entry.get("kind") == "quartus":
+        rule = ("Changes only the Quartus project folder outside the repository (quartus_pgm: the board). The pds-quartus "
+                "tools run it and show the command line; run it yourself in the project folder to repeat a step by hand.")
+    elif entry["changes"]:
+        rule = "The assistant does not run this command; run it yourself and then check the result."
+    else:
+        rule = "Read-only command."
+    return {"ok": True, "command": command, "matched": best, "changes_repository": entry["changes"], **entry[lang], "rule": rule}
 
 
 # Same classification as src/shared/guard.py (the guard hook of the student plugins); keep them equal

@@ -5,7 +5,7 @@
     "url": "https://github.com/etf-unibl"
   },
   "description": "AI assistant plugins of the PDS course (Projektovanje digitalnih sistema): student plugins that teach the course workflow, and instructor plugins that only the course staff can install.",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "plugins": [
     {
       "name": "pds-course",

@@ -28,6 +28,18 @@ def test_explain_matches_most_specific_and_languages():
     assert not explain.explain_command("git bisect start")["ok"]
 
 
+def test_explain_quartus_commands():
+    chained = explain.explain_command("quartus_sh -t create_project.tcl && quartus_sh --flow compile top && quartus_sta -t pds_timing.tcl")
+    assert chained["ok"] and [p["matched"] for p in chained["parts"]] == ["quartus_sh -t", "quartus_sh --flow compile", "quartus_sta -t"]
+    full_path = explain.explain_command(r'"C:\intelFPGA_lite\23.1std\quartus\bin64\quartus_map.exe" top')
+    assert full_path["matched"] == "quartus_map" and full_path["changes_repository"] is False
+    assert "project folder outside the repository" in full_path["rule"]
+    pgm = explain.explain_command('quartus_pgm -c "DE-SoC [USB-1]" -m JTAG -o "p;output_files/top.sof@2"', "sr")
+    assert pgm["matched"] == "quartus_pgm -c" and "ploču" in pgm["undo"]
+    assert explain.explain_command("quartus_sta top")["matched"] == "quartus_sta"
+    assert not explain.is_state_changing("quartus_sh --flow compile top")  # the guard lets the tools run Quartus
+
+
 def test_repo_git_refuses_writes(tmp_path):
     for args in (["commit", "-m", "x"], ["push"], ["branch", "new"], ["branch", "-D", "x"], ["config", "user.name", "x"], ["remote", "add", "o", "u"]):
         with pytest.raises(repo.GitError):

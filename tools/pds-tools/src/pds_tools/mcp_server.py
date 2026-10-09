@@ -88,7 +88,7 @@ def branch_check(issue_title: str | None = None, base: str = "origin/assignments
 
 
 def explain_command(command: str, lang: str = "en") -> dict:
-    """Explains a git/gh/course command: what it does, why it is used in the course, how to check the result and how to undo it. lang: 'sr' or 'en'."""
+    """Explains a git/gh/course/Quartus command (commands chained with && one by one): what it does, why it is used in the course, how to check the result and how to undo it. lang: 'sr' or 'en'."""
     return explain.explain_command(command, lang)
 
 
@@ -239,7 +239,7 @@ PROFILES = {
                  (course_doc, READ_ONLY)],
     "quartus": [(quartus_env, READ_ONLY), (quartus_project_create, PROJECT_FILES), (quartus_compile, PROJECT_FILES),
                 (quartus_job, READ_ONLY), (quartus_timing, PROJECT_FILES), (synth_summary, READ_ONLY), (board_pins, READ_ONLY), (pin_check, READ_ONLY),
-                (pin_plan, READ_ONLY), (board_cables, READ_ONLY), (quartus_tcl, ACTS), (board_program, ACTS)],
+                (pin_plan, READ_ONLY), (board_cables, READ_ONLY), (quartus_tcl, ACTS), (board_program, ACTS), (explain_command, READ_ONLY)],
 }
 PROFILES["all"] = list({f.__name__: (f, a) for p in PROFILES.values() for f, a in p}.values())
 
