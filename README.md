@@ -17,6 +17,7 @@ The student plugins teach the course workflow instead of doing it: they never ru
 | `pds-learning` | students | tutor with the course topic pages, video moments, examples, glossary and self-check quiz |
 | `pds-quartus` | students and staff | Intel Quartus Prime from the command line: project for a design (DE1-SoC, VHDL-2008, pins, clock constraint), synthesis and full compilation, timing analysis and closure, timing constraints (SDC) the student calculates and writes, Tcl, programming the board |
 | `pds-datasheet` | students and staff | timing of a component datasheet (PDF): the timing tables and diagrams, what each parameter means, the values for the DE1-SoC, as a timing card for the timing constraints of `pds-quartus` |
+| `pds-docs` | students | design documentation (Doxygen `--!` comments): a skeleton in the design file with briefs read from the code and TODO placeholders for the details the student writes (the one allowed change of a graded file, comments only), a review against the course requirements and Doxygen's pitfalls, the HTML pages built locally |
 | `pds-template`, `pds-admin`, `pds-assignments`, `pds-verification`, `pds-review`, `pds-materials` | course staff | instructor plugins; their files are in a private repository, so only the course staff can install them |
 
 Add the marketplace once and install plugins by name, e.g. in Claude Code:

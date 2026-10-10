@@ -4,8 +4,9 @@
     pds-mcp --profile learning   # tools of the pds-learning plugin
     pds-mcp --list               # profiles and their tools
 
-All tools are read-only (MCP read-only hint). The server runs over stdio in the folder the AI
-tool starts it in, normally the student's course repository.
+The tools are read-only (MCP read-only hint), except the Quartus tools (they write the Quartus project
+outside the repository) and docs_skeleton (adds documentation comments to a design file, never code).
+The server runs over stdio in the folder the AI tool starts it in, normally the student's course repository.
 """
 
 import argparse
@@ -19,13 +20,15 @@ import urllib.parse
 from mcp.server.mcpserver import Context, MCPServer
 from mcp.types import ToolAnnotations
 
-from . import __version__, datasheet, env, explain, github, hdl, pins, quartus, quartus_run, repo, rules, topics
+from . import __version__, datasheet, docs, env, explain, github, hdl, pins, quartus, quartus_run, repo, rules, topics
 
 READ_ONLY = ToolAnnotations(readOnlyHint=True, destructiveHint=False, idempotentHint=True, openWorldHint=False)
 READ_ONLY_REMOTE = ToolAnnotations(readOnlyHint=True, destructiveHint=False, idempotentHint=True, openWorldHint=True)
 # Quartus tools write into the Quartus project folder outside the repository; Tcl and programming the board act on the user's machine
 PROJECT_FILES = ToolAnnotations(readOnlyHint=False, destructiveHint=False, idempotentHint=False, openWorldHint=False)
 ACTS = ToolAnnotations(readOnlyHint=False, destructiveHint=True, idempotentHint=False, openWorldHint=False)
+# docs_skeleton adds --! comments to a design file (verified: no code changes); running it again adds nothing
+DOC_COMMENTS = ToolAnnotations(readOnlyHint=False, destructiveHint=False, idempotentHint=True, openWorldHint=False)
 
 
 def _read(path):
@@ -248,6 +251,25 @@ def board_device_timing(device: str | None = None) -> dict:
     return datasheet.board_devices(device)
 
 
+def docs_outline(path: str) -> dict:
+    """The design elements of a VHDL file (file, entity, generics, ports, architecture, constants, types, signals, functions, processes, instances) with their keys and the --! comment Doxygen attaches to each (brief, details, TODO left). Use the keys for docs_skeleton."""
+    return docs.outline(base_path(path))
+
+
+def docs_check(path: str) -> dict:
+    """Review of the design documentation of a VHDL file or task folder (testbenches left out, as in the course Doxyfile): the course requirements (file, entity and architecture with brief and details, every generic and port, processes, signals, constants, types, instances) and Doxygen's VHDL pitfalls verified with Doxygen 1.9.5 (multi-line comment without @brief, blank line inside a comment, a trailing --! joined with the comment below, shared declarations, unlabeled processes, comments Doxygen drops, plain -- comments, TODO placeholders left). Advice only: never changes the file."""
+    return docs.check(base_path(path))
+
+
+def docs_skeleton(path: str, briefs: dict[str, str] | None = None, write: bool = False) -> dict:
+    """Draft documentation of a design file of a graded assignment, the one allowed change of a file in assignments/: adds --! comments only for elements without one (existing comments and code stay as they are, verified), in the layout of the course style. briefs: {key from docs_outline: one sentence written from the code} for the file, entity, architecture, generics, ports, signals, constants, types, processes and instances; every brief not given and every detailed description (entity, architecture) becomes a TODO placeholder the student writes. write=false returns the diff to show the student first; write=true writes it."""
+    return docs.skeleton(base_path(path), briefs, write)
+
+
+def docs_preview(path: str | None = None) -> dict:
+    """Builds the HTML documentation with the course Doxyfile (assignments/Doxyfile), as GitHub Pages does, into <repository>-docs next to the repository (nothing is written into the repository): for a task folder or file, or all of assignments/ without path. Returns the index page, the pages of the design units and Doxygen's warnings."""
+    return docs.preview(base_path(path) if path else None, root=base())
+
 def base_path(path):
     """A path relative to the workspace (the course repository) or absolute."""
     return path if os.path.isabs(path) else os.path.join(base(), path)
@@ -266,12 +288,15 @@ PROFILES = {
                 (quartus_job, READ_ONLY), (quartus_timing, PROJECT_FILES), (synth_summary, READ_ONLY), (board_pins, READ_ONLY), (pin_check, READ_ONLY),
                 (pin_plan, READ_ONLY), (board_cables, READ_ONLY), (quartus_tcl, ACTS), (board_program, ACTS), (explain_command, READ_ONLY),
                 (board_device_timing, READ_ONLY)],
+    "docs": [(docs_outline, READ_ONLY), (docs_check, READ_ONLY), (docs_skeleton, DOC_COMMENTS), (docs_preview, PROJECT_FILES),
+             (style_report, READ_ONLY), (course_doc, READ_ONLY)],
     "datasheet": [(datasheet_open, READ_ONLY), (datasheet_timing, READ_ONLY), (datasheet_search, READ_ONLY), (datasheet_page, READ_ONLY),
                   (board_device_timing, READ_ONLY)],
 }
 PROFILES["all"] = list({f.__name__: (f, a) for p in PROFILES.values() for f, a in p}.values())
 
-INSTRUCTIONS = ("Tools of the PDS (Projektovanje digitalnih sistema) course. All tools are read-only. "
+INSTRUCTIONS = ("Tools of the PDS (Projektovanje digitalnih sistema) course. The tools are read-only, except the Quartus "
+                "project tools and docs_skeleton (adds documentation comments to a design file, never code). "
                 "Never run commands that change the repository or GitHub for the student: show the command, explain it "
                 "(explain_command), let the student run it, then check the result with repo_state.")
 

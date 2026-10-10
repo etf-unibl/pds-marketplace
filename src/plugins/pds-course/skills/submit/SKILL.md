@@ -15,7 +15,8 @@ description: Prepare the submission of a PDS task - pre-submission checklist (lo
 2. **Local checks**, the same as CI (use the tools, and show the commands):
    - style: `style_report <N>` (`vhdl-style <N>`);
    - testbenches: `run_testbenches assignments/<N>` (GHDL, VHDL-2008, like the `testbench` job);
-   - test assignment: `vhdl_analyze assignments/<N>/test.vhd`.
+   - test assignment: `vhdl_analyze assignments/<N>/test.vhd`;
+   - documentation (graded, not checked by CI; `docs/design-documentation.md`): every design file has the Doxygen comments the guide requires and no TODO placeholder is left. With the pds-docs plugin, its `review` skill checks it (`docs_check`); otherwise point the student to the guide.
    Fix what fails before submitting (explain, do not edit the student's files).
    - AI attribution (course rule): if an AI tool generated code in the solution, every commit containing such code must have an `AI-assisted-by: <tool> - <how it was used>` line (`docs/assignment-submission.md`, "Korišćenje AI alata" / "Using AI tools"). Ask the student; a missing line is fixed by rewording the commit (the `fix` skill of pds-git explains `git commit --amend` / `git rebase -i` and the force push it needs).
 3. **Push**: show `git push -u origin <branch>` and explain `-u` (first push of the branch).

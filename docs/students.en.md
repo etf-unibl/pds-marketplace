@@ -24,6 +24,7 @@ If the assistant only explained and you wrote the code yourself, no line is need
 | One AI tool: [Claude Code](https://code.claude.com/docs/en/quickstart), [GitHub Copilot CLI](https://docs.github.com/en/copilot/how-tos/copilot-cli) (free for students with [GitHub Education](https://education.github.com)) or Antigravity CLI | the assistant | `claude --version`, `copilot --version` or `agy --version` |
 | `pds-tools`, the course tools the plugins use (step 1) | the plugins' tools | `pds-mcp --list` |
 | For `pds-quartus`: Quartus Prime Lite with Cyclone V support, `quartus/bin64` on `PATH` (`docs/tools-setup.md`) | creating projects, compiling, timing, programming | `quartus_sh --version` |
+| For the preview of `pds-docs`: [Doxygen](https://www.doxygen.nl/download.html) on `PATH` (`docs/design-documentation.md`) | the documentation pages on your computer | `doxygen --version` |
 | Optional: the GitHub CLI `gh`, logged in (`gh auth login`) | pull request status and time tracking of private repositories; more GitHub requests per hour | `gh auth status` |
 
 Node.js is not needed.
@@ -33,7 +34,7 @@ Node.js is not needed.
 Install `pds-tools` into the same Python you use for the course (where `vhdl-style` is installed):
 
 ```
-python -m pip install "pds-tools @ git+https://github.com/etf-unibl/pds-marketplace@v0.2.9#subdirectory=tools/pds-tools"
+python -m pip install "pds-tools @ git+https://github.com/etf-unibl/pds-marketplace@v0.2.10#subdirectory=tools/pds-tools"
 ```
 
 On Linux and macOS use `python3` instead of `python`. Check that the command `pds-mcp` is found:
@@ -59,6 +60,7 @@ All PDS plugins come from one marketplace, `pds-marketplace`. Install the plugin
 | `pds-learning` | tutor for the lectures (topic pages, video moments, example code), glossary, self-check quiz |
 | `pds-quartus` | Quartus from the command line: a project for your design (DE1-SoC, VHDL-2008, pins, clock) outside the repository, synthesis and full compilation, timing analysis and closure, Tcl scripts, programming the board |
 | `pds-datasheet` | reading the timing of a component's datasheet (PDF): where the timing tables are, what each parameter means, which values fit your board; the result goes to the timing constraints of `pds-quartus` |
+| `pds-docs` | documenting your design (graded): a documentation skeleton in your design file, a review of your documentation, the HTML pages on your computer before GitHub Pages publishes them |
 
 ### Claude Code
 
@@ -126,6 +128,9 @@ Ask in your own words, in Serbian or English; the assistant picks the matching s
 | connect to the board | "Which pins do I use for the switches and the 7-segment displays?" | `pds-design:pins` |
 | use Quartus | "Create a Quartus project for task 12 and synthesize it." / "Compile it and tell me the Fmax." / "Program the board." / "Write a Tcl script that sets the pins." / "Which timing constraints does my design need, and how do I calculate the input delay?" | `pds-quartus:project`, `compile`, `timing`, `constraints`, `program`, `tcl` |
 | read a datasheet | "Here is the datasheet of the ADC: datasheets/ltc2308.pdf. Where are its timing values and what do they mean?" | `pds-datasheet:datasheet` |
+| document the design | "Make a documentation skeleton for assignments/12/counter.vhd." / "Is my documentation complete?" / "Show me how my documentation will look." | `pds-docs:document`, `review`, `preview` |
+
+**Documentation skeleton:** the one exception to "the assistant does not edit `assignments/`". With your confirmation, it adds Doxygen comments (`--!`) to your design file: one-sentence briefs it reads from the code (file, entity, ports, architecture, signals, processes, ...) and TODO placeholders for the detailed descriptions. It never changes code or a comment you wrote. You write every TODO in your own words and check the generated briefs. The skeleton's comments need no `AI-assisted-by:` line in the commit. The review only advises; you correct the comments yourself.
 
 What the assistant does by itself: it reads files, runs GHDL and the style check (without `--fix`), reads your issues and pull requests on GitHub, and searches the course topic pages. What it leaves to you: every command that changes something. It shows the command, explains each part, says what you should see and how to undo it, and checks the result after you ran it.
 
@@ -141,7 +146,7 @@ The course announces new versions of the plugins and of `pds-tools` (the plugins
 2. **Update `pds-tools`** in the same Python as in step 1; activate the virtual environment first if you use one. Use the version tag the course announces:
 
    ```
-   python -m pip install --upgrade "pds-tools @ git+https://github.com/etf-unibl/pds-marketplace@v0.2.9#subdirectory=tools/pds-tools"
+   python -m pip install --upgrade "pds-tools @ git+https://github.com/etf-unibl/pds-marketplace@v0.2.10#subdirectory=tools/pds-tools"
    pds-mcp --version
    ```
 

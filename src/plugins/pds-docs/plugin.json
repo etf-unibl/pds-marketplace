@@ -1,0 +1,8 @@
+{
+  "name": "pds-docs",
+  "displayName": "PDS design documentation",
+  "description": "Design documentation (Doxygen --! comments) for the PDS course: drafts a documentation skeleton in your design file (brief descriptions of the file, entity, ports, architecture, processes and signals, with TODO placeholders for the detailed descriptions you write yourself), reviews your documentation against the course requirements and Doxygen's pitfalls, and builds the HTML pages locally so you see them before GitHub Pages publishes them.",
+  "profile": "docs",
+  "keywords": ["pds", "vhdl", "doxygen", "documentation"],
+  "auto_approve": ["docs_outline", "docs_check", "docs_preview", "style_report", "course_doc"]
+}

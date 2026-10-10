@@ -12,7 +12,7 @@ Sources: *DE1-SoC User Manual* (Terasic, rev. F of 2019-01-28; rev. E of 2015 wh
   - On GPIO 0, `GPIO_0_D0` and `GPIO_0_D2` (header pins 1 and 3) are marked as clock inputs (`Clock_in`, sheet 12).
   - A component on a GPIO header is the student's: they provide its datasheet.
 - **On-board devices connected to the FPGA:** the notes of each are returned by **`board_device_timing`** (`sdram`, `adc-ltc2308`, `adc-ad7928`, `vga-adv7123`, `audio-wm8731`, `video-adv7180`, `level-shifter-txb0104`, `clock-si5350c`, `fpga-cyclone-v`). They cover the connection and the clock, where the timing is in the checked datasheet revision, the role of each parameter, and the pitfalls. Call it before explaining an on-board device. In short:
-  - **SDRAM (U27):** the part is not named in the board documents; read the chip marking (revision letter and speed grade change the values). `DRAM_CLK` is a PLL clock output of the FPGA.
+  - **SDRAM (U27):** the part is not named in the board documents; read the chip marking (revision letter and speed grade change the values). One lab board carries IS42S16320D-7TL (`board_device_timing sdram`), but the student confirms the marking on their own board. `DRAM_CLK` is a PLL clock output of the FPGA.
   - **ADC (U24):** check the board revision or the chip.
     - **Rev. F boards:** LTC2308, connected directly. Its timing is specified at OVDD = 5 V, but the board runs it at 3.3 V.
     - **Rev. C boards:** AD7928 at 5 V, behind a TXB0104 level shifter (U26), whose delay adds to every ADC signal.

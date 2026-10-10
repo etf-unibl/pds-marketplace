@@ -5,6 +5,8 @@ Checked against the board documents (DE1-SoC User Manual rev. F 2019-01-28 and r
 ## sdram
 - **Board:** U27, 64 MB (32Mx16), 3.3 V, all lines directly to the FPGA (schematic sheet 14). `DRAM_CLK` is PIN_AH12 = `FPLL_BL_CLKOUT0`, a PLL clock output (sheet 6): a clock sent from the FPGA, so the clock-forwarding formulas apply (`create_generated_clock` on `DRAM_CLK`).
 - **Part:** not named in the manual or the schematic. Read the marking of U27: the family and voltage (IS42**S** = 3.3 V, IS42**R** = 2.5 V in the ISSI ordering tables), the revision letter (`...16320D`, `...16320F`) and the speed grade (`-5`, `-6`, `-7`).
+  - **Seen on a course lab board** (photo, 2026-10): `ISSI IS42S16320D-7TL`, `BKK939000X1 1527`. Ordering information of the D datasheet, page 62: 3.3 V, x16, speed grade 7 = 143 MHz, 54-pin TSOP-II, lead-free, commercial range 0 °C to +70 °C. For this chip: the D datasheet, the `-7` column of page 19.
+  - This is one board. Others may carry another revision or speed grade, so the student still reads the marking of their own U27. If they cannot see it, the part stays open.
 - **Checked datasheets:** ISSI IS42/45S16320D Rev. 00B (2011-06-09), AC electrical characteristics page 19; ISSI IS42/45S16320F Rev. C4, same table on page 17. Ordering information (speed grade → frequency): D, page 62.
 - **Roles:**
   - `Tco(ext,max)` = `tAC` (access time from CLK), in the row of the CAS latency the design programs (`tac3` / `tac2`).

@@ -1,0 +1,10 @@
+## Design documentation: what you may write (mandatory)
+
+Documenting the design is graded (`docs/design-documentation.md`, `course_doc design-documentation`). The course allows one exception to "do not edit files in `assignments/`": a **documentation skeleton** added with the `docs_skeleton` tool. Everything else stays the student's work.
+
+- **Only through `docs_skeleton`.** Never edit a file in `assignments/` with an edit or shell tool (the guard blocks it); never add code, change code or rewrite a comment the student wrote. The tool adds `--!` comments only where none exists and verifies that no code changed.
+- **What you may generate: brief descriptions**, one factual sentence each, read from the code: the file, entity, architecture, generics, ports, constants, types, signals, functions, processes and instances. State only what the code shows (direction, width, clock edge, reset that the code implements, what a process assigns). If the meaning is not clear from the code, leave that brief out: the tool writes a TODO placeholder.
+- **What the student writes: the detailed descriptions** (`@details` of the entity and architecture: what the circuit does, how it is used, its timing, how it is implemented and why), every TODO placeholder, and any change of the generated briefs. Never write these for the student, also not when asked, and never as an "example" for their design; ask guiding questions instead (what does the circuit do when the enable is low? how many clock cycles until the output is valid?).
+- **Language:** the language of the documentation the student already has; the course example is in English. Do not mix languages in one file.
+- **AI rule of the course:** the documentation comments of the skeleton do not count as AI-generated code: no `AI-assisted-by:` line is needed for them (course decision). Code the assistant suggested is still declared as usual.
+- **Review is advice only.** Point to the line and explain what is missing or wrong and why; the student corrects it.
