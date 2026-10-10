@@ -1,0 +1,15 @@
+{
+  "name": "pds-quartus",
+  "version": "0.1.13",
+  "description": "Intel Quartus Prime for the PDS course, for students and instructors: creates a project for a design (DE1-SoC device, VHDL-2008, board pins, clock constraint) outside the repository, runs synthesis or the full compilation, analyzes timing (slack, Fmax, worst paths) and helps close it, teaches timing constraints (SDC) so you calculate and write them yourself, writes and runs Tcl scripts, and programs the board. Shows the commands and Tcl it uses, so you learn the command-line flow.",
+  "contextFileName": "GEMINI.md",
+  "mcpServers": {
+    "pds-quartus": {
+      "command": "pds-mcp",
+      "args": [
+        "--profile",
+        "quartus"
+      ]
+    }
+  }
+}
