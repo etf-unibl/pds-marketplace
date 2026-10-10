@@ -5,7 +5,7 @@ import shutil
 import subprocess
 import sys
 
-from . import STYLE_TOOLS_VERSION, repo
+from . import STYLE_TOOLS_VERSION, __version__, repo
 
 TOOLS = [
     ("git", ["git", "--version"], True, "docs/git-setup.md"),
@@ -53,5 +53,5 @@ def env_check(path="."):
     if root and hooks != ".githooks":
         problems.append("The course git hooks are not enabled in this repository: git config core.hooksPath .githooks")
     problems += [f"{t['tool']} is not installed ({t['install']})." for t in tools if t["required"] and not t["found"]]
-    return {"ok": not problems, "python": sys.version.split()[0], "tools": tools, "git_identity": identity,
+    return {"ok": not problems, "pds_tools": __version__, "python": sys.version.split()[0], "tools": tools, "git_identity": identity,
             "repository": root, "hooks_path": hooks, "problems": problems}

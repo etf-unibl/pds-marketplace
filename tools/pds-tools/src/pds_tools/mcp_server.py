@@ -36,7 +36,7 @@ def _read(path):
 # ---- tool functions (thin wrappers with docstrings that the AI tool sees) ----
 
 def env_check() -> dict:
-    """Checks the student's environment: git, GHDL, vhdl-style, gh, Quartus and ModelSim/Questa on PATH, git identity (noreply e-mail) and course hooks."""
+    """Checks the student's environment: the pds-tools version, git, GHDL, vhdl-style, gh, Quartus and ModelSim/Questa on PATH, git identity (noreply e-mail) and course hooks."""
     return env.env_check(base())
 
 

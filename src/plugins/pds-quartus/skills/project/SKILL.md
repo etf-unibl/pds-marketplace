@@ -16,7 +16,7 @@ description: Creates an Intel Quartus Prime project for a PDS design or task fol
 ## Notes
 
 - The project folder is the student's own working folder outside the repository; creating and compiling there does not change the repository. Edits of the VHDL files in `assignments/` remain the student's (graded work).
-- An existing project is not overwritten unless asked (`overwrite: true`).
+- Pass only the sources (and `top` when it is ambiguous). **Do not pass `overwrite` or `assign_pins` unless the student asked**: `overwrite: true` re-creates an existing project and discards the assignments made in it since (pins, settings); if the project exists, say so and ask, or compile it as it is.
 - For a different board or device pass the device and leave pins to the student (`assign_pins: false`).
 
 {{include quartus-tools-rule}}

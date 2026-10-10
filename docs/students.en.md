@@ -33,7 +33,7 @@ Node.js is not needed.
 Install `pds-tools` into the same Python you use for the course (where `vhdl-style` is installed):
 
 ```
-python -m pip install "pds-tools @ git+https://github.com/etf-unibl/pds-marketplace@v0.2.6#subdirectory=tools/pds-tools"
+python -m pip install "pds-tools @ git+https://github.com/etf-unibl/pds-marketplace@v0.2.7#subdirectory=tools/pds-tools"
 ```
 
 On Linux and macOS use `python3` instead of `python`. Check that the command `pds-mcp` is found:
@@ -133,13 +133,26 @@ If the assistant tries to run such a command itself, a guard stops it with the m
 
 ## Updating
 
-| Tool | Update the plugins |
-| ------ | ------ |
-| Claude Code | `/plugin marketplace update pds-marketplace`, then `/reload-plugins` |
-| Copilot CLI | `copilot plugin marketplace update`, then `copilot plugin update` (all installed plugins) |
-| Antigravity CLI | `git pull` in the clone, then `agy plugin install` again |
+The course announces new versions of the plugins and of `pds-tools` (the plugins call the tools of `pds-tools`, so a new plugin version may need the new `pds-tools` too). Update both, in this order:
 
-Update `pds-tools` with the install command of step 1 when the course announces a new version (the version tag in the command changes).
+1. **Close the AI tool** (every open session). On Windows a running `pds-mcp` cannot be replaced.
+2. **Update `pds-tools`** in the same Python as in step 1; activate the virtual environment first if you use one. Use the version tag the course announces:
+
+   ```
+   python -m pip install --upgrade "pds-tools @ git+https://github.com/etf-unibl/pds-marketplace@v0.2.7#subdirectory=tools/pds-tools"
+   pds-mcp --version
+   ```
+
+   `pds-mcp --version` must print the version of the tag in the command.
+3. **Update the plugins:**
+
+   | Tool | Update the plugins |
+   | ------ | ------ |
+   | Claude Code | start it, then `/plugin marketplace update pds-marketplace` and `/reload-plugins` |
+   | Copilot CLI | in the terminal: `copilot plugin marketplace update`, then `copilot plugin update` (all installed plugins) |
+   | Antigravity CLI | `git pull` in the clone, then `agy plugin install` again |
+
+4. **Start the AI tool again** in your course repository, from a terminal where the environment is active, and ask "Check my setup for the PDS course." The answer lists the tools and their versions, `pds-tools` included.
 
 ## Troubleshooting
 

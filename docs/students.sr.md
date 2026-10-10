@@ -33,7 +33,7 @@ Ako je asistent samo objašnjavao, a kod ste pisali sami, linija nije potrebna. 
 Instalirajte `pds-tools` u isti *Python* koji koristite za kurs (u kojem je instaliran `vhdl-style`):
 
 ```
-python -m pip install "pds-tools @ git+https://github.com/etf-unibl/pds-marketplace@v0.2.6#subdirectory=tools/pds-tools"
+python -m pip install "pds-tools @ git+https://github.com/etf-unibl/pds-marketplace@v0.2.7#subdirectory=tools/pds-tools"
 ```
 
 Na *Linux* i *macOS* platformama umjesto `python` koristite `python3`. Provjerite da se komanda `pds-mcp` pronalazi:
@@ -133,13 +133,26 @@ Ako asistent pokuša sam da pokrene takvu komandu, zaštita ga zaustavlja poruko
 
 ## Ažuriranje
 
-| Alat | Ažuriranje dodataka |
-| ------ | ------ |
-| Claude Code | `/plugin marketplace update pds-marketplace`, zatim `/reload-plugins` |
-| Copilot CLI | `copilot plugin marketplace update`, zatim `copilot plugin update` (svi instalirani dodaci) |
-| Antigravity CLI | `git pull` u klonu, zatim ponovo `agy plugin install` |
+Kurs najavljuje nove verzije dodataka i alata `pds-tools` (dodaci pozivaju alate iz `pds-tools`, pa nova verzija dodataka može zahtijevati i novu verziju `pds-tools`). Ažurirajte oba dijela, ovim redom:
 
-`pds-tools` ažurirajte komandom iz koraka 1 kada kurs najavi novu verziju (mijenja se oznaka verzije u komandi).
+1. **Zatvorite AI alat** (svaku otvorenu sesiju). Na *Windows*-u se `pds-mcp` koji radi ne može zamijeniti.
+2. **Ažurirajte `pds-tools`** u istom *Python*-u kao u koraku 1; ako koristite virtuelno okruženje, prvo ga aktivirajte. Koristite oznaku verzije koju kurs najavi:
+
+   ```
+   python -m pip install --upgrade "pds-tools @ git+https://github.com/etf-unibl/pds-marketplace@v0.2.7#subdirectory=tools/pds-tools"
+   pds-mcp --version
+   ```
+
+   `pds-mcp --version` mora ispisati verziju iz oznake u komandi.
+3. **Ažurirajte dodatke:**
+
+   | Alat | Ažuriranje dodataka |
+   | ------ | ------ |
+   | Claude Code | pokrenite ga, zatim `/plugin marketplace update pds-marketplace` i `/reload-plugins` |
+   | Copilot CLI | u terminalu: `copilot plugin marketplace update`, zatim `copilot plugin update` (svi instalirani dodaci) |
+   | Antigravity CLI | `git pull` u klonu, zatim ponovo `agy plugin install` |
+
+4. **Ponovo pokrenite AI alat** u repozitorijumu kursa, iz terminala u kojem je okruženje aktivno, i pitajte "Provjeri moje okruženje za kurs PDS." Odgovor navodi alate i njihove verzije, uključujući `pds-tools`.
 
 ## Rješavanje problema
 
