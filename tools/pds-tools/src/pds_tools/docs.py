@@ -825,6 +825,10 @@ def preview(target=None, root=None, timeout=300):
     if result["doxygen"] and result["doxygen"] != CI_DOXYGEN:
         result["version_note"] = (f"Doxygen {result['doxygen']} here, {CI_DOXYGEN} on GitHub Pages: the pages may look slightly "
                                   "different; check the published page after the merge.")
+    if not shutil.which("doxygen"):
+        result["path_note"] = (f"Doxygen was found at {exe}, but it is not on the PATH, so the command of the course guide "
+                               f"(doxygen Doxyfile) does not work in a terminal: add {os.path.dirname(exe)} to the PATH "
+                               "and open a new terminal.")
     if r.returncode != 0:
         result["error"] = (r.stderr or r.stdout)[-2000:]
     return result

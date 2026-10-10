@@ -125,7 +125,9 @@ def synth_summary(project_dir=".", revision=None):
               "design_warnings": important, "other_warning_count": len(all_messages) - len(important)}
     if sta is not None:
         result["timing"] = timing(sta, _read(base + ".sta.summary"))
-        if not os.path.exists(os.path.join(project_dir, rep["revision"] + ".sdc")) and not result["timing"]["fmax"]:
+        qsf = _read(os.path.join(project_dir, rep["revision"] + ".qsf")) or ""
+        has_sdc = os.path.exists(os.path.join(project_dir, rep["revision"] + ".sdc")) or "SDC_FILE" in qsf
+        if not has_sdc and not result["timing"]["fmax"]:
             result["timing"]["note"] = "Without an SDC file the timing analysis assumes a 1 GHz clock; see topic 13."
     regs = result["summary"].get("Total registers")
     if regs == "0":

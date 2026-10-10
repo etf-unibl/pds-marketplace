@@ -133,6 +133,12 @@ def test_guard_and_explain_classify_the_same():
     ({"toolCall": {"name": "replace_file_content", "args": {"TargetFile": "C:\\r\\assignments\\12\\x.vhd"}}}, True),
     ({"toolCall": {"name": "write_to_file", "args": {"TargetFile": "C:\\r\\notes.md"}}}, False),
     ({"toolCall": {"name": "git_commit", "args": {}}}, True),
+    # Several calls in one input (Copilot SDK, as recorded in its session events)
+    ({"sessionId": "s", "cwd": "c:\\r", "toolCalls": [{"id": "1", "name": "view", "args": {"path": "c:\\r"}},
+                                                     {"id": "2", "name": "powershell", "args": {"command": "git commit -m x"}}]}, True),
+    ({"sessionId": "s", "toolCalls": [{"id": "1", "name": "edit", "args": {"path": "C:\\r\\assignments\\12\\x.vhd"}}]}, True),
+    ({"sessionId": "s", "toolCalls": [{"id": "1", "name": "view", "args": {"path": "c:\\r"}},
+                                      {"id": "2", "name": "powershell", "args": {"command": "git status"}}]}, False),
 ])
 def test_guard_decisions(data, denied):
     assert _guard().decide(data)[0] is denied

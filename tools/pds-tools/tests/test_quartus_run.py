@@ -71,6 +71,20 @@ def test_project_files_without_quartus(task, tmp_path):
     assert (tmp_path / "proj" / "board_top.sdc.new").read_text() == sdc
 
 
+def test_project_uses_the_sdc_of_the_task_folder(task, tmp_path):
+    repo, folder = task
+    submitted = "create_clock -name CLOCK_50 -period 20.0 [get_ports {CLOCK_50}]\nset_false_path -from [get_ports {SW[*]}]\n"
+    (folder / "board_top.sdc").write_text(submitted)
+    before = sorted(os.listdir(folder))
+    r = q.project_create(str(folder), project_dir=str(tmp_path / "proj"), run=False)
+    tcl = (tmp_path / "proj" / "create_project.tcl").read_text()
+    assert f"SDC_FILE {{{str(folder / 'board_top.sdc').replace(os.sep, '/')}}}" in tcl
+    assert r["sdc_file"] == str(folder / "board_top.sdc") and r["sdc"] == submitted and "sdc_source" in r
+    assert "# set_false_path -to [get_ports {LEDR[*]}]" in r["sdc_template"]
+    assert not (tmp_path / "proj" / "board_top.sdc").exists()  # no second copy that could differ
+    assert sorted(os.listdir(folder)) == before and (folder / "board_top.sdc").read_text() == submitted
+
+
 def test_report_tables():
     text = ("+------+\n; Setup Summary ;\n+------+\n; Clock ; Slack  ; End Point TNS ;\n+------+\n"
             "; clk   ; 18.840 ; 0.000         ;\n+------+\n")

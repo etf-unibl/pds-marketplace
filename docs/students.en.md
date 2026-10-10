@@ -34,7 +34,7 @@ Node.js is not needed.
 Install `pds-tools` into the same Python you use for the course (where `vhdl-style` is installed):
 
 ```
-python -m pip install "pds-tools @ git+https://github.com/etf-unibl/pds-marketplace@v0.2.10#subdirectory=tools/pds-tools"
+python -m pip install "pds-tools @ git+https://github.com/etf-unibl/pds-marketplace@v0.2.11#subdirectory=tools/pds-tools"
 ```
 
 On Linux and macOS use `python3` instead of `python`. Check that the command `pds-mcp` is found:
@@ -146,7 +146,7 @@ The course announces new versions of the plugins and of `pds-tools` (the plugins
 2. **Update `pds-tools`** in the same Python as in step 1; activate the virtual environment first if you use one. Use the version tag the course announces:
 
    ```
-   python -m pip install --upgrade "pds-tools @ git+https://github.com/etf-unibl/pds-marketplace@v0.2.10#subdirectory=tools/pds-tools"
+   python -m pip install --upgrade "pds-tools @ git+https://github.com/etf-unibl/pds-marketplace@v0.2.11#subdirectory=tools/pds-tools"
    pds-mcp --version
    ```
 

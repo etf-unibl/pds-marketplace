@@ -1,7 +1,7 @@
 {
   "name": "pds-datasheet",
   "description": "Reading the timing of a component datasheet (PDF) for the PDS course: finds the timing tables and diagrams, explains what each parameter means (setup, hold, clock-to-output, access and hold times, test conditions, min/typ/max) and helps you choose the values that match your board, collected in a timing card that pds-quartus uses to teach the timing constraints (SDC) you calculate yourself.",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "author": {
     "name": "Faculty of Electrical Engineering, University of Banja Luka",
     "url": "https://github.com/etf-unibl"

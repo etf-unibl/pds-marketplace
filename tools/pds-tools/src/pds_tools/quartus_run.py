@@ -245,7 +245,12 @@ def project_create(sources, top=None, project_dir=None, device=DEVICE, family=FA
            "# Advanced Physical Optimization costs minutes of Fitter time even for a small design, which course designs do not need",
            "set_global_assignment -name ADVANCED_PHYSICAL_OPTIMIZATION OFF"]
     tcl += [f"set_global_assignment -name VHDL_FILE {{{f.replace(os.sep, '/')}}}" for f in files]
-    tcl.append(f"set_global_assignment -name SDC_FILE {top}.sdc")
+    # A task submitted with its constraints has <top>.sdc next to its VHDL files: the project uses that file, so the
+    # student edits the file they submit (nothing is written into the repository)
+    task_sdc = next((os.path.join(d, f"{top}.sdc") for d in sorted({os.path.dirname(os.path.abspath(f)) for f in files})
+                     if os.path.isfile(os.path.join(d, f"{top}.sdc"))), None)
+    tcl.append(f"set_global_assignment -name SDC_FILE {{{task_sdc.replace(os.sep, '/')}}}" if task_sdc
+               else f"set_global_assignment -name SDC_FILE {top}.sdc")
     pin_lines = plan.get("assignments", [])
     for line in pin_lines:
         tcl.append(line)
@@ -255,17 +260,25 @@ def project_create(sources, top=None, project_dir=None, device=DEVICE, family=FA
     sdc = sdc_template(top, clock, clock_mhz, ports)
     with open(os.path.join(project_dir, "create_project.tcl"), "w", encoding="utf-8", newline="\n") as f:
         f.write("\n".join(tcl))
-    # An existing SDC that differs from the template holds the student's constraints: it is kept, and the
-    # template goes next to it for comparison
-    sdc_path = os.path.join(project_dir, f"{top}.sdc")
-    old_sdc = open(sdc_path, encoding="utf-8", errors="replace").read() if os.path.exists(sdc_path) else None
-    sdc_kept = old_sdc is not None and old_sdc.strip() != sdc.strip()
-    with open(sdc_path + (".new" if sdc_kept else ""), "w", encoding="utf-8", newline="\n") as f:
-        f.write(sdc)
+    if task_sdc:
+        sdc_path, sdc_kept = task_sdc, False
+        old_sdc = open(task_sdc, encoding="utf-8", errors="replace").read()
+    else:
+        # An existing SDC that differs from the template holds the student's constraints: it is kept, and the
+        # template goes next to it for comparison
+        sdc_path = os.path.join(project_dir, f"{top}.sdc")
+        old_sdc = open(sdc_path, encoding="utf-8", errors="replace").read() if os.path.exists(sdc_path) else None
+        sdc_kept = old_sdc is not None and old_sdc.strip() != sdc.strip()
+        with open(sdc_path + (".new" if sdc_kept else ""), "w", encoding="utf-8", newline="\n") as f:
+            f.write(sdc)
     result = {"project_dir": project_dir, "top": top, "files": files, "device": device, "clock": clock,
               "clock_mhz": clock_mhz if clock else None, "pins_assigned": len(pin_lines),
               "ports_without_pin": plan.get("without_pin", []), "tcl": "\n".join(tcl),
-              "sdc": old_sdc if sdc_kept else sdc}
+              "sdc_file": sdc_path, "sdc": old_sdc if (sdc_kept or task_sdc) else sdc}
+    if task_sdc:
+        result["sdc_source"] = (f"The project uses {task_sdc}, the constraints file in the task folder (submitted with the "
+                                "task): edit that file, then compile again. The generated template is in sdc_template.")
+        result["sdc_template"] = sdc
     if sdc_kept:
         result["sdc_kept"] = (f"{top}.sdc was kept: it differs from the generated file, so it holds constraints added "
                               f"since; the generated template is {top}.sdc.new, for comparison")

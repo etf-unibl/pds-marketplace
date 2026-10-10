@@ -153,13 +153,15 @@ def contents_entries(section_text, video=None):
 
 
 def search_topics(query, path=".", limit=8):
-    """Finds topic pages and video moments about a query (all words must appear in a paragraph)."""
+    """Finds topic pages and video moments about a query, ranked by how many of its words appear in a paragraph
+    (all words first; a long query also finds paragraphs with at least half of its words)."""
     docs = Docs(path)
     if not docs.available:
         return _unavailable(docs)
-    words = [w.lower() for w in re.findall(r"[\w'-]+", query) if len(w) > 1]
+    words = list(dict.fromkeys(w.lower() for w in re.findall(r"[\w'-]+", query) if len(w) > 1))
     if not words:
         return {"ok": False, "message": "Empty query."}
+    required = len(words) if len(words) <= 2 else max(2, (len(words) + 1) // 2)
     hits = []
     for page in _pages(docs):
         for key, body in page["sections"].items():
@@ -167,14 +169,17 @@ def search_topics(query, path=".", limit=8):
                 continue  # the contents table is searched row by row below (video moments)
             for para in re.split(r"\n\s*\n", body):
                 low = para.lower()
-                if all(w in low for w in words):
-                    score = sum(low.count(w) for w in words) + (3 if key in ("key_terms", "contents") else 0)
+                matched = [w for w in words if w in low]
+                if len(matched) >= required:
+                    score = 100 * len(matched) + sum(low.count(w) for w in matched) + (3 if key in ("key_terms", "contents") else 0)
                     hits.append({"score": score, "topic": page["number"], "title": page["title"], "section": key,
-                                 "text": para.strip()[:600], "file": page["file"]})
+                                 "text": para.strip()[:600], "file": page["file"], "matched": len(matched)})
         for row in contents_entries(page["sections"].get("contents", "")):
-            if all(w in row["topic"].lower() for w in words):
-                hits.append({"score": 10, "topic": page["number"], "title": page["title"], "section": "video",
-                             "text": f"{row['time']} {row['topic']}", "url": row["url"], "file": page["file"]})
+            matched = [w for w in words if w in row["topic"].lower()]
+            if len(matched) >= required:
+                hits.append({"score": 100 * len(matched) + 10, "topic": page["number"], "title": page["title"],
+                             "section": "video", "text": f"{row['time']} {row['topic']}", "url": row["url"],
+                             "file": page["file"], "matched": len(matched)})
     hits.sort(key=lambda h: -h["score"])
     seen, result = set(), []
     for h in hits:
@@ -182,6 +187,8 @@ def search_topics(query, path=".", limit=8):
         if k not in seen:
             seen.add(k)
             h.pop("score")
+            if h.pop("matched") < len(words):
+                h["partial"] = True
             result.append(h)
         if len(result) >= limit:
             break

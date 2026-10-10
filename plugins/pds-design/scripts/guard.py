@@ -126,6 +126,15 @@ def tool_call(data):
 
 def decide(data):
     """(deny, reason) for a hook input of Claude Code, Copilot CLI or Antigravity CLI."""
+    if isinstance(data.get("toolCalls"), list):
+        # Several calls in one input ({"toolCalls": [{"name", "args"}]}, as the Copilot SDK records them): the
+        # batch is denied if one of its calls is
+        for call in data["toolCalls"]:
+            if isinstance(call, dict):
+                deny, reason = decide({"toolName": call.get("name") or "", "toolArgs": call.get("args") or {}})
+                if deny:
+                    return deny, reason
+        return False, ""
     tool, args = tool_call(data)
     if tool == "git_commit":  # Antigravity's built-in commit step
         return True, MESSAGE_COMMAND.format(cmd="git commit")

@@ -34,7 +34,7 @@ Ako je asistent samo objašnjavao, a kod ste pisali sami, linija nije potrebna. 
 Instalirajte `pds-tools` u isti *Python* koji koristite za kurs (u kojem je instaliran `vhdl-style`):
 
 ```
-python -m pip install "pds-tools @ git+https://github.com/etf-unibl/pds-marketplace@v0.2.10#subdirectory=tools/pds-tools"
+python -m pip install "pds-tools @ git+https://github.com/etf-unibl/pds-marketplace@v0.2.11#subdirectory=tools/pds-tools"
 ```
 
 Na *Linux* i *macOS* platformama umjesto `python` koristite `python3`. Provjerite da se komanda `pds-mcp` pronalazi:
@@ -146,7 +146,7 @@ Kurs najavljuje nove verzije dodataka i alata `pds-tools` (dodaci pozivaju alate
 2. **Ažurirajte `pds-tools`** u istom *Python*-u kao u koraku 1; ako koristite virtuelno okruženje, prvo ga aktivirajte. Koristite oznaku verzije koju kurs najavi:
 
    ```
-   python -m pip install --upgrade "pds-tools @ git+https://github.com/etf-unibl/pds-marketplace@v0.2.10#subdirectory=tools/pds-tools"
+   python -m pip install --upgrade "pds-tools @ git+https://github.com/etf-unibl/pds-marketplace@v0.2.11#subdirectory=tools/pds-tools"
    pds-mcp --version
    ```
 

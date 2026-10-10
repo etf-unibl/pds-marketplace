@@ -8,13 +8,14 @@ allowed-tools: mcp__plugin_pds-docs_pds-docs__docs_outline, mcp__plugin_pds-docs
 
 ## Steps
 
-1. **`docs_preview`** with the task folder (`assignments/<N>`), or without a path for all of `assignments/` as GitHub Pages builds it. It uses `assignments/Doxyfile` unchanged and writes the pages to `<repository>-docs` next to the repository, so nothing new appears in `git status`.
+1. **Call `docs_preview` first**, before anything else: with the task folder (`assignments/<N>`), or without a path for all of `assignments/` as GitHub Pages builds it. Do not check for Doxygen yourself (`doxygen --version`, `Get-Command doxygen`): the tool also finds Doxygen in its default install folder when it is not on the `PATH`, and reports when it is really missing. Never describe the pages from the comments instead of building them. It uses `assignments/Doxyfile` unchanged and writes the pages to `<repository>-docs` next to the repository, so nothing new appears in `git status`.
 2. **Doxygen missing** (`ok: false`): explain the installation from the course guide (`course_doc design-documentation`, "Lokalni pregled dokumentacije"): https://www.doxygen.nl/download.html, on Windows the setup program or `winget install DimitriVanHeesch.Doxygen`, then a new terminal and the AI tool started again. The student installs it.
 3. **Show the result:**
    - the index page and the pages of the design units (`pages`), to open in a web browser; the designs are in the menu **Design Unit List**;
    - on a page: the brief in the summary tables (ports, signals, processes), the details below; a missing brief leaves an empty cell, a missing comment an undocumented row;
    - Doxygen `warnings`, explained (e.g. "unknown command '@details'" is a blank line inside a comment);
-   - `version_note`, if the local Doxygen differs from the one of GitHub Pages.
+   - `version_note`, if the local Doxygen differs from the one of GitHub Pages;
+   - `path_note`, if Doxygen is installed but not on the `PATH`: say how to add its folder to the `PATH`, so the course guide's command below works too.
 4. **The command of the course guide**, so the student can do it without the assistant: in `assignments/` run `doxygen Doxyfile` and open `assignments/html/index.html` (`html/` is in `.gitignore`, not committed).
 5. If something looks wrong on the page, use the `review` skill (`docs_check`) to find the cause in the comments.
 

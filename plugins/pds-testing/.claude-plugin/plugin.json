@@ -1,7 +1,7 @@
 {
   "name": "pds-testing",
   "displayName": "PDS testing",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "description": "Testbenches for the PDS course: self-checking patterns, test vector tables, procedures, file-based tests, clock and reset, running them exactly like the course CI with GHDL (VHDL-2008) and reading the results.",
   "author": {
     "name": "Faculty of Electrical Engineering, University of Banja Luka",
