@@ -19,6 +19,7 @@ allowed-tools: mcp__plugin_pds-quartus_pds-quartus__quartus_env, mcp__plugin_pds
 - The project folder is the student's own working folder outside the repository; creating and compiling there does not change the repository. Edits of the VHDL files in `assignments/` remain the student's (graded work).
 - Pass only the sources (and `top` when it is ambiguous). **Do not pass `overwrite` or `assign_pins` unless the student asked**: `overwrite: true` re-creates an existing project and discards the assignments made in it since (pins, settings); if the project exists, say so and ask, or compile it as it is.
 - For a different board or device pass the device and leave pins to the student (`assign_pins: false`).
+- The generated `<top>.sdc` has the clock of the design (a board fact) and commented templates of the constraints the student adds and calculates; point to the `constraints` skill. On a re-created project an edited SDC is kept (`sdc_kept`, template in `<top>.sdc.new`).
 
 ## Quartus only through the tools (mandatory)
 

@@ -1,7 +1,7 @@
 {
   "name": "pds-testing",
   "description": "Testbenches for the PDS course: self-checking patterns, test vector tables, procedures, file-based tests, clock and reset, running them exactly like the course CI with GHDL (VHDL-2008) and reading the results.",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "author": {
     "name": "Faculty of Electrical Engineering, University of Banja Luka",
     "url": "https://github.com/etf-unibl"

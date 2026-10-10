@@ -1,7 +1,7 @@
 {
   "name": "pds-course",
   "displayName": "PDS course",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "Course workflow of PDS: setup check, task context, pull request description, failed CI checks and time tracking. Teaches the workflow, never runs it.",
   "author": {
     "name": "Faculty of Electrical Engineering, University of Banja Luka",

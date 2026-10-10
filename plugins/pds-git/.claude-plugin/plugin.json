@@ -1,7 +1,7 @@
 {
   "name": "pds-git",
   "displayName": "PDS git coach",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "Git coach for the PDS course: branch from an issue, commit messages in the course format, push and sync, merge conflicts, fixing mistakes. Shows and explains every command; the student runs it.",
   "author": {
     "name": "Faculty of Electrical Engineering, University of Banja Luka",

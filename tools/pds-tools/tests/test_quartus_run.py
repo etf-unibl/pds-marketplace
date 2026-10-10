@@ -55,10 +55,20 @@ def test_project_files_without_quartus(task, tmp_path):
     assert "board_top_tb" not in tcl and tcl.count("VHDL_FILE") == 2
     assert "ADVANCED_PHYSICAL_OPTIMIZATION OFF" in tcl  # minutes of Fitter time otherwise
     sdc = (tmp_path / "proj" / "board_top.sdc").read_text()
-    assert "create_clock -name CLOCK_50 -period 20.0 [get_ports {CLOCK_50}]" in sdc
+    assert "create_clock -name CLOCK_50 -period 20.0 [get_ports {CLOCK_50}]" in sdc and "derive_pll_clocks" in sdc
+    # the constraints the student calculates are templates, commented out, with the port names of the design
+    assert "# set_false_path -from [get_ports {SW[*]}]" in sdc and "# set_false_path -to [get_ports {LEDR[*]}]" in sdc
+    assert "# set_output_delay -clock clk_virt -max <ns> [get_ports {dbg}]" in sdc
+    assert not any(l.startswith(("set_input_delay", "set_output_delay", "set_false_path", "set_max_delay")) for l in sdc.splitlines())
     (tmp_path / "proj" / "board_top.qpf").write_text("")
     with pytest.raises(FileExistsError):
         q.project_create(str(folder), project_dir=str(tmp_path / "proj"), run=False)
+    # overwrite keeps an SDC with the student's constraints and writes the template next to it
+    edited = sdc + "set_false_path -from [get_ports {SW[*]}]\n"
+    (tmp_path / "proj" / "board_top.sdc").write_text(edited)
+    r = q.project_create(str(folder), project_dir=str(tmp_path / "proj"), run=False, overwrite=True)
+    assert r["sdc_kept"] and (tmp_path / "proj" / "board_top.sdc").read_text() == edited
+    assert (tmp_path / "proj" / "board_top.sdc.new").read_text() == sdc
 
 
 def test_report_tables():

@@ -184,7 +184,7 @@ def quartus_env() -> dict:
 
 def quartus_project_create(sources: list[str], top: str | None = None, project_dir: str | None = None,
                            assign_pins: bool = True, clock_mhz: float = 50.0, overwrite: bool = False) -> dict:
-    """Creates a Quartus project for a task folder or VHDL files (testbenches left out): DE1-SoC device 5CSEMA5F31C6, VHDL-2008, top-level entity (detected if not given), pins for ports named like board signals (SW, KEY, LEDR, HEX0..5, CLOCK_50, GPIO) with 3.3-V LVTTL, clock constraint for a clock port. The project folder is outside the repository: leave project_dir out to use the default <repository>-quartus/<task>-<top> next to it. Writes and runs create_project.tcl and returns it."""
+    """Creates a Quartus project for a task folder or VHDL files (testbenches left out): DE1-SoC device 5CSEMA5F31C6, VHDL-2008, top-level entity (detected if not given), pins for ports named like board signals (SW, KEY, LEDR, HEX0..5, CLOCK_50, GPIO) with 3.3-V LVTTL, and the SDC file: the clock constraint for a clock port plus commented templates of the constraints the student adds (input/output delays, false paths, max delay); an edited SDC is kept on overwrite (sdc_kept, template in <top>.sdc.new). The project folder is outside the repository: leave project_dir out to use the default <repository>-quartus/<task>-<top> next to it. Writes and runs create_project.tcl and returns it."""
     return quartus_run.project_create([base_path(s) for s in sources], top, base_path(project_dir) if project_dir else None,
                                       assign_pins=assign_pins, clock_mhz=clock_mhz, overwrite=overwrite)
 

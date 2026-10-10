@@ -156,11 +156,63 @@ def _inside_repo(path):
     return None
 
 
+def sdc_template(top, clock, clock_mhz, ports):
+    """The SDC file of a new project: the clock of the design (a board fact) and, commented out, the constraints
+    the student adds and calculates (lecture 13): virtual clock, input and output delays, false paths, max delay."""
+    def names(group):
+        return " ".join(p["name"] + ("[*]" if p["indices"] is not None else "") for p in group)
+
+    period = round(1000.0 / clock_mhz, 3)
+    inputs = [p for p in ports if p["mode"] == "in" and p["name"] != clock]
+    switches = [p for p in inputs if p["name"].upper() in ("SW", "KEY")]
+    data_in = [p for p in inputs if p not in switches]
+    outputs = [p for p in ports if p["mode"] in ("out", "inout", "buffer")]
+    displays = [p for p in outputs if re.match(r"^(LEDR|LEDG|HEX\d)$", p["name"], re.I)]
+    outputs = [p for p in outputs if p not in displays]
+    sdc = [f"# Timing constraints of {top} (PDS course), read by the Fitter and the Timing Analyzer.",
+           "# Theory and examples: docs/topics/13-timing-analysis.md (setup and hold conditions, SDC file, create_clock,",
+           "# set_input_delay / set_output_delay). After a change compile again: the Fitter uses this file too.",
+           ""]
+    if clock:
+        sdc += [f"# Clock of the design: {period} ns = {clock_mhz:g} MHz (CLOCK_50 of the DE1-SoC is a 50 MHz oscillator)",
+                f"create_clock -name {clock} -period {period} [get_ports {{{clock}}}]",
+                "# Clocks made from it by a PLL (nothing to derive if the design has no PLL)",
+                "derive_pll_clocks",
+                "derive_clock_uncertainty"]
+    else:
+        sdc += ["# No clock port found: a combinational design has no clock. Its input-to-output delay is checked",
+                "# only with set_max_delay (below); without it the delays are reported as unconstrained."]
+    sdc += ["",
+            "# ---- Constraints you add yourself: uncomment a line and write the value you calculated ----"]
+    if data_in or outputs:
+        sdc += ["# Inputs from / outputs to another clocked device: a virtual clock for that device",
+                f"# create_clock -name clk_virt -period {period}"]
+    if data_in:
+        sdc += ["# Input delay: Tco of the external flip-flop + board delay; longest (-max, setup) and shortest (-min, hold)",
+                f"# set_input_delay -clock clk_virt -max <ns> [get_ports {{{names(data_in)}}}]",
+                f"# set_input_delay -clock clk_virt -min <ns> [get_ports {{{names(data_in)}}}]"]
+    if outputs:
+        sdc += ["# Output delay: board delay + Tsetup of the external flip-flop (-max); board delay - its Thold (-min)",
+                f"# set_output_delay -clock clk_virt -max <ns> [get_ports {{{names(outputs)}}}]",
+                f"# set_output_delay -clock clk_virt -min <ns> [get_ports {{{names(outputs)}}}]"]
+    if switches:
+        sdc += ["# Switches and push buttons change at any time, with no relation to the clock: not timed",
+                f"# set_false_path -from [get_ports {{{names(switches)}}}]"]
+    if displays:
+        sdc += ["# LEDs and 7-segment displays are read by a person, not by a clocked device: not timed",
+                f"# set_false_path -to [get_ports {{{names(displays)}}}]"]
+    sdc += ["# A combinational path from an input to an output: the longest allowed delay",
+            "# set_max_delay -from [all_inputs] -to [all_outputs] <ns>",
+            ""]
+    return "\n".join(sdc)
+
+
 def project_create(sources, top=None, project_dir=None, device=DEVICE, family=FAMILY, assign_pins=True,
                    clock_mhz=50.0, io_standard=IO_STANDARD, run=True, overwrite=False):
     """Creates a Quartus project for VHDL files or a task folder: device of the DE1-SoC, VHDL-2008, top-level
-    entity, pins of the ports named like board signals (SW, KEY, LEDR, HEX0..5, CLOCK_50, GPIO), a clock
-    constraint (SDC) for a clock port. Writes create_project.tcl and runs it with quartus_sh -t."""
+    entity, pins of the ports named like board signals (SW, KEY, LEDR, HEX0..5, CLOCK_50, GPIO), and the SDC file:
+    the clock constraint for a clock port and commented templates of the constraints the student adds (an edited
+    SDC is kept on overwrite). Writes create_project.tcl and runs it with quartus_sh -t."""
     files = _vhdl_sources(sources)
     top = top or guess_top(files)
     if not top:
@@ -200,20 +252,23 @@ def project_create(sources, top=None, project_dir=None, device=DEVICE, family=FA
         target = line.split(" -to ", 1)[1]
         tcl.append(f'set_instance_assignment -name IO_STANDARD "{io_standard}" -to {target}')
     tcl += ["export_assignments", "project_close", ""]
-    sdc = [f"# Timing constraints of {top} (PDS course)"]
-    if clock:
-        period = round(1000.0 / clock_mhz, 3)
-        sdc.append(f"create_clock -name {clock} -period {period} [get_ports {{{clock}}}]")
-    else:
-        sdc.append("# no clock port found: a combinational design has no clock to constrain; add create_clock for a clock port")
-    sdc += ["derive_clock_uncertainty", ""]
+    sdc = sdc_template(top, clock, clock_mhz, ports)
     with open(os.path.join(project_dir, "create_project.tcl"), "w", encoding="utf-8", newline="\n") as f:
         f.write("\n".join(tcl))
-    with open(os.path.join(project_dir, f"{top}.sdc"), "w", encoding="utf-8", newline="\n") as f:
-        f.write("\n".join(sdc))
+    # An existing SDC that differs from the template holds the student's constraints: it is kept, and the
+    # template goes next to it for comparison
+    sdc_path = os.path.join(project_dir, f"{top}.sdc")
+    old_sdc = open(sdc_path, encoding="utf-8", errors="replace").read() if os.path.exists(sdc_path) else None
+    sdc_kept = old_sdc is not None and old_sdc.strip() != sdc.strip()
+    with open(sdc_path + (".new" if sdc_kept else ""), "w", encoding="utf-8", newline="\n") as f:
+        f.write(sdc)
     result = {"project_dir": project_dir, "top": top, "files": files, "device": device, "clock": clock,
               "clock_mhz": clock_mhz if clock else None, "pins_assigned": len(pin_lines),
-              "ports_without_pin": plan.get("without_pin", []), "tcl": "\n".join(tcl), "sdc": "\n".join(sdc)}
+              "ports_without_pin": plan.get("without_pin", []), "tcl": "\n".join(tcl),
+              "sdc": old_sdc if sdc_kept else sdc}
+    if sdc_kept:
+        result["sdc_kept"] = (f"{top}.sdc was kept: it differs from the generated file, so it holds constraints added "
+                              f"since; the generated template is {top}.sdc.new, for comparison")
     if not run:
         result.update(ok=True, ran=False, command=f"cd {project_dir} && quartus_sh -t create_project.tcl")
         return result
