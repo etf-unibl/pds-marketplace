@@ -1,0 +1,15 @@
+{
+  "name": "pds-design",
+  "version": "0.1.13",
+  "description": "Design review for the PDS course: VHDL style rules explained, synthesis warnings (latches, sensitivity lists), resources and timing from Quartus reports, DE1-SoC pin mapping and board testing.",
+  "contextFileName": "GEMINI.md",
+  "mcpServers": {
+    "pds-design": {
+      "command": "pds-mcp",
+      "args": [
+        "--profile",
+        "design"
+      ]
+    }
+  }
+}
