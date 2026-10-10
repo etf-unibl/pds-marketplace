@@ -1,0 +1,15 @@
+{
+  "name": "pds-datasheet",
+  "version": "0.1.13",
+  "description": "Reading the timing of a component datasheet (PDF) for the PDS course: finds the timing tables and diagrams, explains what each parameter means (setup, hold, clock-to-output, access and hold times, test conditions, min/typ/max) and helps you choose the values that match your board, collected in a timing card that pds-quartus uses to teach the timing constraints (SDC) you calculate yourself.",
+  "contextFileName": "GEMINI.md",
+  "mcpServers": {
+    "pds-datasheet": {
+      "command": "pds-mcp",
+      "args": [
+        "--profile",
+        "datasheet"
+      ]
+    }
+  }
+}
