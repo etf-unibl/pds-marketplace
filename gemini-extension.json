@@ -1,0 +1,15 @@
+{
+  "name": "pds-docs",
+  "version": "0.1.13",
+  "description": "Design documentation (Doxygen --! comments) for the PDS course: drafts a documentation skeleton in your design file (brief descriptions of the file, entity, ports, architecture, processes and signals, with TODO placeholders for the detailed descriptions you write yourself), reviews your documentation against the course requirements and Doxygen's pitfalls, and builds the HTML pages locally so you see them before GitHub Pages publishes them.",
+  "contextFileName": "GEMINI.md",
+  "mcpServers": {
+    "pds-docs": {
+      "command": "pds-mcp",
+      "args": [
+        "--profile",
+        "docs"
+      ]
+    }
+  }
+}
