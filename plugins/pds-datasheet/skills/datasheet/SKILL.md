@@ -1,50 +1,68 @@
 ---
-name: constraints
-description: Timing constraints (the SDC file) of a PDS design in Quartus - the clock (create_clock), PLL clocks, a virtual clock, input and output delays (set_input_delay / set_output_delay), false paths for switches, keys and LEDs, the maximum delay of a combinational path (set_max_delay) - with the theory to calculate the values (setup and hold conditions, lecture 13). The student writes the constraints; the assistant teaches how to find the values and checks them with the timing analysis. Use when the student asks about the SDC file, timing constraints, unconstrained paths, input or output delay, or how to choose a constraint value.
-allowed-tools: mcp__plugin_pds-quartus_pds-quartus__quartus_env, mcp__plugin_pds-quartus_pds-quartus__quartus_project_create, mcp__plugin_pds-quartus_pds-quartus__quartus_compile, mcp__plugin_pds-quartus_pds-quartus__quartus_job, mcp__plugin_pds-quartus_pds-quartus__quartus_timing, mcp__plugin_pds-quartus_pds-quartus__synth_summary, mcp__plugin_pds-quartus_pds-quartus__board_pins, mcp__plugin_pds-quartus_pds-quartus__pin_check, mcp__plugin_pds-quartus_pds-quartus__pin_plan, mcp__plugin_pds-quartus_pds-quartus__board_cables, mcp__plugin_pds-quartus_pds-quartus__explain_command, mcp__plugin_pds-quartus_pds-quartus__board_device_timing
+name: datasheet
+description: Reads the timing of a component datasheet (PDF) the student provides - finds the timing requirements, switching / AC characteristics and timing diagrams, explains each parameter (clock-to-output, setup, hold, access time, output hold, clock limits), the min/typ/max columns and the test conditions, and helps the student choose the values that match the DE1-SoC board. Strict: every value comes from a datasheet page or the student, a value not found is reported, never invented. The result is a timing card for the timing constraints (pds-quartus constraints skill). Use when the student gives a datasheet, asks where a timing value is in a datasheet, or what a datasheet parameter means.
+allowed-tools: mcp__plugin_pds-datasheet_pds-datasheet__*
 ---
 
-# Timing constraints (SDC)
+# Timing from a component datasheet
 
-The student writes the constraints and calculates their values; you teach the theory, check the reasoning and verify the result with the timing analysis. Constraints are part of the timing lecture, so a ready-made SDC would take away what the student should learn.
+The student learns to find and read the timing of a real component. Show where the information is and what it means, and **let the student choose the values**: which row, which column, min or max. Confirm a correct choice; for a wrong one, point to the column header, the condition or the footnote that decides it. The values end in a **timing card**, from which the student calculates the constraints (pds-quartus `constraints` skill). **Every value comes from the datasheet or the student, with its page; a value you cannot find is reported as not found** (the strict rule below).
+
+Who provides what:
+- **On-board devices of the DE1-SoC** (SDRAM, ADC, audio codec, VGA DAC, TV decoder): the parts and connections are in the board facts below. The student provides the datasheet of the exact part on their board.
+- **A component the student connects to a GPIO header:** the student finds and provides its datasheet.
 
 ## Steps
 
-1. **Where the design stands.** The project folder from `quartus_project_create` has `<top>.sdc`; read it (it is outside the repository). After a full compilation (`compile` skill, `flow: "full"`), **call `quartus_timing`** and show what is unconstrained (`unconstrained`, `check_timing`) and which clocks exist.
-2. **Point to the lecture** `docs/topics/13-timing-analysis.md` (with pds-learning: `topic_get 13`) and the video moments that fit the question: setup and hold (01:13), the setup condition and fmax (11:56), the hold condition (16:29), clock skew and hold violations (20:31), the SDC file (44:11), `create_clock` (53:16), `set_input_delay` and `set_output_delay` (1:07:11). Closing timing by pipelining: topic 14 (`topic_get 14`).
-3. **Explain the theory** of the constraint at hand (below), in the lecture's notation, and ask the student where each number comes from: the clock of the task or the board, the datasheet of the external device (`Tco`, `Tsetup`, `Thold`), the board delay, the requirement of the task.
-   - **An on-board device** (SDRAM, ADC, VGA DAC, audio codec, TV decoder): `board_device_timing` gives its connection, clock, datasheet pages and pitfalls.
-   - **The component's values:** a timing card from the pds-datasheet `datasheet` skill holds them (role, datasheet parameter, value, page). Use the card's roles in the formulas below. Without a card: if the student has the datasheet as a PDF, use that skill (with pds-datasheet installed; otherwise tell the student to install it), or let the student read the values with the parameter names of that skill. Never fill in a component value yourself: a value without a source stays open (strict rule below).
-   - **The board delay:** an estimate (below, "The FPGA and the board"); the student writes the assumption in a comment next to the constraint. **Let the student calculate the value.** Check the calculation step by step and point to the wrong step instead of giving the result. A worked example uses other numbers than the student's design.
-4. **The student edits `<top>.sdc`.** The generated file already has the board facts (the `CLOCK_50` clock, `derive_pll_clocks`, `derive_clock_uncertainty`) and commented templates with the design's port names: uncomment a line and write the value. **Do not write the SDC yourself**, also not when asked: show the line, explain each option, and let the student add it, as with commands that change something.
-5. **Check:** compile again with `flow: "full"` (the Fitter uses the SDC too), then `quartus_timing`. The constrained path must no longer be listed as unconstrained; read the setup slack (`-max` values) and the hold slack (`-min` values). Negative slack: `timing` skill (what to change in the design, or whether the requirement allows a different constraint). An SDC error (unknown port, wrong syntax) appears in the compile result: explain the message and let the student correct the line.
-6. **Keep the student's work.** Never re-create the project to "reset" constraints. If the project is re-created (`overwrite`, only when the student asks), `quartus_project_create` keeps an edited SDC (`sdc_kept`) and writes the fresh template next to it as `<top>.sdc.new`.
+1. **On-board device?** For a DE1-SoC device, call `board_device_timing` first: how it is connected and clocked, the checked datasheet revision, the pages, the pitfalls.
+2. **The exact part.** Ask for the part number and suffix printed on the chip (speed grade, temperature range), or the board revision for an on-board device. On the DE1-SoC the SDRAM part is not named in the board documents, and the ADC differs between board revisions (board facts below). Without the exact part, say which values depend on it and leave them open.
+3. **The datasheet.** The student gives the path of the PDF. Datasheets are the vendor's documents: keep them next to the repository, not in it, and cite the title, revision and web address in the design documentation. **Call `datasheet_open`**: title and revision, the bookmarks of the timing sections, the pages with timing tables and diagrams. Check that the datasheet covers the exact part (title, ordering information: `datasheet_search` for the part number); if it does not, say so and ask for the right one. A PDF without text (a scan) cannot be read: ask the student to read the values from it, with the page number.
+4. **Which interface.** Ask which pins of the component connect to the FPGA, in which direction, and who drives its clock (its own oscillator, or an FPGA pin). Only the parameters of those pins matter. Show the student the sections and pages (e.g. "6.6 Timing Requirements, page 6; Figure 6-1 timing diagram, page 7") and the diagram that defines the parameters: the edge each one is measured from, and the edge it is measured to.
+5. **The tables. Call `datasheet_timing`** for those pages. Explain how the table is built:
+   - A page without a ruled table comes back as its text: read the rows from it (symbol, parameter, values in the column order of the header).
+   - Rows are the parameters with their symbol, from and to pins, and conditions.
+   - Column groups are the supply voltage, temperature range, part or speed grade, and MIN/TYP/MAX.
+   - Ask the student which column group fits their setup: VCC = 3.3 V on the DE1-SoC GPIO, the temperature range of the part they have (the suffix of the part number), the load, and the speed grade printed on the chip.
+6. **The parameters** (table below): explain each one the student needs in their own words and with the diagram, and ask which role it has in the formulas (the constraints skill's theory).
+7. **Check every chosen value on the page** (`datasheet_page`; with `layout: true` a value alone in its row stays under its MIN/TYP/MAX header; `datasheet_search` for a symbol or a footnote):
+   - The tables are extracted automatically. A cell with several numbers (`merged_values`) spans merged columns, and only the page shows which ones.
+   - Overbars are lost in the extracted text: `Q` and Q̄ (or `CS` and its active-low form) can look the same in two rows. The page shows which row is which.
+   - Footnotes change a value: some apply only at another load, or only when the clocks are tied together.
+   - The test conditions are in "Parameter Measurement Information" or "Load circuit": the load capacitance (`CL`) and the reference level (`VM`, e.g. VCC/2). A larger real load means a longer delay.
+8. **A parameter that is not there.** Search for it (`datasheet_search`: the symbol, its names in the table below, the words of its description) and look at the timing pages. If it is not found, report exactly that: what you searched and where. Then the student finds it another way (strict rule). Do not continue with a guessed value.
+9. **The timing card.** When the student has chosen and checked the values, write the card (format below) and continue with the pds-quartus `constraints` skill: the student calculates the input and output delays from the card and the board delays, and writes the SDC. If pds-quartus is not installed, tell the student to install it (`docs/students.en.md`).
 
-## Theory (notation of lecture 13)
+## Datasheet names and their role
 
-- **Between two registers on one clock** with period `Tc`:
-  - setup: `Tcq + Tnext(max) + Tsetup < Tc`, so setup slack = `Tc - (Tcq + Tnext(max) + Tsetup)` and `fmax = 1 / (Tcq + Tnext(max) + Tsetup)`;
-  - hold: `Thold < Tcq + Tnext(min)`, so hold slack = `Tcq + Tnext(min) - Thold`;
-  - clock skew `Tskew` (the capturing register gets the edge later than the launching one) adds to the setup side (`Tc + Tskew`) and to the hold requirement (`Thold + Tskew`): it helps setup and endangers hold.
-  - The designer chooses `Tc` (`create_clock -period`) and changes `Tnext` (the logic); `Tcq`, `Tsetup` and `Thold` belong to the device and are in the timing report.
-- **Input delay** (`set_input_delay -clock clk_virt`): an external flip-flop, clocked by the virtual clock `clk_virt` with the external device's period, launches the data; it reaches the FPGA pin `Tco(ext) + Tboard` after the edge.
-  - `-max` = `Tco(ext,max) + Tboard(max)`: used for setup; the path from the pin to the first register inside the FPGA must then fit into `Tc - input delay(max) - Tsetup`.
-  - `-min` = `Tco(ext,min) + Tboard(min)`: used for hold.
-- **Output delay** (`set_output_delay -clock clk_virt`): an external flip-flop captures the FPGA output; the data must arrive `Tsetup(ext)` before its edge and the board adds `Tboard`.
-  - `-max` = `Tboard(max) + Tsetup(ext)`: the path from the last register in the FPGA to the pin must fit into `Tc - output delay(max)`.
-  - `-min` = `Tboard(min) - Thold(ext)`: used for hold.
-- **The FPGA sends the clock to the device** (SPI `SCLK`, SDRAM `CLK`, a shift register's clock): the clock crosses the board too. The delays are relative to the clock on the FPGA's clock output port (`create_generated_clock` on that port, from the clock that drives it), and `Tclk_board` is the trace of that clock:
-  - input: `-max` = `Tclk_board(max) + Tco(ext,max) + Tdata_board(max)`, `-min` = `Tclk_board(min) + Tco(ext,min) + Tdata_board(min)`;
-  - output: `-max` = `Tdata_board(max) + Tsetup(ext) - Tclk_board(min)`, `-min` = `Tdata_board(min) - Thold(ext) - Tclk_board(max)`;
-  - for an output, a clock trace as long as the data trace cancels it (why boards route them with equal lengths); for an input the two add up (the clock goes out, the data comes back), which limits how fast the FPGA can read the device.
-- **Combinational path from an input to an output** (no clock): `set_max_delay -from [all_inputs] -to [all_outputs] <ns>`, where the value is the time the surrounding system allows between an input change and a valid output (e.g. what is left of the external clock period after the external `Tco`, the board delays and the external `Tsetup`). `quartus_timing` reports the actual delays (`pin_to_pin`) to compare with.
-- **No timing relation to the clock:** switches and push buttons change at any moment (synchronize them in VHDL with two flip-flops, then `set_false_path -from` those ports); LEDs and 7-segment displays are read by a person (`set_false_path -to`). These are board facts, not calculated values.
-- **Orders of magnitude**, only to check a result, never as a value: a board trace adds about 1 ns per 15 cm. The `Tco` and `Tsetup` of fast logic and memories are a few ns, while slow serial devices are often tens of ns. A computed input or output delay larger than the clock period means a wrong number, or a requirement the design cannot meet. A value that looks implausible is checked again on its datasheet page, not replaced.
+| Role in the formulas | Names in datasheets | Notes |
+| --- | --- | --- |
+| `Tco(ext,max)`: clock edge to valid output of the component (for `set_input_delay -max`) | `tCO`, `tCLK-Q`, `tpd` from CLK to Q (logic families), `tAC` (SDRAM access time from the clock), `tV` / `tDOV` / `tSDO` ("SCK to SDO valid", SPI devices), `tD` | Always the MAX column. A memory or ADC lists one per mode or clock frequency (e.g. per CAS latency): use the row of the mode in the design. |
+| `Tco(ext,min)`: earliest output change after the edge (for `set_input_delay -min`) | `tpd` MIN, `tOH` (output hold, SDRAM), `tHO` / `tDOH` ("SDO hold after SCK") | Often not given. Only when the MIN column is empty may 0 be proposed (the data may change right at the edge): marked "assumed", and the student decides. |
+| `Tsetup(ext)`: data before the component's clock edge (for `set_output_delay -max`) | `tSU`, `tS`, `tDS` (data), `tAS` (address), `tCMS` (command), `tSUDI` | MIN column: the component needs at least this. |
+| `Thold(ext)`: data after the component's clock edge (for `set_output_delay -min`) | `tH`, `tHD`, `tDH`, `tAH`, `tCMH` | MIN column. A hold time of 0 still enters the formula. |
+| Clock limits: the clock the design gives the component | `fCLK` / `fmax` / `fSCK` max, `tCK` / `tCYC` min (period), `tCH` / `tCL` / `tw` (high and low pulse width) | A check of the design (clock divider, PLL), not an SDC value. |
+| Not for the SDC, but for the design | `tCONV` (ADC conversion), `tRCD` / `tRP` / `tREF` (SDRAM commands, refresh), `tw` of reset, `tPZH` / `tPZL` / `tdis` (output enable and disable of a bus) | Clock cycles the state machine must wait: count them with the clock period. |
+| Never used | TYP values, `tr` / `tf` / `tt` (edge transition times) | TYP is a typical part, not a guarantee. Transition times are part of how the delays are measured. |
 
-## Notes
+- A missing MIN or MAX means the vendor guarantees nothing on that side. Say so in the card. A safe value is allowed only where the strict rule names one; every other missing value stays open.
+- Some datasheets give a value only for one supply voltage or one temperature. The card notes the condition.
 
-- The constraints are read by the Fitter as well: after any change of the SDC compile again before `quartus_timing`.
-- Show how the same is done in the GUI: **Tools > Timing Analyzer**, menu **Constraints** (*Create Clock*, *Set Input Delay*, *Set Output Delay*, *Set False Path*), which shows the matching SDC command (lecture 13).
+## Timing card (format)
+
+```
+Timing card: <part number> - <datasheet title, revision>, interface <pins to the FPGA>
+Clock of the component: <own oscillator f = ... | FPGA pin <name>>; conditions: VCC = 3.3 V, <temperature range>, CL = <pF>
+| Role         | Datasheet parameter     | Value   | Where              | Note                     |
+| Tco(ext,max) | tpd CLK->Q, MAX         | 5.9 ns  | p. 7, 6.7 Switching|                          |
+| Tco(ext,min) | tpd CLK->Q, MIN         | 2.2 ns  | p. 7, 6.7 Switching|                          |
+| Tsetup(ext)  | tsu Data                | 1.3 ns  | p. 7, 6.6 Timing   |                          |
+| Thold(ext)   | th                      | 1.2 ns  | p. 7, 6.6 Timing   |                          |
+| Clock limit  | fmax                    | 175 MHz | p. 7, 6.7 Switching| the design's clock must be lower |
+| Condition    | CL, test load           | 50 pF   | p. 9, Figure 7-1   | load of the values above |
+| Not found    | <symbol>                | open    | searched: <pages, terms> | the student looks for it: <where> |
+```
+
+The values above only show the format (SN74LVC1G74 at 3.3 V, -40 to 85 °C). Never put them, or any value not read from the student's datasheet, into a card.
 
 ## Timing values: only from a source, never invented (mandatory)
 
@@ -92,13 +110,6 @@ Sources: *DE1-SoC User Manual* (Terasic, rev. F of 2019-01-28; rev. E of 2015 wh
   - A buffer or level shifter in the path adds its own `tpd` (its datasheet).
   - For the clock-forwarding formulas, the difference between the clock and data traces matters, not their lengths alone.
   - A board delay is an estimate, never a datasheet value. Agree the estimate with the student, use 0 for a minimum (the safe side for hold), round a maximum up, and write the assumption in a comment in the SDC.
-
-## Quartus only through the tools (mandatory)
-
-- Run Quartus only through the `pds-quartus` tools: `quartus_env`, `quartus_project_create`, `quartus_compile`, `quartus_job`, `quartus_timing`, `synth_summary`, `quartus_tcl`, `board_cables`, `board_program`. They do more than the bare commands (the timing tool, for example, also reports the input-to-output delays of a combinational design, which the default compilation flow does not).
-- If a tool you need is not in your tool list, search for it by its exact name (e.g. `quartus_timing`) before doing anything else.
-- **Never replace a tool with `quartus_sh`, `quartus_map`, `quartus_fit`, `quartus_sta`, `quartus_pgm` or a Tcl script of your own in the shell**, not even when the tool cannot be found. If it still cannot be found, say so: no result is better than a different one presented as the tool's. Ask the student to repeat the request naming the tool ("use the pds-quartus `quartus_timing` tool"), or to start a new session if that does not help.
-- Showing the commands the tools ran, so the student can run them by hand, stays part of every answer. When the student asks what the commands do, **call `explain_command`** with them (several commands joined with `&&` are explained one by one) and answer from its result: what each does, why it is used, how to check the result and how to undo it.
 
 ## Teach, don't execute (mandatory)
 

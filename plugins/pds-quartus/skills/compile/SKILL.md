@@ -1,7 +1,7 @@
 ---
 name: compile
 description: Runs Intel Quartus Prime on a PDS project from the command line - Analysis & Synthesis only, or the full compilation (synthesis, fitter, assembler, timing) that produces the .sof for the board - and explains errors, critical warnings and synthesis problems (inferred latches, removed registers, incomplete sensitivity lists, truncated values). Use when the student asks to synthesize, compile, or why Quartus fails or warns.
-allowed-tools: mcp__plugin_pds-quartus_pds-quartus__quartus_env, mcp__plugin_pds-quartus_pds-quartus__quartus_project_create, mcp__plugin_pds-quartus_pds-quartus__quartus_compile, mcp__plugin_pds-quartus_pds-quartus__quartus_job, mcp__plugin_pds-quartus_pds-quartus__quartus_timing, mcp__plugin_pds-quartus_pds-quartus__synth_summary, mcp__plugin_pds-quartus_pds-quartus__board_pins, mcp__plugin_pds-quartus_pds-quartus__pin_check, mcp__plugin_pds-quartus_pds-quartus__pin_plan, mcp__plugin_pds-quartus_pds-quartus__board_cables, mcp__plugin_pds-quartus_pds-quartus__explain_command
+allowed-tools: mcp__plugin_pds-quartus_pds-quartus__quartus_env, mcp__plugin_pds-quartus_pds-quartus__quartus_project_create, mcp__plugin_pds-quartus_pds-quartus__quartus_compile, mcp__plugin_pds-quartus_pds-quartus__quartus_job, mcp__plugin_pds-quartus_pds-quartus__quartus_timing, mcp__plugin_pds-quartus_pds-quartus__synth_summary, mcp__plugin_pds-quartus_pds-quartus__board_pins, mcp__plugin_pds-quartus_pds-quartus__pin_check, mcp__plugin_pds-quartus_pds-quartus__pin_plan, mcp__plugin_pds-quartus_pds-quartus__board_cables, mcp__plugin_pds-quartus_pds-quartus__explain_command, mcp__plugin_pds-quartus_pds-quartus__board_device_timing
 ---
 
 # Compile with Quartus

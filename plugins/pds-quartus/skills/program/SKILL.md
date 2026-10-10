@@ -1,7 +1,7 @@
 ---
 name: program
 description: Programs the DE1-SoC board with a compiled PDS design (.sof over JTAG with the USB-Blaster) and helps when the board is not found - cable, power, driver, JTAG chain - and with testing the design on the board (switches, keys, LEDs, 7-segment displays). Use when the student wants to put the design on the board or the Programmer does not see it.
-allowed-tools: mcp__plugin_pds-quartus_pds-quartus__quartus_env, mcp__plugin_pds-quartus_pds-quartus__quartus_project_create, mcp__plugin_pds-quartus_pds-quartus__quartus_compile, mcp__plugin_pds-quartus_pds-quartus__quartus_job, mcp__plugin_pds-quartus_pds-quartus__quartus_timing, mcp__plugin_pds-quartus_pds-quartus__synth_summary, mcp__plugin_pds-quartus_pds-quartus__board_pins, mcp__plugin_pds-quartus_pds-quartus__pin_check, mcp__plugin_pds-quartus_pds-quartus__pin_plan, mcp__plugin_pds-quartus_pds-quartus__board_cables, mcp__plugin_pds-quartus_pds-quartus__explain_command
+allowed-tools: mcp__plugin_pds-quartus_pds-quartus__quartus_env, mcp__plugin_pds-quartus_pds-quartus__quartus_project_create, mcp__plugin_pds-quartus_pds-quartus__quartus_compile, mcp__plugin_pds-quartus_pds-quartus__quartus_job, mcp__plugin_pds-quartus_pds-quartus__quartus_timing, mcp__plugin_pds-quartus_pds-quartus__synth_summary, mcp__plugin_pds-quartus_pds-quartus__board_pins, mcp__plugin_pds-quartus_pds-quartus__pin_check, mcp__plugin_pds-quartus_pds-quartus__pin_plan, mcp__plugin_pds-quartus_pds-quartus__board_cables, mcp__plugin_pds-quartus_pds-quartus__explain_command, mcp__plugin_pds-quartus_pds-quartus__board_device_timing
 ---
 
 # Programming the DE1-SoC

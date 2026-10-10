@@ -1,7 +1,7 @@
 ---
 name: project
 description: Creates an Intel Quartus Prime project for a PDS design or task folder - DE1-SoC device (Cyclone V 5CSEMA5F31C6), VHDL-2008, top-level entity, board pins for ports named like the board signals, clock constraint - outside the repository, with the Tcl script that does it. Use when the student or instructor wants a Quartus project, wants to synthesize or put a design on the board.
-allowed-tools: mcp__plugin_pds-quartus_pds-quartus__quartus_env, mcp__plugin_pds-quartus_pds-quartus__quartus_project_create, mcp__plugin_pds-quartus_pds-quartus__quartus_compile, mcp__plugin_pds-quartus_pds-quartus__quartus_job, mcp__plugin_pds-quartus_pds-quartus__quartus_timing, mcp__plugin_pds-quartus_pds-quartus__synth_summary, mcp__plugin_pds-quartus_pds-quartus__board_pins, mcp__plugin_pds-quartus_pds-quartus__pin_check, mcp__plugin_pds-quartus_pds-quartus__pin_plan, mcp__plugin_pds-quartus_pds-quartus__board_cables, mcp__plugin_pds-quartus_pds-quartus__explain_command
+allowed-tools: mcp__plugin_pds-quartus_pds-quartus__quartus_env, mcp__plugin_pds-quartus_pds-quartus__quartus_project_create, mcp__plugin_pds-quartus_pds-quartus__quartus_compile, mcp__plugin_pds-quartus_pds-quartus__quartus_job, mcp__plugin_pds-quartus_pds-quartus__quartus_timing, mcp__plugin_pds-quartus_pds-quartus__synth_summary, mcp__plugin_pds-quartus_pds-quartus__board_pins, mcp__plugin_pds-quartus_pds-quartus__pin_check, mcp__plugin_pds-quartus_pds-quartus__pin_plan, mcp__plugin_pds-quartus_pds-quartus__board_cables, mcp__plugin_pds-quartus_pds-quartus__explain_command, mcp__plugin_pds-quartus_pds-quartus__board_device_timing
 ---
 
 # Quartus project

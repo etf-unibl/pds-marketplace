@@ -33,7 +33,7 @@ Node.js is not needed.
 Install `pds-tools` into the same Python you use for the course (where `vhdl-style` is installed):
 
 ```
-python -m pip install "pds-tools @ git+https://github.com/etf-unibl/pds-marketplace@v0.2.8#subdirectory=tools/pds-tools"
+python -m pip install "pds-tools @ git+https://github.com/etf-unibl/pds-marketplace@v0.2.9#subdirectory=tools/pds-tools"
 ```
 
 On Linux and macOS use `python3` instead of `python`. Check that the command `pds-mcp` is found:
@@ -58,6 +58,7 @@ All PDS plugins come from one marketplace, `pds-marketplace`. Install the plugin
 | `pds-testing` | writing self-checking testbenches, running them like the course CI |
 | `pds-learning` | tutor for the lectures (topic pages, video moments, example code), glossary, self-check quiz |
 | `pds-quartus` | Quartus from the command line: a project for your design (DE1-SoC, VHDL-2008, pins, clock) outside the repository, synthesis and full compilation, timing analysis and closure, Tcl scripts, programming the board |
+| `pds-datasheet` | reading the timing of a component's datasheet (PDF): where the timing tables are, what each parameter means, which values fit your board; the result goes to the timing constraints of `pds-quartus` |
 
 ### Claude Code
 
@@ -124,6 +125,7 @@ Ask in your own words, in Serbian or English; the assistant picks the matching s
 | learn | "Why does Quartus infer a latch here?" / "Quiz me on lecture 10." | `pds-learning:tutor`, `pds-learning:quiz` |
 | connect to the board | "Which pins do I use for the switches and the 7-segment displays?" | `pds-design:pins` |
 | use Quartus | "Create a Quartus project for task 12 and synthesize it." / "Compile it and tell me the Fmax." / "Program the board." / "Write a Tcl script that sets the pins." / "Which timing constraints does my design need, and how do I calculate the input delay?" | `pds-quartus:project`, `compile`, `timing`, `constraints`, `program`, `tcl` |
+| read a datasheet | "Here is the datasheet of the ADC: datasheets/ltc2308.pdf. Where are its timing values and what do they mean?" | `pds-datasheet:datasheet` |
 
 What the assistant does by itself: it reads files, runs GHDL and the style check (without `--fix`), reads your issues and pull requests on GitHub, and searches the course topic pages. What it leaves to you: every command that changes something. It shows the command, explains each part, says what you should see and how to undo it, and checks the result after you ran it.
 
@@ -139,7 +141,7 @@ The course announces new versions of the plugins and of `pds-tools` (the plugins
 2. **Update `pds-tools`** in the same Python as in step 1; activate the virtual environment first if you use one. Use the version tag the course announces:
 
    ```
-   python -m pip install --upgrade "pds-tools @ git+https://github.com/etf-unibl/pds-marketplace@v0.2.8#subdirectory=tools/pds-tools"
+   python -m pip install --upgrade "pds-tools @ git+https://github.com/etf-unibl/pds-marketplace@v0.2.9#subdirectory=tools/pds-tools"
    pds-mcp --version
    ```
 

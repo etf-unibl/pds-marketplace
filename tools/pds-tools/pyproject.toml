@@ -4,13 +4,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pds-tools"
-version = "0.2.8"
-description = "Read-only helpers and MCP server behind the PDS course AI plugins (rules, git state, GHDL, pins, topic pages)"
+version = "0.2.9"
+description = "Read-only helpers and MCP server behind the PDS course AI plugins (rules, git state, GHDL, pins, topic pages, Quartus, datasheets)"
 readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "MIT"}
 authors = [{name = "Faculty of Electrical Engineering, University of Banja Luka"}]
-dependencies = ["mcp>=2.3,<3", "psutil>=5.9"]
+# pypdfium2 (page text, bookmarks) and pdfplumber (tables): component datasheets (pds-datasheet)
+dependencies = ["mcp>=2.3,<3", "psutil>=5.9", "pypdfium2>=4.30", "pdfplumber>=0.11"]
 
 [project.optional-dependencies]
 # The style check of the course; pinned to the version used by the course CI
@@ -28,4 +29,4 @@ pds-tools = "pds_tools.cli:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-pds_tools = ["data/*.csv", "data/*.json"]
+pds_tools = ["data/*.csv", "data/*.json", "data/*.md"]

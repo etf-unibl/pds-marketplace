@@ -33,7 +33,7 @@ Ako je asistent samo objašnjavao, a kod ste pisali sami, linija nije potrebna. 
 Instalirajte `pds-tools` u isti *Python* koji koristite za kurs (u kojem je instaliran `vhdl-style`):
 
 ```
-python -m pip install "pds-tools @ git+https://github.com/etf-unibl/pds-marketplace@v0.2.8#subdirectory=tools/pds-tools"
+python -m pip install "pds-tools @ git+https://github.com/etf-unibl/pds-marketplace@v0.2.9#subdirectory=tools/pds-tools"
 ```
 
 Na *Linux* i *macOS* platformama umjesto `python` koristite `python3`. Provjerite da se komanda `pds-mcp` pronalazi:
@@ -58,6 +58,7 @@ Svi PDS dodaci dolaze iz jednog *marketplace*-a, `pds-marketplace`. Instalirajte
 | `pds-testing` | pisanja *testbench*-eva sa samoprovjerom i njihovog pokretanja kao u CI-ju |
 | `pds-learning` | učenja uz predavanja (stranice tema, trenuci u videu, kod primjera), rječnika pojmova, kviza za provjeru znanja |
 | `pds-quartus` | rada sa *Quartus*-om iz komandne linije: projekat za vaš dizajn (DE1-SoC, VHDL-2008, pinovi, takt) izvan repozitorijuma, sinteza i kompletno prevođenje, vremenska analiza i zatvaranje tajminga, *Tcl* skripte, programiranje ploče |
+| `pds-datasheet` | čitanja tajminga iz *datasheet*-a komponente (PDF): gdje su tabele tajminga, šta znači svaki parametar, koje vrijednosti odgovaraju vašoj ploči; rezultat koristi `pds-quartus` za vremenska ograničenja |
 
 ### Claude Code
 
@@ -124,6 +125,7 @@ Pitajte svojim riječima, na srpskom ili engleskom; asistent bira odgovarajuću 
 | učite | „Zašto Quartus ovdje pravi leč?“ / „Ispitaj me iz predavanja 10.“ | `pds-learning:tutor`, `pds-learning:quiz` |
 | povežete dizajn sa pločom | „Koje pinove koristim za prekidače i sedmosegmentne displeje?“ | `pds-design:pins` |
 | koristite *Quartus* | „Napravi Quartus projekat za zadatak 12 i sintetizuj ga.“ / „Prevedi ga i reci mi Fmax.“ / „Isprogramiraj ploču.“ / „Napiši Tcl skriptu koja dodjeljuje pinove.“ / „Koja vremenska ograničenja treba mom dizajnu i kako da izračunam kašnjenje ulaza?“ | `pds-quartus:project`, `compile`, `timing`, `constraints`, `program`, `tcl` |
+| čitate *datasheet* | „Ovo je datasheet AD konvertora: datasheets/ltc2308.pdf. Gdje su vrijednosti tajminga i šta znače?“ | `pds-datasheet:datasheet` |
 
 Šta asistent radi sam: čita fajlove, pokreće GHDL i provjeru stila (bez `--fix`), čita vaše zadatke i *pull request*-ove na *GitHub*-u i pretražuje stranice tema kursa. Šta ostavlja vama: svaku komandu koja nešto mijenja. Prikazuje komandu, objašnjava svaki njen dio, kaže šta treba da vidite i kako da poništite izmjenu, a nakon što je pokrenete, provjerava rezultat.
 
@@ -139,7 +141,7 @@ Kurs najavljuje nove verzije dodataka i alata `pds-tools` (dodaci pozivaju alate
 2. **Ažurirajte `pds-tools`** u istom *Python*-u kao u koraku 1; ako koristite virtuelno okruženje, prvo ga aktivirajte. Koristite oznaku verzije koju kurs najavi:
 
    ```
-   python -m pip install --upgrade "pds-tools @ git+https://github.com/etf-unibl/pds-marketplace@v0.2.8#subdirectory=tools/pds-tools"
+   python -m pip install --upgrade "pds-tools @ git+https://github.com/etf-unibl/pds-marketplace@v0.2.9#subdirectory=tools/pds-tools"
    pds-mcp --version
    ```
 

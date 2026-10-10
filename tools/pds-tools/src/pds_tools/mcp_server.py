@@ -19,7 +19,7 @@ import urllib.parse
 from mcp.server.mcpserver import Context, MCPServer
 from mcp.types import ToolAnnotations
 
-from . import __version__, env, explain, github, hdl, pins, quartus, quartus_run, repo, rules, topics
+from . import __version__, datasheet, env, explain, github, hdl, pins, quartus, quartus_run, repo, rules, topics
 
 READ_ONLY = ToolAnnotations(readOnlyHint=True, destructiveHint=False, idempotentHint=True, openWorldHint=False)
 READ_ONLY_REMOTE = ToolAnnotations(readOnlyHint=True, destructiveHint=False, idempotentHint=True, openWorldHint=True)
@@ -223,6 +223,31 @@ def board_program(sof: str, cable: str | None = None) -> dict:
     return quartus_run.program_board(base_path(sof), cable)
 
 
+def datasheet_open(path: str) -> dict:
+    """Opens a component datasheet (PDF) the student provides: title, number of pages, the bookmarks of the timing sections, and the pages most likely to hold timing information (timing requirements, switching / AC characteristics, timing diagrams) with their headings and figure captions."""
+    return datasheet.open_datasheet(base_path(path))
+
+
+def datasheet_timing(path: str, pages: list[int] | None = None) -> dict:
+    """The timing tables of a datasheet as printed (or of the given pages): columns from the joined header labels (supply voltage, temperature range, part or speed grade, MIN/TYP/MAX), parameter rows with symbol, from/to pins and conditions, footnotes, and the full text of pages without a ruled table. Values are not interpreted: check them on the page (datasheet_page). A value that is not in the datasheet is reported as not found, never estimated."""
+    return datasheet.timing_tables(base_path(path), pages)
+
+
+def datasheet_search(path: str, text: str) -> dict:
+    """Lines of a datasheet that contain the text (case and spaces ignored), with their pages: a parameter symbol (tSU, tAC), a pin name, a footnote or a test condition."""
+    return datasheet.search(base_path(path), text)
+
+
+def datasheet_page(path: str, page: int, layout: bool = False) -> dict:
+    """The full text of one datasheet page, to check a table value, its footnotes and test conditions. layout: true keeps the horizontal positions, so a value alone in its row stays under its column header (MIN, TYP, MAX)."""
+    return datasheet.page_text(base_path(path), page, layout)
+
+
+def board_device_timing(device: str | None = None) -> dict:
+    """Timing notes of the DE1-SoC on-board devices (sdram, adc-ltc2308, adc-ad7928, level-shifter-txb0104, vga-adv7123, audio-wm8731, video-adv7180, clock-si5350c, fpga-cyclone-v), checked against the board manual, the schematic and named datasheet revisions: how the device is connected and clocked, where its timing is in the datasheet, which parameter has which role, and the pitfalls. Without device: the list. The values are for checking the student's reading of the same datasheet revision, never a replacement for it."""
+    return datasheet.board_devices(device)
+
+
 def base_path(path):
     """A path relative to the workspace (the course repository) or absolute."""
     return path if os.path.isabs(path) else os.path.join(base(), path)
@@ -239,7 +264,10 @@ PROFILES = {
                  (course_doc, READ_ONLY)],
     "quartus": [(quartus_env, READ_ONLY), (quartus_project_create, PROJECT_FILES), (quartus_compile, PROJECT_FILES),
                 (quartus_job, READ_ONLY), (quartus_timing, PROJECT_FILES), (synth_summary, READ_ONLY), (board_pins, READ_ONLY), (pin_check, READ_ONLY),
-                (pin_plan, READ_ONLY), (board_cables, READ_ONLY), (quartus_tcl, ACTS), (board_program, ACTS), (explain_command, READ_ONLY)],
+                (pin_plan, READ_ONLY), (board_cables, READ_ONLY), (quartus_tcl, ACTS), (board_program, ACTS), (explain_command, READ_ONLY),
+                (board_device_timing, READ_ONLY)],
+    "datasheet": [(datasheet_open, READ_ONLY), (datasheet_timing, READ_ONLY), (datasheet_search, READ_ONLY), (datasheet_page, READ_ONLY),
+                  (board_device_timing, READ_ONLY)],
 }
 PROFILES["all"] = list({f.__name__: (f, a) for p in PROFILES.values() for f, a in p}.values())
 

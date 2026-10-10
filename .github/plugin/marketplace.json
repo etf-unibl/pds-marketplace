@@ -5,7 +5,7 @@
     "url": "https://github.com/etf-unibl"
   },
   "description": "AI assistant plugins of the PDS course (Projektovanje digitalnih sistema): student plugins that teach the course workflow, and instructor plugins that only the course staff can install.",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "plugins": [
     {
       "name": "pds-course",
@@ -18,6 +18,20 @@
         "fpga",
         "course",
         "github"
+      ]
+    },
+    {
+      "name": "pds-datasheet",
+      "source": "plugins/pds-datasheet",
+      "description": "Reading the timing of a component datasheet (PDF) for the PDS course: finds the timing tables and diagrams, explains what each parameter means (setup, hold, clock-to-output, access and hold times, test conditions, min/typ/max) and helps you choose the values that match your board, collected in a timing card that pds-quartus uses to teach the timing constraints (SDC) you calculate yourself.",
+      "category": "education",
+      "tags": [
+        "pds",
+        "datasheet",
+        "timing",
+        "sdc",
+        "fpga",
+        "de1-soc"
       ]
     },
     {

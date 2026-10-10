@@ -5,5 +5,5 @@
   "profile": "quartus",
   "keywords": ["pds", "quartus", "fpga", "timing", "tcl", "de1-soc"],
   "auto_approve": ["quartus_env", "quartus_project_create", "quartus_compile", "quartus_job", "quartus_timing", "synth_summary",
-                   "board_pins", "pin_check", "pin_plan", "board_cables", "explain_command"]
+                   "board_pins", "pin_check", "pin_plan", "board_cables", "explain_command", "board_device_timing"]
 }
