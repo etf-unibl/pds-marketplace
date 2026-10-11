@@ -156,7 +156,7 @@ The course announces new versions of the plugins and of `pds-tools` (the plugins
    | Tool | Update the plugins |
    | ------ | ------ |
    | Claude Code | start it, then `/plugin marketplace update pds-marketplace` and `/reload-plugins` |
-   | Copilot CLI | in the terminal: `copilot plugin marketplace update`, then `copilot plugin update` (all installed plugins) |
+   | Copilot CLI | in the terminal: `copilot plugin marketplace update`, then `copilot plugin update --all` (all installed plugins) |
    | Antigravity CLI | `git pull` in the clone, then `agy plugin install` again |
 
 4. **Start the AI tool again** in your course repository, from a terminal where the environment is active, and ask "Check my setup for the PDS course." The answer lists the tools and their versions, `pds-tools` included.

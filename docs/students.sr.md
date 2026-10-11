@@ -156,7 +156,7 @@ Kurs najavljuje nove verzije dodataka i alata `pds-tools` (dodaci pozivaju alate
    | Alat | Ažuriranje dodataka |
    | ------ | ------ |
    | Claude Code | pokrenite ga, zatim `/plugin marketplace update pds-marketplace` i `/reload-plugins` |
-   | Copilot CLI | u terminalu: `copilot plugin marketplace update`, zatim `copilot plugin update` (svi instalirani dodaci) |
+   | Copilot CLI | u terminalu: `copilot plugin marketplace update`, zatim `copilot plugin update --all` (svi instalirani dodaci) |
    | Antigravity CLI | `git pull` u klonu, zatim ponovo `agy plugin install` |
 
 4. **Ponovo pokrenite AI alat** u repozitorijumu kursa, iz terminala u kojem je okruženje aktivno, i pitajte "Provjeri moje okruženje za kurs PDS." Odgovor navodi alate i njihove verzije, uključujući `pds-tools`.
