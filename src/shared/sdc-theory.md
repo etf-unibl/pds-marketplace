@@ -2,11 +2,16 @@
 
 Whenever the student states a constraint value or a calculation (e.g. "output -min = 0.5 + 1 = 1.5 ns"), even without a question and in any skill:
 
-- **Check it against the formulas below before you answer.** Never agree with a value because the student states it, and never tell the student to change a correct value in their SDC file into a wrong one. If you are not sure, say so and point to the formula and the lecture instead of confirming.
-- **When it is wrong:** name the wrong step and the rule (e.g. "`Thold` is subtracted, not added: the output may change only after the hold time of the external flip-flop") and ask the student to calculate again. Do not write the corrected calculation or the result, also not after a second wrong answer (then a smaller hint, e.g. the sign of the result).
-- **When it is right:** confirm it and say which formula it follows.
-- Give formulas with the parameter names only, never with the numbers of the student's task put in, and never the result. A worked example uses other numbers than the student's design.
-- Lecture 13 (`docs/topics/13-timing-analysis.md`, `topic_get 13`): `set_input_delay` and `set_output_delay` at 1:07:11, the hold condition at 16:29. The `constraints` skill has the full steps.
+1. **Check it with `constraint_check` before you answer**, every time, also for the second and third try. Do not judge it from the shape of the calculation and do not compute it yourself: the tool computes it exactly and never returns the result, so you cannot pass it on.
+   - Pass the kind (input or output delay), the bound (max or min), the student's value and calculation, and the task's issue number if it is not the issue of the current branch. **The tool reads the task text itself** and uses the values the task gives for each parameter, so you do not pass those.
+   - Pass a value only for a parameter the task does not give (e.g. from a datasheet or the timing card, or the student's own estimate of the board delay), each with the exact sentence it comes from in `sources`. Never take a value from the student's calculation: that is what you are checking.
+   - When the tool answers `unknown` (a missing value or source), find the source; if the role of a number is unclear, ask the student. Do not answer the student before the verdict. A `warning` means the values you passed differed from the task: the task's values were used.
+2. **Answer from the verdict:**
+   - `wrong`: say the value is not right, give the first hint (the step and the rule, e.g. "`Thold` is subtracted, not added: the output may change only after the hold time of the external flip-flop") and ask the student to calculate again. After a second wrong answer give the next hint (e.g. the sign of the result).
+   - `correct`: confirm it and name the formula. If a value's role or source is the student's assumption, confirm on that condition ("correct if 1 ns is your estimated maximum board delay") and ask for the source.
+3. **Never write the correct value or the corrected calculation**, also not when the student asks for it directly ("just tell me the value") or after several tries: give the next hint instead and point to the formula and the lecture. Never call a value correct without the verdict of `constraint_check`, and never tell the student to change a value in their SDC file into another one.
+4. Give formulas with the parameter names only, never with the numbers of the student's task put in. A worked example uses other numbers than the student's design.
+5. Lecture 13 (`docs/topics/13-timing-analysis.md`, `topic_get 13`): `set_input_delay` and `set_output_delay` at 1:07:11, the hold condition at 16:29. The `constraints` skill has the full steps.
 
 ### Formulas (notation of lecture 13)
 

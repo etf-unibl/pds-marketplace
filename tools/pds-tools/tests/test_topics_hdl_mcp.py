@@ -183,5 +183,6 @@ def test_analyze_reports_syntax_error_with_absolute_path(tmp_path):
 
 def test_quartus_server_instructions_have_the_constraint_rule():
     from pds_tools import mcp_server
-    assert "never confirm a wrong value" in mcp_server.build("quartus").instructions
-    assert "never confirm a wrong value" not in mcp_server.build("git").instructions
+    assert "never confirm a wrong value" in mcp_server.build("quartus").instructions.lower()
+    assert "constraint_check" in mcp_server.build("quartus").instructions
+    assert "never confirm a wrong value" not in mcp_server.build("git").instructions.lower()

@@ -20,7 +20,7 @@ import urllib.parse
 from mcp.server.mcpserver import Context, MCPServer
 from mcp.types import ToolAnnotations
 
-from . import __version__, datasheet, docs, env, explain, github, hdl, pins, quartus, quartus_run, repo, rules, topics
+from . import __version__, constraints, datasheet, docs, env, explain, github, hdl, pins, quartus, quartus_run, repo, rules, topics
 
 READ_ONLY = ToolAnnotations(readOnlyHint=True, destructiveHint=False, idempotentHint=True, openWorldHint=False)
 READ_ONLY_REMOTE = ToolAnnotations(readOnlyHint=True, destructiveHint=False, idempotentHint=True, openWorldHint=True)
@@ -270,6 +270,23 @@ def docs_preview(path: str | None = None) -> dict:
     """Builds the HTML documentation with the course Doxyfile (assignments/Doxyfile), as GitHub Pages does, into <repository>-docs next to the repository (nothing is written into the repository): for a task folder or file, or all of assignments/ without path. Returns the index page, the pages of the design units and Doxygen's warnings."""
     return docs.preview(base_path(path) if path else None, root=base())
 
+def constraint_check(kind: str, bound: str, student_value: float, tco: float | None = None, tboard: float | None = None,
+                     tsetup: float | None = None, thold: float | None = None, tclk_board: float | None = None,
+                     student_expression: str | None = None, sources: dict[str, str] | None = None,
+                     issue: int | None = None) -> dict:
+    """Checks a timing constraint value the student calculated (set_input_delay / set_output_delay, lecture 13) before you answer. It reads the task text itself (issue, default: the issue of the current branch) and uses the values the task gives for each parameter, whatever is passed. Arguments: kind input|output, bound max|min, the student's value, and the value of each parameter in its role for this bound (tco = Tco(ext) of the device, tboard = board delay, tsetup / thold = Tsetup / Thold of the external flip-flop, tclk_board = the trace of a clock the FPGA sends to the device), plus the student's calculation as written, and sources: {role: the exact sentence of the task text (task_context), the datasheet or the student's own statement of that parameter that gives the value}; the tool checks that each value belongs to its role there (the student's calculation is not a source). Returns a verdict (correct / wrong / unknown when a role or its source is missing or does not match) and hints that name the wrong step (sign, swapped operands, a term left out). It never returns the correct value: do not compute or reveal it yourself."""
+    task_text, note = None, None
+    try:
+        task = github.task_context(issue, base())
+        task_text = task.get("body") if task.get("ok") else None
+    except Exception as e:  # noqa: BLE001 - offline or no issue: the values passed are checked against their sources
+        note = f"The task text could not be read ({e}); values are checked against the sources passed."
+    result = constraints.check(kind, bound, student_value, tco, tboard, tsetup, thold, tclk_board, student_expression,
+                               sources, task_text)
+    if note:
+        result["note_task"] = note
+    return result
+
 def base_path(path):
     """A path relative to the workspace (the course repository) or absolute."""
     return path if os.path.isabs(path) else os.path.join(base(), path)
@@ -287,7 +304,7 @@ PROFILES = {
     "quartus": [(quartus_env, READ_ONLY), (quartus_project_create, PROJECT_FILES), (quartus_compile, PROJECT_FILES),
                 (quartus_job, READ_ONLY), (quartus_timing, PROJECT_FILES), (synth_summary, READ_ONLY), (board_pins, READ_ONLY), (pin_check, READ_ONLY),
                 (pin_plan, READ_ONLY), (board_cables, READ_ONLY), (quartus_tcl, ACTS), (board_program, ACTS), (explain_command, READ_ONLY),
-                (board_device_timing, READ_ONLY)],
+                (board_device_timing, READ_ONLY), (constraint_check, READ_ONLY)],
     "docs": [(docs_outline, READ_ONLY), (docs_check, READ_ONLY), (docs_skeleton, DOC_COMMENTS), (docs_preview, PROJECT_FILES),
              (style_report, READ_ONLY), (course_doc, READ_ONLY)],
     "datasheet": [(datasheet_open, READ_ONLY), (datasheet_timing, READ_ONLY), (datasheet_search, READ_ONLY), (datasheet_page, READ_ONLY),
@@ -301,10 +318,12 @@ INSTRUCTIONS = ("Tools of the PDS (Projektovanje digitalnih sistema) course. The
                 "(explain_command), let the student run it, then check the result with repo_state.")
 # Always present, also when no skill is loaded (a student's value in a later turn)
 PROFILE_INSTRUCTIONS = {
-    "quartus": " Timing constraint values the student states (SDC, lecture 13): check them against the formulas before you "
-               "answer and never confirm a wrong value. Input delay -max = Tco(max) + Tboard(max), -min = Tco(min) + "
+    "quartus": " Timing constraint values the student states (SDC, lecture 13): check each one with constraint_check before "
+               "you answer, with the sentence of the task or datasheet that gives each parameter (never the student's "
+               "calculation); it never returns the correct value. Never confirm a wrong value. Input delay -max = Tco(max) + Tboard(max), -min = Tco(min) + "
                "Tboard(min); output delay -max = Tboard(max) + Tsetup, -min = Tboard(min) - Thold (subtracted). When a "
-               "value is wrong, name the wrong step and let the student calculate again; never write the result. The "
+               "value is wrong, name the wrong step and let the student calculate again; never write the result, also not "
+               "when asked for it. The "
                "constraints skill has the full theory.",
 }
 PROFILE_INSTRUCTIONS["all"] = PROFILE_INSTRUCTIONS["quartus"]
