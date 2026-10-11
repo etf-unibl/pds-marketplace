@@ -15,18 +15,31 @@ The student writes the constraints and calculates their values; you teach the th
    - if the project was created before the student added that file: the student copies the project's `<top>.sdc` (the template, or their edited version) into `assignments/<N>/<top>.sdc` (show the `copy` command), then the project is created again with `overwrite: true` so it uses that file. Never tell the student to edit one file while Quartus reads another.
    After a full compilation (`compile` skill, `flow: "full"`), **call `quartus_timing`** and show what is unconstrained (`unconstrained`, `check_timing`) and which clocks exist.
 2. **Point to the lecture** `docs/topics/13-timing-analysis.md` (with pds-learning: `topic_get 13`) and the video moments that fit the question: setup and hold (01:13), the setup condition and fmax (11:56), the hold condition (16:29), clock skew and hold violations (20:31), the SDC file (44:11), `create_clock` (53:16), `set_input_delay` and `set_output_delay` (1:07:11). Closing timing by pipelining: topic 14 (`topic_get 14`).
-3. **Explain the theory** of the constraint at hand (below), in the lecture's notation, and ask the student where each number comes from: the clock of the task or the board, the datasheet of the external device (`Tco`, `Tsetup`, `Thold`), the board delay, the requirement of the task.
+3. **Explain the theory** of the constraint at hand (formulas in the shared text below), in the lecture's notation, and ask the student where each number comes from: the clock of the task or the board, the datasheet of the external device (`Tco`, `Tsetup`, `Thold`), the board delay, the requirement of the task.
    - **An on-board device** (SDRAM, ADC, VGA DAC, audio codec, TV decoder): `board_device_timing` gives its connection, clock, datasheet pages and pitfalls.
    - **The component's values:** a timing card from the pds-datasheet `datasheet` skill holds them (role, datasheet parameter, value, page). Use the card's roles in the formulas below. Without a card: if the student has the datasheet as a PDF, use that skill (with pds-datasheet installed; otherwise tell the student to install it), or let the student read the values with the parameter names of that skill. Never fill in a component value yourself: a value without a source stays open (strict rule below).
    - **The board delay:** an estimate (below, "The FPGA and the board"); the student writes the assumption in a comment next to the constraint. **Let the student calculate the value.**
-   - Give the formula with the parameter names only (`-max` = `Tco(max)` + `Tboard(max)`), never with the numbers of the student's task put in, and never the result. The student picks the numbers from the task or the datasheet and calculates.
-   - Check the calculation step by step. When a step is wrong, name the step and the rule ("`Thold` is subtracted, not added: the output may change only after the hold time") and ask the student to calculate again: **do not write the corrected calculation or the result**, also not after a second wrong answer (then give a smaller hint, e.g. the sign of the result).
-   - A worked example uses other numbers than the student's design.
+   - Check every value and calculation of the student against the formulas (shared text below): never confirm a wrong value, never give the result.
 4. **The student edits the SDC file the project uses** (`sdc_file`, step 1). The generated file already has the board facts (the `CLOCK_50` clock, `derive_pll_clocks`, `derive_clock_uncertainty`) and commented templates with the design's port names: uncomment a line and write the value. **Do not write the SDC yourself**, also not when asked: show the line, explain each option, and let the student add it, as with commands that change something.
 5. **Check:** compile again with `flow: "full"` (the Fitter uses the SDC too), then `quartus_timing`. The constrained path must no longer be listed as unconstrained; read the setup slack (`-max` values) and the hold slack (`-min` values). Negative slack: `timing` skill (what to change in the design, or whether the requirement allows a different constraint). An SDC error (unknown port, wrong syntax) appears in the compile result: explain the message and let the student correct the line.
 6. **Keep the student's work.** Never re-create the project to "reset" constraints. If the project is re-created (`overwrite`, only when the student asks), `quartus_project_create` keeps an edited SDC (`sdc_kept`) and writes the fresh template next to it as `<top>.sdc.new`.
 
-## Theory (notation of lecture 13)
+## Notes
+
+- The constraints are read by the Fitter as well: after any change of the SDC compile again before `quartus_timing`.
+- Show how the same is done in the GUI: **Tools > Timing Analyzer**, menu **Constraints** (*Create Clock*, *Set Input Delay*, *Set Output Delay*, *Set False Path*), which shows the matching SDC command (lecture 13).
+
+## Timing constraint values: theory and checking (mandatory)
+
+Whenever the student states a constraint value or a calculation (e.g. "output -min = 0.5 + 1 = 1.5 ns"), even without a question and in any skill:
+
+- **Check it against the formulas below before you answer.** Never agree with a value because the student states it, and never tell the student to change a correct value in their SDC file into a wrong one. If you are not sure, say so and point to the formula and the lecture instead of confirming.
+- **When it is wrong:** name the wrong step and the rule (e.g. "`Thold` is subtracted, not added: the output may change only after the hold time of the external flip-flop") and ask the student to calculate again. Do not write the corrected calculation or the result, also not after a second wrong answer (then a smaller hint, e.g. the sign of the result).
+- **When it is right:** confirm it and say which formula it follows.
+- Give formulas with the parameter names only, never with the numbers of the student's task put in, and never the result. A worked example uses other numbers than the student's design.
+- Lecture 13 (`docs/topics/13-timing-analysis.md`, `topic_get 13`): `set_input_delay` and `set_output_delay` at 1:07:11, the hold condition at 16:29. The `constraints` skill has the full steps.
+
+### Formulas (notation of lecture 13)
 
 - **Between two registers on one clock** with period `Tc`:
   - setup: `Tcq + Tnext(max) + Tsetup < Tc`, so setup slack = `Tc - (Tcq + Tnext(max) + Tsetup)` and `fmax = 1 / (Tcq + Tnext(max) + Tsetup)`;
@@ -46,11 +59,6 @@ The student writes the constraints and calculates their values; you teach the th
 - **Combinational path from an input to an output** (no clock): `set_max_delay -from [all_inputs] -to [all_outputs] <ns>`, where the value is the time the surrounding system allows between an input change and a valid output (e.g. what is left of the external clock period after the external `Tco`, the board delays and the external `Tsetup`). `quartus_timing` reports the actual delays (`pin_to_pin`) to compare with.
 - **No timing relation to the clock:** switches and push buttons change at any moment (synchronize them in VHDL with two flip-flops, then `set_false_path -from` those ports); LEDs and 7-segment displays are read by a person (`set_false_path -to`). These are board facts, not calculated values.
 - **Orders of magnitude**, only to check a result, never as a value: a board trace adds about 1 ns per 15 cm. The `Tco` and `Tsetup` of fast logic and memories are a few ns, while slow serial devices are often tens of ns. A computed input or output delay larger than the clock period means a wrong number, or a requirement the design cannot meet. A value that looks implausible is checked again on its datasheet page, not replaced.
-
-## Notes
-
-- The constraints are read by the Fitter as well: after any change of the SDC compile again before `quartus_timing`.
-- Show how the same is done in the GUI: **Tools > Timing Analyzer**, menu **Constraints** (*Create Clock*, *Set Input Delay*, *Set Output Delay*, *Set False Path*), which shows the matching SDC command (lecture 13).
 
 ## Timing values: only from a source, never invented (mandatory)
 

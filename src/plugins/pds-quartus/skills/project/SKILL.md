@@ -20,6 +20,8 @@ description: Creates an Intel Quartus Prime project for a PDS design or task fol
 - For a different board or device pass the device and leave pins to the student (`assign_pins: false`).
 - The generated `<top>.sdc` has the clock of the design (a board fact) and commented templates of the constraints the student adds and calculates; point to the `constraints` skill. On a re-created project an edited SDC is kept (`sdc_kept`, template in `<top>.sdc.new`).
 
+{{include sdc-theory}}
+
 {{include quartus-tools-rule}}
 
 {{include teach-rule}}

@@ -299,6 +299,15 @@ INSTRUCTIONS = ("Tools of the PDS (Projektovanje digitalnih sistema) course. The
                 "project tools and docs_skeleton (adds documentation comments to a design file, never code). "
                 "Never run commands that change the repository or GitHub for the student: show the command, explain it "
                 "(explain_command), let the student run it, then check the result with repo_state.")
+# Always present, also when no skill is loaded (a student's value in a later turn)
+PROFILE_INSTRUCTIONS = {
+    "quartus": " Timing constraint values the student states (SDC, lecture 13): check them against the formulas before you "
+               "answer and never confirm a wrong value. Input delay -max = Tco(max) + Tboard(max), -min = Tco(min) + "
+               "Tboard(min); output delay -max = Tboard(max) + Tsetup, -min = Tboard(min) - Thold (subtracted). When a "
+               "value is wrong, name the wrong step and let the student calculate again; never write the result. The "
+               "constraints skill has the full theory.",
+}
+PROFILE_INSTRUCTIONS["all"] = PROFILE_INSTRUCTIONS["quartus"]
 
 
 _workdir = None
@@ -415,7 +424,8 @@ def safe(func):
 def build(profile):
     if profile not in PROFILES:
         raise SystemExit(f"Unknown profile '{profile}'. Profiles: {', '.join(PROFILES)}")
-    server = MCPServer(name=f"pds-{profile}", version=__version__, instructions=INSTRUCTIONS)
+    server = MCPServer(name=f"pds-{profile}", version=__version__,
+                       instructions=INSTRUCTIONS + PROFILE_INSTRUCTIONS.get(profile, ""))
     for func, annotations in PROFILES[profile]:
         server.tool(annotations=annotations)(with_workspace(safe(func)))
     return server
