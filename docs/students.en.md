@@ -34,7 +34,7 @@ Node.js is not needed.
 Install `pds-tools` into the same Python you use for the course (where `vhdl-style` is installed):
 
 ```
-python -m pip install "pds-tools @ git+https://github.com/etf-unibl/pds-marketplace@v0.2.17#subdirectory=tools/pds-tools"
+python -m pip install "pds-tools @ git+https://github.com/etf-unibl/pds-marketplace@v0.3.0#subdirectory=tools/pds-tools"
 ```
 
 On Linux and macOS use `python3` instead of `python`. Check that the command `pds-mcp` is found:
@@ -43,9 +43,9 @@ On Linux and macOS use `python3` instead of `python`. Check that the command `pd
 pds-mcp --list
 ```
 
-The output lists the tool sets of the plugins (`course`, `git`, `design`, `testing`, `learning`, `quartus`).
+The output lists the tool sets of the plugins (`course`, `git`, `design`, `testing`, `learning`, `quartus`, `docs`, `datasheet`) and their tools.
 
-**Virtual environment:** if you installed the course tools in a virtual environment, activate it **before** you start the AI tool (`.venv\Scripts\Activate.ps1` on Windows, `source .venv/bin/activate` on Linux/macOS). The AI tool starts `pds-mcp` from the `PATH` of the terminal it was started in; without the environment the plugins' tools are missing.
+**Virtual environment:** if you installed the course tools in a virtual environment, activate it **before** you start the AI tool (`.venv\Scripts\activate.bat` in Command Prompt, `.venv\Scripts\Activate.ps1` in PowerShell, `source .venv/bin/activate` on Linux/macOS). The AI tool starts `pds-mcp` from the `PATH` of the terminal it was started in; without the environment the plugins' tools are missing.
 
 ## 2. Add the plugins to your AI tool
 
@@ -73,7 +73,7 @@ Start Claude Code in your course repository (`claude`) and run:
 /plugin install pds-learning@pds-marketplace
 ```
 
-(`pds-design` and `pds-testing` the same way.) Then run `/reload-plugins` or restart Claude Code. The first time a plugin's tool runs, Claude Code asks for permission; the tools only read, so you can choose to allow them for the plugin.
+(The other plugins the same way.) Then run `/reload-plugins` or restart Claude Code. The plugins' tools run without asking, except the three you confirm every time: writing the documentation skeleton into your design file, running a Tcl script and programming the board.
 
 ### GitHub Copilot CLI
 
@@ -90,16 +90,22 @@ Start Copilot in your course repository with its strongest automatic setting, `c
 
 ### Antigravity CLI
 
-Antigravity copies a plugin from a folder when you install it. Clone the marketplace once and install from it:
+Antigravity copies a plugin from a folder when you install it. Clone the marketplace once, next to your course repository, and install from it. With Antigravity **closed**, in Command Prompt (all eight plugins in one line):
 
 ```
 git clone https://github.com/etf-unibl/pds-marketplace.git
-agy plugin install pds-marketplace/plugins/pds-course
-agy plugin install pds-marketplace/plugins/pds-git
-agy plugin install pds-marketplace/plugins/pds-learning
+for %p in (pds-course pds-git pds-learning pds-design pds-testing pds-quartus pds-datasheet pds-docs) do agy plugin install pds-marketplace\plugins\%p
 ```
 
-Check with `agy plugin list`. To update later, **close Antigravity** (while it runs, the course tools it started lock the plugin folders and the install fails with "being used by another process"), run `git pull` in the clone and install the plugins again.
+In PowerShell, Linux or macOS install them one by one (`agy plugin install pds-marketplace/plugins/pds-course`, ...) or with a loop, e.g. in bash:
+
+```
+for p in pds-course pds-git pds-learning pds-design pds-testing pds-quartus pds-datasheet pds-docs; do agy plugin install pds-marketplace/plugins/$p; done
+```
+
+Check with `agy plugin list`: every plugin is enabled and lists its skills, one rule, one MCP server and one hook. The rule is a short summary of the course rules that Antigravity applies to every message, also when no skill matches the question.
+
+To update later, **close Antigravity first**, run `git pull` in the clone and install the plugins again with the same command. While Antigravity runs, the course tools it started lock the plugin folders: the install fails with "being used by another process" and can leave a plugin folder empty, so install again once Antigravity is closed.
 
 - Start `agy` in your course repository from a terminal where `pds-mcp --version` works (with the virtual environment active, if you use one). Antigravity shows no error when it cannot start the course tools; the assistant then tells you that `pds-mcp` is not found and how to fix it.
 - Antigravity starts the course tools with the first message of a session, so the first answer may come without them: the assistant checks `pds-mcp --version` and asks you to send the message again. The second message uses the tools.
@@ -135,7 +141,7 @@ Ask in your own words, in Serbian or English; the assistant picks the matching s
 
 **Documentation skeleton:** the one exception to "the assistant does not edit `assignments/`". With your confirmation, it adds Doxygen comments (`--!`) to your design file: one-sentence briefs it reads from the code (file, entity, ports, architecture, signals, processes, ...) and TODO placeholders for the detailed descriptions. It never changes code or a comment you wrote. You write every TODO in your own words and check the generated briefs. The skeleton's comments need no `AI-assisted-by:` line in the commit. The review only advises; you correct the comments yourself.
 
-What the assistant does by itself: it reads files, runs GHDL and the style check (without `--fix`), reads your issues and pull requests on GitHub, and searches the course topic pages. What it leaves to you: every command that changes something. It shows the command, explains each part, says what you should see and how to undo it, and checks the result after you ran it.
+What the assistant does by itself, through the course tools: it reads files, runs GHDL and the style check (without `--fix`) in a temporary copy, so nothing is written into your repository, reads your issues and pull requests on GitHub, and searches the course topic pages. What it leaves to you: every command that changes something. It shows the command, explains each part, says what you should see and how to undo it, and checks the result after you ran it.
 
 If the assistant tries to run such a command itself, a guard stops it with the message "PDS plugin rule (teach, don't execute)", and it shows you the command instead. That is expected.
 
@@ -149,7 +155,7 @@ The course announces new versions of the plugins and of `pds-tools` (the plugins
 2. **Update `pds-tools`** in the same Python as in step 1; activate the virtual environment first if you use one. Use the version tag the course announces:
 
    ```
-   python -m pip install --upgrade "pds-tools @ git+https://github.com/etf-unibl/pds-marketplace@v0.2.17#subdirectory=tools/pds-tools"
+   python -m pip install --upgrade "pds-tools @ git+https://github.com/etf-unibl/pds-marketplace@v0.3.0#subdirectory=tools/pds-tools"
    pds-mcp --version
    ```
 
@@ -160,7 +166,7 @@ The course announces new versions of the plugins and of `pds-tools` (the plugins
    | ------ | ------ |
    | Claude Code | start it, then `/plugin marketplace update pds-marketplace` and `/reload-plugins` |
    | Copilot CLI | in the terminal: `copilot plugin marketplace update`, then `copilot plugin update --all` (all installed plugins) |
-   | Antigravity CLI | with Antigravity closed: `git pull` in the clone, then `agy plugin install` for each plugin again |
+   | Antigravity CLI | with Antigravity closed: `git pull` in the clone, then the install command of section 2 again |
 
 4. **Start the AI tool again** in your course repository, from a terminal where the environment is active, and ask "Check my setup for the PDS course." The answer lists the tools and their versions, `pds-tools` included.
 
@@ -175,5 +181,6 @@ The course announces new versions of the plugins and of `pds-tools` (the plugins
 | Copilot answers from memory instead of using the tools | type `/mcp`: the `pds-…` servers must be listed and running; if they are not, Copilot cannot find `pds-mcp` (start it from a terminal where `pds-mcp --list` works). If they are running, start Copilot with `copilot --model auto --auto-tier intelligence` (section 2) and ask again, naming the plugin, e.g. "use the pds-learning tools" |
 | Antigravity: the plugin does nothing | run `agy plugin list`; reinstall from the clone; the guard needs Python on `PATH` (`python --version`) |
 | Antigravity asks to send the first message again | expected: it starts the course tools with the first message of a session; send the message again |
-| Antigravity: `agy plugin install` fails with "being used by another process" | Antigravity is still running: close it and install again |
-| Windows: "Python was not found; run without arguments to install from the Microsoft Store" | message of the Windows `python3` shortcut, from plugins before 0.1.16 (their guard tried `python3` first); update the plugins. If it remains, Python is not on `PATH`: install it and tick "Add python.exe to PATH" |
+| Antigravity: `agy plugin install` fails with "being used by another process" | Antigravity is still running: close it and install again (all plugins: a failed install can leave a plugin folder empty) |
+| The style check fails on the file header (`pds_001`) | copy the header block from the course guide `docs/vhdl-code-style.md` on GitHub (branch `main`) and change only the unit name, the year and the description; a header retyped by hand or by the assistant often differs in a line break of the license |
+| Windows: "Python was not found; run without arguments to install from the Microsoft Store" | Python is not on `PATH` (the message comes from the Windows `python3` shortcut): install Python and tick "Add python.exe to PATH", then open a new terminal |

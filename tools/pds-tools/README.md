@@ -2,7 +2,7 @@
 
 Helpers and the MCP server behind the AI plugins of the PDS course (*Projektovanje digitalnih sistema*, Faculty of Electrical Engineering, University of Banja Luka).
 
-The package does not change the course repository or GitHub. It reads the git state, the course documents and Quartus reports, analyses VHDL with GHDL in a temporary library and checks texts against the course rules. Commands that change state are only explained. Two exceptions write files: the Quartus tools write the Quartus project outside the repository, and `docs_skeleton` adds documentation comments (`--!`, never code) to a design file when the student confirms it.
+The package does not change the course repository or GitHub. It reads the git state, the course documents and Quartus reports, analyses VHDL with GHDL in a temporary library and checks texts against the course rules. Commands that change state are only explained. Exceptions that write: the Quartus tools write the Quartus project outside the repository (and `quartus_tcl` runs a script there, `board_program` programs the board, both after confirmation), and `docs_skeleton` adds documentation comments (`--!`, never code) to a design file when the student confirms it.
 
 | Module | Contents |
 | ------ | ------ |
@@ -14,6 +14,7 @@ The package does not change the course repository or GitHub. It reads the git st
 | `quartus_run` | Quartus projects outside the repository, compilation, timing analysis, Tcl, programming the board |
 | `pins` | DE1-SoC pin table and checks of top-level ports |
 | `datasheet` | timing tables and pages of component datasheets (PDF), notes on the DE1-SoC devices |
+| `constraints` | check of a timing constraint value the student calculated, against the values the task gives (`constraint_check`) |
 | `docs` | Doxygen documentation of designs: outline, review against the course requirements and Doxygen's pitfalls, skeleton (comments only), local HTML preview |
 | `topics` | topic pages, glossary, self-check questions and example code of the course repository |
 | `explain` | explanations of the commands of the course workflow (Serbian and English) |
@@ -24,8 +25,10 @@ The package does not change the course repository or GitHub. It reads the git st
 ```
 pds-mcp --profile git          # MCP server (stdio) with the tools of one plugin
 pds-mcp --list                 # profiles and tools
-pds-tools topics_search latch  # the same tools from the command line, JSON output
+pds-tools topics_search latch  # the read-only tools from the command line, JSON output
 ```
+
+The command line is for scripts and debugging. It offers only the read-only tools; the plugins use the MCP server, so the AI tool keeps the confirmations of the tools that write.
 
 Profiles: `course`, `git`, `design`, `testing`, `learning`, `quartus`, `datasheet`, `docs` (and `all`).
 

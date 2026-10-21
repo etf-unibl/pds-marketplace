@@ -35,11 +35,13 @@ Add the marketplace once and install plugins by name, e.g. in Claude Code:
 | `tools/pds-tools` | Python package with the read-only tools and the MCP server (`pds-mcp --profile <plugin>`) |
 | `src/` | skills, guard hook and shared texts of the plugins (hand-edited); `src/marketplace/` lists the instructor plugins |
 | `build/` | generator of the plugin packages and the marketplace catalogs |
-| `plugins/` | generated plugin packages (Claude Code, Copilot CLI and Antigravity CLI in one folder each) |
+| `plugins/` | generated plugin packages (Claude Code, Copilot CLI and Antigravity CLI in one folder each; `rules/` is the always-on course rule of Antigravity CLI) |
 | `.claude-plugin/marketplace.json`, `.github/plugin/marketplace.json` | the catalog for Claude Code and for Copilot CLI (Copilot does not accept `git-subdir` sources) |
 | `evals/` | scenario tests of the plugins with the real AI tools |
 
-Development: edit `src/`, run `python build/build.py`, test with `python -m pytest` in `tools/pds-tools` and the evals; CI checks that the generated files are current. Releases of `pds-tools` are tagged `v<version>`; the student guides install from the tag.
+Development: edit `src/`, run `python build/build.py`, test with `python -m pytest` in `tools/pds-tools` and the evals; CI checks that the generated files are current.
+
+Releases: a release is tagged `v<pds-tools version>` (e.g. `v0.3.0`, with plugins 0.2.0); the student guides, the course templates and the onboarding material install `pds-tools` from that tag, and the plugins come from `main`. The private instructor plugins follow with a release that pins the same `pds-tools` tag.
 
 ## License
 
