@@ -236,3 +236,12 @@ def test_quartus_server_instructions_have_the_constraint_rule():
     assert "never confirm a wrong value" in mcp_server.build("quartus").instructions.lower()
     assert "constraint_check" in mcp_server.build("quartus").instructions
     assert "never confirm a wrong value" not in mcp_server.build("git").instructions.lower()
+
+
+def test_cli_offers_only_read_only_tools(capsys):
+    # an assistant without the MCP servers found the CLI and could have written files with it, without the confirmation
+    from pds_tools import cli
+    assert cli.main(["--list"]) == 0
+    listed = capsys.readouterr().out
+    assert "env_check(" in listed and "docs_skeleton(" not in listed and "board_program(" not in listed and "quartus_tcl(" not in listed
+    assert cli.main(["docs_skeleton", "x.vhd", "write=true"]) == 2

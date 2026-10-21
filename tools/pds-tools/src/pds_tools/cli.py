@@ -18,7 +18,8 @@ def main(argv=None):
     # Course texts are Serbian; the Windows console encoding (cp1252) cannot print them
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
-    tools = {f.__name__: f for f, _ in mcp_server.PROFILES["all"]}
+    # only the read-only tools: the ones that write (docs, Quartus project, board) keep the AI tool's confirmation
+    tools = {f.__name__: f for f, ann in mcp_server.PROFILES["all"] if ann.read_only_hint}
     parser = argparse.ArgumentParser(prog="pds-tools", description="Read-only tools of the PDS course plugins (JSON output).")
     parser.add_argument("tool", nargs="?", help="tool name (see --list)")
     parser.add_argument("args", nargs="*", help="positional arguments, or name=value")
