@@ -54,6 +54,7 @@ You help a student of the PDS course (*Projektovanje digitalnih sistema*) learn 
 | `testbench` | testbench does not compile, entity not named like the file, `assert ... severity error` fired, no `wait;` (stopped after 10 ms) | `run_testbenches assignments/<N>` |
 | `verif` | instructor tests: wrong file, entity or port names, or wrong behaviour | compare names with the issue text; simulate own testbench; results are in the `verif-artifacts` artifact |
 
+   - A failed `description` rule: `pr_status` returns the course template (`template`, `.github/pull_request_template.md` from `main`; task branches do not have it). Show which `<!-- section:... -->` marker or check item is missing, from that template; do not search the repository for it. The student writes the summary in their own words and edits the description on GitHub.
 3. Remind the student that the checks run again after every push and after editing the title or description, and that a job stuck in *Queued* for long should be reported to the instructor rather than re-run repeatedly.
 
 See `docs/automated-checks.md` (`course_doc automated-checks`).

@@ -10,6 +10,7 @@ The server runs over stdio in the folder the AI tool starts it in, normally the 
 """
 
 import argparse
+import datetime
 import functools
 import inspect
 import os
@@ -49,8 +50,26 @@ def task_context(issue: int | None = None) -> dict:
 
 
 def pr_status(pr: int | None = None) -> dict:
-    """Pull request of the current branch (or number pr): the course rule checks (title, branch, assignee, files, commits, description) and the CI results with error annotations."""
-    return github.pr_status(pr, base())
+    """Pull request of the current branch (or number pr): the course rule checks (title, branch, assignee, files, commits, description) and the CI results with error annotations; when the description does not follow the template, the template itself."""
+    result = github.pr_status(pr, base())
+    if any(c.get("rule") == "description" and not c.get("ok") for c in result.get("rule_checks", [])):
+        # GitHub takes the template from the default branch; task branches start from assignments, which has none
+        template = pr_template(base())
+        if template:
+            result["template"] = template
+            result["template_note"] = ("The description of the pull request must keep the <!-- section:... --> markers of this template "
+                                       "(.github/pull_request_template.md on main): the student writes the summary in their own words and ticks the check list.")
+    return result
+
+
+def pr_template(path):
+    root = repo.find_root(path) or path
+    for ref in topics.REFS:
+        text = repo.show_file(root, ref, ".github/pull_request_template.md")
+        if text:
+            return text
+    full = os.path.join(root, ".github", "pull_request_template.md")
+    return _read(full) if os.path.isfile(full) else None
 
 
 def time_summary(issue: int | None = None) -> dict:
@@ -97,27 +116,67 @@ def explain_command(command: str, lang: str = "en") -> dict:
 
 def vhdl_analyze(paths: list[str]) -> dict:
     """Analyses VHDL files or folders with GHDL (VHDL-2008, the course standard) into a temporary library; returns errors and warnings with file and line."""
-    return hdl.analyze(paths)
+    return hdl.analyze([base_path(p) for p in paths])
 
 
 def list_testbenches(folder: str) -> dict:
     """Testbenches (*_tb.vhd) of an assignment folder and whether each entity is named like its file (CI requirement)."""
-    return hdl.list_testbenches(folder)
+    return hdl.list_testbenches(base_path(folder))
 
 
 def run_testbenches(folder: str, testbenches: list[str] | None = None, stop_time: str = "10ms") -> dict:
     """Runs the testbenches of an assignment folder exactly like the course CI (in a temporary copy, nothing is written to the folder); pass/fail, assertion messages and files the testbench writes."""
-    return hdl.run_testbenches(folder, testbenches, stop_time)
+    return hdl.run_testbenches(base_path(folder), testbenches, stop_time)
 
 
 def style_report(target: str) -> dict:
-    """Runs the course style check (vhdl-style, never with --fix) on an issue number, folder or file and returns the violations."""
-    return hdl.style_report(target, base())
+    """Runs the course style check (vhdl-style, never with --fix) on an issue number, folder or file and returns the violations; for a wrong file header (pds_001) the exact header of the course style guide for that file."""
+    result = hdl.style_report(target, base())
+    files = sorted({v["file"] for v in result.get("violations", []) if v["rule"] == "pds_001"})
+    if files:
+        headers = {f: header_template(base_path(f)) for f in files}
+        result["header_templates"] = {f: h for f, h in headers.items() if h}
+        if result["header_templates"]:
+            result["header_note"] = ("The header the check expects (docs/vhdl-code-style.md, unit name and year filled in): give it to the student "
+                                     "exactly as it is, line by line, never retyped or rewrapped. Only the description lines are the student's.")
+    return result
+
+
+HEADER_BLOCK = re.compile(r"```[a-z]*\n(-{20,}\n--\n-- unit name:.*?-- The MIT License.*?\n-{20,})\n```", re.S)
+DESCRIPTION_PLACEHOLDER = "--   <description of the unit, in your own words>"
+
+
+def header_template(path):
+    """The file header of the course style guide for a VHDL file: its design unit and the current year."""
+    guide = topics.Docs(base())
+    m = HEADER_BLOCK.search(guide.read("docs/vhdl-code-style.md") or "") if guide.available else None
+    if not m:
+        return None
+    try:
+        code = re.sub(r"--[^\n]*", "", _read(path))
+    except OSError:
+        return None
+    unit = re.search(r"\b(?:entity|package)\s+(\w+)\s+is\b", code, re.I)
+    out, in_description = [], False
+    for line in m.group(1).split("\n"):
+        if line.startswith("-- unit name:"):
+            line = "-- unit name:     " + (unit.group(1) if unit else "<name of the design unit>")
+        elif line == "-- description:":
+            in_description = True
+        elif in_description and re.fullmatch(r"-- +\S.*", line):
+            # the example description of the guide becomes one placeholder line
+            if out[-1] != DESCRIPTION_PLACEHOLDER:
+                out.append(DESCRIPTION_PLACEHOLDER)
+            continue
+        elif line.startswith("---"):
+            in_description = False
+        out.append(re.sub(r"^(-- Copyright \(c\) )\d{4}", lambda g: g.group(1) + str(datetime.date.today().year), line))
+    return "\n".join(out) + "\n"
 
 
 def synth_summary(project_dir: str = ".", revision: str | None = None) -> dict:
     """Reads the Quartus reports of a compiled project: flow summary (ALMs, registers, pins, memory, DSP), warnings that point to design errors (latches, sensitivity lists, ...) and timing (Fmax, slack, unconstrained paths)."""
-    return quartus.synth_summary(project_dir, revision)
+    return quartus.synth_summary(base_path(project_dir), revision)
 
 
 def board_pins(filter_text: str | None = None) -> dict:
@@ -127,12 +186,12 @@ def board_pins(filter_text: str | None = None) -> dict:
 
 def pin_check(vhdl_file: str) -> dict:
     """Checks the ports of the top-level entity in a VHDL file against the board pin names: which bits have a pin, which do not, and direction or vector problems."""
-    return pins.pin_check(_read(vhdl_file))
+    return pins.pin_check(_read(base_path(vhdl_file)))
 
 
 def pin_plan(vhdl_file: str) -> dict:
     """Quartus pin assignments (set_location_assignment lines) for the ports of a VHDL file that match board signals; text only, nothing is written."""
-    return pins.pin_plan(_read(vhdl_file))
+    return pins.pin_plan(_read(base_path(vhdl_file)))
 
 
 def topics_list() -> dict:
@@ -289,7 +348,7 @@ def constraint_check(kind: str, bound: str, student_value: float, tco: float | N
 
 def base_path(path):
     """A path relative to the workspace (the course repository) or absolute."""
-    return path if os.path.isabs(path) else os.path.join(base(), path)
+    return os.path.normpath(path if os.path.isabs(path) else os.path.join(base(), path))
 
 
 PROFILES = {

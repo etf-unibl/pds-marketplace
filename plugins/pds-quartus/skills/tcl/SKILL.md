@@ -10,6 +10,7 @@ allowed-tools: mcp__plugin_pds-quartus_pds-quartus__quartus_env, mcp__plugin_pds
 
 1. Find out the goal (a setting, assignments for many pins, a constraint, a report, a repeatable flow) and the tool it needs:
    - `quartus_sh -t` - project and assignments: `project_open`/`project_new`, `set_global_assignment -name ...`, `set_location_assignment PIN_.. -to <port>`, `set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to <port>`, `export_assignments`, `project_close`; flows with `load_package flow` and `execute_flow -compile`;
+   - reading assignments back (verified with Quartus Prime 23.1 Lite): `foreach_in_collection asgn [get_all_instance_assignments -name LOCATION] { set port [lindex $asgn 2]; set pin [lindex $asgn 4] }` - each element is a list {section, source, destination, name, value}; `get_all_instance_assignments -name IO_STANDARD` the same way, `get_global_assignment -name <name>` for one project setting;
    - `quartus_sta -t` - timing: `project_open`, `create_timing_netlist`, `read_sdc`, `update_timing_netlist`, `report_timing`, `create_timing_summary`, `report_clock_fmax_summary`;
    - SDC (the `.sdc` file, read by the fitter and the timing analyzer): `create_clock -period 20.0 [get_ports CLOCK_50]`, `derive_clock_uncertainty`, `set_input_delay` / `set_output_delay`, `set_false_path`.
    The project skill's `create_project.tcl` and the timing skill's `pds_timing.tcl` in the project folder are working examples to start from.

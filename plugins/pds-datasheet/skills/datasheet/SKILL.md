@@ -23,6 +23,7 @@ Who provides what:
    - Rows are the parameters with their symbol, from and to pins, and conditions.
    - Column groups are the supply voltage, temperature range, part or speed grade, and MIN/TYP/MAX.
    - Ask the student which column group fits their setup: VCC = 3.3 V on the DE1-SoC GPIO, the temperature range of the part they have (the suffix of the part number), the load, and the speed grade printed on the chip.
+   - No column for the student's supply voltage (e.g. a 74HC part, given at 2 V, 4.5 V and 6 V, powered from 3.3 V): the datasheet does not specify the part there. Never interpolate or estimate a value between columns. Say so and show the student the options: a part of a family specified at 3.3 V (the vendor's LV, LVC or AHC version), or the column of the next lower voltage (2 V), the slowest listed, as a value the datasheet does not guarantee at 3.3 V - marked so in the timing card, and the student and the instructor decide.
 6. **The parameters** (table below): explain each one the student needs in their own words and with the diagram, and ask which role it has in the formulas (the constraints skill's theory).
 7. **Check every chosen value on the page** (`datasheet_page`; with `layout: true` a value alone in its row stays under its MIN/TYP/MAX header; `datasheet_search` for a symbol or a footnote):
    - The tables are extracted automatically. A cell with several numbers (`merged_values`) spans merged columns, and only the page shows which ones.

@@ -18,6 +18,7 @@ description: Explain VHDL style check results of the PDS course (vhdl-style, VSG
    - other identifiers are VSG rules;
    - `[VHDLVersion]` lines are GHDL errors (the code is not valid VHDL-2008); explain them like compiler errors.
    Look the rule up in the rule reference linked from `docs/vhdl-code-style.md` (`course_doc vhdl-code-style`) and show the corrected line; the student edits the file.
+   - A wrong file header (`pds_001`): `style_report` returns the exact header for the file in `header_templates` (unit name and current year filled in). Show it exactly as it is, never retyped from memory or rewrapped: the check compares every license line letter by letter. The student writes only the description lines. Do not search the style tool's source code for the header.
 4. Run `style_report` again after the student's changes.
 
 Typical course rules: file header with the current year, file named like the entity, port suffixes by mode (`_i`, `_o`), signal and constant naming, one statement per line, no `buffer` ports, only `numeric_std` arithmetic.

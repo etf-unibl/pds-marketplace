@@ -167,6 +167,56 @@ def test_branch_check_parameter_base_does_not_hide_repository(course, monkeypatc
     assert isinstance(mcp_server.branch_check(base="origin/assignments"), dict)
 
 
+def test_relative_paths_resolve_against_the_repository(course, tmp_path, monkeypatch):
+    # Antigravity CLI starts the servers outside the repository: assignments/12/x.vhd once failed
+    # with "cannot open" while style_report found the same file
+    from pds_tools import mcp_server
+    folder = os.path.join(course, "assignments", "12")
+    os.makedirs(folder)
+    with open(os.path.join(folder, "top.vhd"), "w") as f:
+        f.write("library ieee;\nuse ieee.std_logic_1164.all;\nentity top is\n  port (SW : in std_logic_vector(1 downto 0); LEDR : out std_logic_vector(1 downto 0));\nend top;\n"
+                "architecture rtl of top is\nbegin\n  LEDR <= SW;\nend rtl;\n")
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(mcp_server, "_workdir", str(course))
+    assert mcp_server.pin_check("assignments/12/top.vhd")["ok"]
+    assert mcp_server.list_testbenches("assignments/12")["ok"]
+    if hdl.find_ghdl():
+        assert mcp_server.vhdl_analyze(["assignments/12/top.vhd"])["ok"]
+        assert mcp_server.vhdl_analyze(["assignments\\12"])["ok"]
+
+
+STYLE_GUIDE = os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "pds-course-template", "docs", "vhdl-code-style.md")
+
+
+@pytest.mark.skipif(not os.path.isfile(STYLE_GUIDE), reason="course template not next to the plugins")
+def test_header_and_pr_template_from_main(tmp_path, monkeypatch):
+    # agy retyped the license header from memory (one line rewrapped) and searched the style tool's source;
+    # the pull request template is only on main, so it searched the task branch in vain
+    import datetime
+    from pds_tools import mcp_server
+    root = tmp_path / "course"
+    (root / "docs").mkdir(parents=True)
+    (root / "docs" / "topics").mkdir()
+    (root / "docs" / "topics" / "05-x.md").write_text("# x\n", encoding="utf-8")
+    with open(STYLE_GUIDE, encoding="utf-8") as f:
+        (root / "docs" / "vhdl-code-style.md").write_text(f.read(), encoding="utf-8")
+    (root / ".github").mkdir()
+    (root / ".github" / "pull_request_template.md").write_text("<!-- section:summary -->\n", encoding="utf-8")
+    _git(root, "init", "-q", "-b", "main")
+    _git(root, "-c", "user.name=t", "-c", "user.email=t@t", "add", ".")
+    _git(root, "-c", "user.name=t", "-c", "user.email=t@t", "commit", "-q", "-m", "docs")
+    _git(root, "switch", "-q", "--orphan", "work")
+    (root / "dec.vhd").write_text("-- entity old is\nentity decoder_2_4 is\nend entity decoder_2_4;\n", encoding="utf-8")
+    monkeypatch.setattr(mcp_server, "_workdir", str(root))
+    header = mcp_server.header_template(str(root / "dec.vhd"))
+    lines = header.splitlines()
+    assert "-- unit name:     decoder_2_4" in lines
+    assert f"-- Copyright (c) {datetime.date.today().year} Faculty of Electrical Engineering" in lines
+    assert "-- LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE," in lines
+    assert lines.count("--   <description of the unit, in your own words>") == 1 and "NAND2" not in header
+    assert mcp_server.pr_template(str(root)).strip() == "<!-- section:summary -->"
+
+
 def test_parse_messages_windows_absolute_path():
     out = r"C:\Users\x\AppData\Local\Temp\pds\inv.vhd:5:10: missing ';' at end of port clause"
     m = hdl.parse_messages(out)
