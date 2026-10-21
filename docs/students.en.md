@@ -90,7 +90,7 @@ Start Copilot in your course repository with its strongest automatic setting, `c
 
 ### Antigravity CLI
 
-Antigravity installs plugins from a folder. Clone the marketplace once and install from it:
+Antigravity copies a plugin from a folder when you install it. Clone the marketplace once and install from it:
 
 ```
 git clone https://github.com/etf-unibl/pds-marketplace.git
@@ -99,7 +99,10 @@ agy plugin install pds-marketplace/plugins/pds-git
 agy plugin install pds-marketplace/plugins/pds-learning
 ```
 
-Check with `agy plugin list`. To update later, run `git pull` in the clone and install the plugins again.
+Check with `agy plugin list`. To update later, **close Antigravity** (while it runs, the course tools it started lock the plugin folders and the install fails with "being used by another process"), run `git pull` in the clone and install the plugins again.
+
+- Start `agy` in your course repository from a terminal where `pds-mcp --version` works (with the virtual environment active, if you use one). Antigravity shows no error when it cannot start the course tools; the assistant then tells you that `pds-mcp` is not found and how to fix it.
+- Antigravity starts the course tools with the first message of a session, so the first answer may come without them: the assistant checks `pds-mcp --version` and asks you to send the message again. The second message uses the tools.
 
 ## 3. Check that it works
 
@@ -157,7 +160,7 @@ The course announces new versions of the plugins and of `pds-tools` (the plugins
    | ------ | ------ |
    | Claude Code | start it, then `/plugin marketplace update pds-marketplace` and `/reload-plugins` |
    | Copilot CLI | in the terminal: `copilot plugin marketplace update`, then `copilot plugin update --all` (all installed plugins) |
-   | Antigravity CLI | `git pull` in the clone, then `agy plugin install` again |
+   | Antigravity CLI | with Antigravity closed: `git pull` in the clone, then `agy plugin install` for each plugin again |
 
 4. **Start the AI tool again** in your course repository, from a terminal where the environment is active, and ask "Check my setup for the PDS course." The answer lists the tools and their versions, `pds-tools` included.
 
@@ -165,10 +168,12 @@ The course announces new versions of the plugins and of `pds-tools` (the plugins
 
 | Problem | Cause and fix |
 | ------ | ------ |
-| The assistant answers without running any PDS tool; `/mcp` (Claude Code) shows no `pds-…` server or it failed | `pds-mcp` is not found: install `pds-tools` (step 1) and start the AI tool from a terminal where `pds-mcp --list` works (activate the virtual environment first) |
+| The assistant answers without running any PDS tool; `/mcp` (Claude Code) shows no `pds-…` server or it failed | `pds-mcp` is not found: install `pds-tools` (step 1) and start the AI tool from a terminal where `pds-mcp --list` works. With a virtual environment, activate it first; without one, the `Scripts` folder of your Python (`%APPDATA%\Python\Python3XX\Scripts` after `pip install --user`; pip warns about it) must be on `PATH`. `python -m pip show pds-tools` shows where it is installed |
 | "PDS plugin rule (teach, don't execute)" | expected: run the shown command yourself |
 | The course documents or topic pages are not found | start the AI tool inside your course repository; if you cloned only the `assignments` branch, run `git fetch origin main` |
 | GitHub errors in pull request status or time tracking (403, rate limit, 404 on a private repository) | log in with `gh auth login`; the tools then use your GitHub login |
 | Copilot answers from memory instead of using the tools | type `/mcp`: the `pds-…` servers must be listed and running; if they are not, Copilot cannot find `pds-mcp` (start it from a terminal where `pds-mcp --list` works). If they are running, start Copilot with `copilot --model auto --auto-tier intelligence` (section 2) and ask again, naming the plugin, e.g. "use the pds-learning tools" |
 | Antigravity: the plugin does nothing | run `agy plugin list`; reinstall from the clone; the guard needs Python on `PATH` (`python --version`) |
-| Windows: "Python was not found; run without arguments to install from the Microsoft Store" | harmless message of the Windows `python3` shortcut; the guard then uses `python` or `py` |
+| Antigravity asks to send the first message again | expected: it starts the course tools with the first message of a session; send the message again |
+| Antigravity: `agy plugin install` fails with "being used by another process" | Antigravity is still running: close it and install again |
+| Windows: "Python was not found; run without arguments to install from the Microsoft Store" | message of the Windows `python3` shortcut, from plugins before 0.1.16 (their guard tried `python3` first); update the plugins. If it remains, Python is not on `PATH`: install it and tick "Add python.exe to PATH" |

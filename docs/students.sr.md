@@ -90,7 +90,7 @@ Pokrenite *Copilot* u repozitorijumu kursa sa najjačim automatskim podešavanje
 
 ### Antigravity CLI
 
-*Antigravity* instalira dodatke iz foldera. Jednom klonirajte *marketplace* i instalirajte dodatke iz njega:
+*Antigravity* pri instalaciji kopira dodatak iz foldera. Jednom klonirajte *marketplace* i instalirajte dodatke iz njega:
 
 ```
 git clone https://github.com/etf-unibl/pds-marketplace.git
@@ -99,7 +99,10 @@ agy plugin install pds-marketplace/plugins/pds-git
 agy plugin install pds-marketplace/plugins/pds-learning
 ```
 
-Provjerite komandom `agy plugin list`. Za ažuriranje kasnije izvršite `git pull` u klonu i ponovo instalirajte dodatke.
+Provjerite komandom `agy plugin list`. Za ažuriranje kasnije **zatvorite *Antigravity*** (dok radi, alati kursa koje je pokrenuo zaključavaju foldere dodataka, pa instalacija javlja „being used by another process“), izvršite `git pull` u klonu i ponovo instalirajte dodatke.
+
+- Pokrenite `agy` u repozitorijumu kursa iz terminala u kojem radi `pds-mcp --version` (sa aktivnim virtuelnim okruženjem, ako ga koristite). *Antigravity* ne prijavljuje grešku kada ne može da pokrene alate kursa; asistent vam tada kaže da se `pds-mcp` ne pronalazi i kako se to ispravlja.
+- *Antigravity* pokreće alate kursa tek sa prvom porukom sesije, pa prvi odgovor može stići bez njih: asistent provjeri `pds-mcp --version` i traži da poruku pošaljete ponovo. Druga poruka koristi alate.
 
 ## 3. Provjera da sve radi
 
@@ -157,7 +160,7 @@ Kurs najavljuje nove verzije dodataka i alata `pds-tools` (dodaci pozivaju alate
    | ------ | ------ |
    | Claude Code | pokrenite ga, zatim `/plugin marketplace update pds-marketplace` i `/reload-plugins` |
    | Copilot CLI | u terminalu: `copilot plugin marketplace update`, zatim `copilot plugin update --all` (svi instalirani dodaci) |
-   | Antigravity CLI | `git pull` u klonu, zatim ponovo `agy plugin install` |
+   | Antigravity CLI | dok je *Antigravity* zatvoren: `git pull` u klonu, zatim ponovo `agy plugin install` za svaki dodatak |
 
 4. **Ponovo pokrenite AI alat** u repozitorijumu kursa, iz terminala u kojem je okruženje aktivno, i pitajte "Provjeri moje okruženje za kurs PDS." Odgovor navodi alate i njihove verzije, uključujući `pds-tools`.
 
@@ -165,10 +168,12 @@ Kurs najavljuje nove verzije dodataka i alata `pds-tools` (dodaci pozivaju alate
 
 | Problem | Uzrok i rješenje |
 | ------ | ------ |
-| Asistent odgovara bez pokretanja PDS alata; `/mcp` (*Claude Code*) ne prikazuje server `pds-…` ili prijavljuje grešku | komanda `pds-mcp` se ne pronalazi: instalirajte `pds-tools` (korak 1) i pokrenite AI alat iz terminala u kojem `pds-mcp --list` radi (prethodno aktivirajte virtuelno okruženje) |
+| Asistent odgovara bez pokretanja PDS alata; `/mcp` (*Claude Code*) ne prikazuje server `pds-…` ili prijavljuje grešku | komanda `pds-mcp` se ne pronalazi: instalirajte `pds-tools` (korak 1) i pokrenite AI alat iz terminala u kojem `pds-mcp --list` radi. Sa virtuelnim okruženjem prvo ga aktivirajte; bez njega folder `Scripts` vašeg *Python*-a (`%APPDATA%\Python\Python3XX\Scripts` nakon `pip install --user`; *pip* na to upozorava) mora biti na putanji. `python -m pip show pds-tools` pokazuje gdje je instaliran |
 | „PDS plugin rule (teach, don't execute)“ | očekivano: prikazanu komandu pokrenite sami |
 | Dokumenti kursa ili stranice tema se ne pronalaze | pokrenite AI alat u repozitorijumu kursa; ako ste klonirali samo granu `assignments`, izvršite `git fetch origin main` |
 | Greške *GitHub*-a kod stanja *pull request*-a ili evidencije vremena (403, ograničenje broja zahtjeva, 404 za privatni repozitorijum) | prijavite se komandom `gh auth login`; alati tada koriste vašu *GitHub* prijavu |
 | *Copilot* odgovara napamet umjesto da koristi alate | ukucajte `/mcp`: serveri `pds-…` moraju biti navedeni i pokrenuti; ako nisu, *Copilot* ne nalazi `pds-mcp` (pokrenite ga iz terminala u kojem radi `pds-mcp --list`). Ako rade, pokrenite *Copilot* komandom `copilot --model auto --auto-tier intelligence` (odjeljak 2) i pitajte ponovo, navodeći dodatak, npr. „koristi pds-learning alate“ |
 | *Antigravity*: dodatak ništa ne radi | izvršite `agy plugin list`; ponovo instalirajte iz klona; zaštita zahtijeva *Python* na putanji (`python --version`) |
-| *Windows*: „Python was not found; run without arguments to install from the Microsoft Store“ | bezopasna poruka *Windows* prečice `python3`; zaštita tada koristi `python` ili `py` |
+| *Antigravity* traži da prvu poruku pošaljete ponovo | očekivano: alate kursa pokreće tek sa prvom porukom sesije; pošaljite poruku ponovo |
+| *Antigravity*: `agy plugin install` javlja „being used by another process“ | *Antigravity* je još pokrenut: zatvorite ga i instalirajte ponovo |
+| *Windows*: „Python was not found; run without arguments to install from the Microsoft Store“ | poruka *Windows* prečice `python3`, iz dodataka prije verzije 0.1.16 (njihova zaštita je prvo probala `python3`); ažurirajte dodatke. Ako ostane, *Python* nije na putanji: instalirajte ga i označite „Add python.exe to PATH“ |
