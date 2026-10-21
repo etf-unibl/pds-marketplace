@@ -11,7 +11,7 @@ description: Check and explain the student's PDS course setup (git identity with
 
 ## Steps
 
-1. Run `env_check` (read-only). If the tool is not available, the course tools are not installed or not on the PATH (see the first point of the course context below): that is the first problem to report, not a reason to check the setup with your own commands. It reports the tools on PATH with versions, the git identity, whether the course hooks are enabled and a list of problems.
+1. Run `env_check` (read-only). If the tool is not available, find out why with the steps of the first point of the course context below (the servers may still be starting, or `pds-mcp` is not installed or not on the PATH): that comes first, not a setup check with your own commands. It reports the tools on PATH with versions, the git identity, whether the course hooks are enabled and a list of problems.
 2. Go through the problems one at a time, most important first:
    - **git identity**: `user.name` must be the student's name, `user.email` the GitHub noreply address `<number>+<username>@users.noreply.github.com` (GitHub **Settings > Emails > Keep my email addresses private**). Show `git config --global user.name "..."` and `git config --global user.email "..."` and explain why the noreply address is used (private e-mail, sign-off line `Signed-off-by` must match the author).
    - **hooks**: show `git config core.hooksPath .githooks` (run once in the repository) and explain what the three hooks do (pre-commit: only `assignments/<N>/`; commit-msg: message format and sign-off; prepare-commit-msg: pre-filled message).
