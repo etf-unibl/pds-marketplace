@@ -1,0 +1,339 @@
+# Guard of the PDS student plugins: commands that change the repository or GitHub are
+# denied; the assistant shows and explains them, and the student runs them.
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "git add"
+decision = "deny"
+priority = 500
+denyMessage = "PDS plugin rule (teach, don't execute): show the student this command, explain it, say how to check and undo it; the student runs it. Do not try another way to run it."
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "git commit"
+decision = "deny"
+priority = 501
+denyMessage = "PDS plugin rule (teach, don't execute): show the student this command, explain it, say how to check and undo it; the student runs it. Do not try another way to run it."
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "git push"
+decision = "deny"
+priority = 502
+denyMessage = "PDS plugin rule (teach, don't execute): show the student this command, explain it, say how to check and undo it; the student runs it. Do not try another way to run it."
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "git pull"
+decision = "deny"
+priority = 503
+denyMessage = "PDS plugin rule (teach, don't execute): show the student this command, explain it, say how to check and undo it; the student runs it. Do not try another way to run it."
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "git merge"
+decision = "deny"
+priority = 504
+denyMessage = "PDS plugin rule (teach, don't execute): show the student this command, explain it, say how to check and undo it; the student runs it. Do not try another way to run it."
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "git rebase"
+decision = "deny"
+priority = 505
+denyMessage = "PDS plugin rule (teach, don't execute): show the student this command, explain it, say how to check and undo it; the student runs it. Do not try another way to run it."
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "git reset"
+decision = "deny"
+priority = 506
+denyMessage = "PDS plugin rule (teach, don't execute): show the student this command, explain it, say how to check and undo it; the student runs it. Do not try another way to run it."
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "git restore"
+decision = "deny"
+priority = 507
+denyMessage = "PDS plugin rule (teach, don't execute): show the student this command, explain it, say how to check and undo it; the student runs it. Do not try another way to run it."
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "git checkout"
+decision = "deny"
+priority = 508
+denyMessage = "PDS plugin rule (teach, don't execute): show the student this command, explain it, say how to check and undo it; the student runs it. Do not try another way to run it."
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "git switch"
+decision = "deny"
+priority = 509
+denyMessage = "PDS plugin rule (teach, don't execute): show the student this command, explain it, say how to check and undo it; the student runs it. Do not try another way to run it."
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "git stash"
+decision = "deny"
+priority = 510
+denyMessage = "PDS plugin rule (teach, don't execute): show the student this command, explain it, say how to check and undo it; the student runs it. Do not try another way to run it."
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "git cherry-pick"
+decision = "deny"
+priority = 511
+denyMessage = "PDS plugin rule (teach, don't execute): show the student this command, explain it, say how to check and undo it; the student runs it. Do not try another way to run it."
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "git revert"
+decision = "deny"
+priority = 512
+denyMessage = "PDS plugin rule (teach, don't execute): show the student this command, explain it, say how to check and undo it; the student runs it. Do not try another way to run it."
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "git rm"
+decision = "deny"
+priority = 513
+denyMessage = "PDS plugin rule (teach, don't execute): show the student this command, explain it, say how to check and undo it; the student runs it. Do not try another way to run it."
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "git mv"
+decision = "deny"
+priority = 514
+denyMessage = "PDS plugin rule (teach, don't execute): show the student this command, explain it, say how to check and undo it; the student runs it. Do not try another way to run it."
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "git clean"
+decision = "deny"
+priority = 515
+denyMessage = "PDS plugin rule (teach, don't execute): show the student this command, explain it, say how to check and undo it; the student runs it. Do not try another way to run it."
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "git tag"
+decision = "deny"
+priority = 516
+denyMessage = "PDS plugin rule (teach, don't execute): show the student this command, explain it, say how to check and undo it; the student runs it. Do not try another way to run it."
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "git am"
+decision = "deny"
+priority = 517
+denyMessage = "PDS plugin rule (teach, don't execute): show the student this command, explain it, say how to check and undo it; the student runs it. Do not try another way to run it."
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "git apply"
+decision = "deny"
+priority = 518
+denyMessage = "PDS plugin rule (teach, don't execute): show the student this command, explain it, say how to check and undo it; the student runs it. Do not try another way to run it."
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "git clone"
+decision = "deny"
+priority = 519
+denyMessage = "PDS plugin rule (teach, don't execute): show the student this command, explain it, say how to check and undo it; the student runs it. Do not try another way to run it."
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "git init"
+decision = "deny"
+priority = 520
+denyMessage = "PDS plugin rule (teach, don't execute): show the student this command, explain it, say how to check and undo it; the student runs it. Do not try another way to run it."
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "git branch -d"
+decision = "deny"
+priority = 521
+denyMessage = "PDS plugin rule (teach, don't execute): show the student this command, explain it, say how to check and undo it; the student runs it. Do not try another way to run it."
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "git branch -D"
+decision = "deny"
+priority = 522
+denyMessage = "PDS plugin rule (teach, don't execute): show the student this command, explain it, say how to check and undo it; the student runs it. Do not try another way to run it."
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "git branch -m"
+decision = "deny"
+priority = 523
+denyMessage = "PDS plugin rule (teach, don't execute): show the student this command, explain it, say how to check and undo it; the student runs it. Do not try another way to run it."
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "git branch -M"
+decision = "deny"
+priority = 524
+denyMessage = "PDS plugin rule (teach, don't execute): show the student this command, explain it, say how to check and undo it; the student runs it. Do not try another way to run it."
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "git config --global"
+decision = "deny"
+priority = 525
+denyMessage = "PDS plugin rule (teach, don't execute): show the student this command, explain it, say how to check and undo it; the student runs it. Do not try another way to run it."
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "git config user"
+decision = "deny"
+priority = 526
+denyMessage = "PDS plugin rule (teach, don't execute): show the student this command, explain it, say how to check and undo it; the student runs it. Do not try another way to run it."
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "git config core"
+decision = "deny"
+priority = 527
+denyMessage = "PDS plugin rule (teach, don't execute): show the student this command, explain it, say how to check and undo it; the student runs it. Do not try another way to run it."
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "git config --unset"
+decision = "deny"
+priority = 528
+denyMessage = "PDS plugin rule (teach, don't execute): show the student this command, explain it, say how to check and undo it; the student runs it. Do not try another way to run it."
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "git remote add"
+decision = "deny"
+priority = 529
+denyMessage = "PDS plugin rule (teach, don't execute): show the student this command, explain it, say how to check and undo it; the student runs it. Do not try another way to run it."
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "git remote remove"
+decision = "deny"
+priority = 530
+denyMessage = "PDS plugin rule (teach, don't execute): show the student this command, explain it, say how to check and undo it; the student runs it. Do not try another way to run it."
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "git remote set-url"
+decision = "deny"
+priority = 531
+denyMessage = "PDS plugin rule (teach, don't execute): show the student this command, explain it, say how to check and undo it; the student runs it. Do not try another way to run it."
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "gh pr create"
+decision = "deny"
+priority = 532
+denyMessage = "PDS plugin rule (teach, don't execute): show the student this command, explain it, say how to check and undo it; the student runs it. Do not try another way to run it."
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "gh pr merge"
+decision = "deny"
+priority = 533
+denyMessage = "PDS plugin rule (teach, don't execute): show the student this command, explain it, say how to check and undo it; the student runs it. Do not try another way to run it."
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "gh pr close"
+decision = "deny"
+priority = 534
+denyMessage = "PDS plugin rule (teach, don't execute): show the student this command, explain it, say how to check and undo it; the student runs it. Do not try another way to run it."
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "gh pr edit"
+decision = "deny"
+priority = 535
+denyMessage = "PDS plugin rule (teach, don't execute): show the student this command, explain it, say how to check and undo it; the student runs it. Do not try another way to run it."
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "gh pr comment"
+decision = "deny"
+priority = 536
+denyMessage = "PDS plugin rule (teach, don't execute): show the student this command, explain it, say how to check and undo it; the student runs it. Do not try another way to run it."
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "gh pr review"
+decision = "deny"
+priority = 537
+denyMessage = "PDS plugin rule (teach, don't execute): show the student this command, explain it, say how to check and undo it; the student runs it. Do not try another way to run it."
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "gh pr ready"
+decision = "deny"
+priority = 538
+denyMessage = "PDS plugin rule (teach, don't execute): show the student this command, explain it, say how to check and undo it; the student runs it. Do not try another way to run it."
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "gh issue create"
+decision = "deny"
+priority = 539
+denyMessage = "PDS plugin rule (teach, don't execute): show the student this command, explain it, say how to check and undo it; the student runs it. Do not try another way to run it."
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "gh issue edit"
+decision = "deny"
+priority = 540
+denyMessage = "PDS plugin rule (teach, don't execute): show the student this command, explain it, say how to check and undo it; the student runs it. Do not try another way to run it."
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "gh issue close"
+decision = "deny"
+priority = 541
+denyMessage = "PDS plugin rule (teach, don't execute): show the student this command, explain it, say how to check and undo it; the student runs it. Do not try another way to run it."
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "gh issue comment"
+decision = "deny"
+priority = 542
+denyMessage = "PDS plugin rule (teach, don't execute): show the student this command, explain it, say how to check and undo it; the student runs it. Do not try another way to run it."
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "gh repo"
+decision = "deny"
+priority = 543
+denyMessage = "PDS plugin rule (teach, don't execute): show the student this command, explain it, say how to check and undo it; the student runs it. Do not try another way to run it."
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "gh api -X"
+decision = "deny"
+priority = 544
+denyMessage = "PDS plugin rule (teach, don't execute): show the student this command, explain it, say how to check and undo it; the student runs it. Do not try another way to run it."
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "gh api --method"
+decision = "deny"
+priority = 545
+denyMessage = "PDS plugin rule (teach, don't execute): show the student this command, explain it, say how to check and undo it; the student runs it. Do not try another way to run it."
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "vhdl-style --fix"
+decision = "deny"
+priority = 546
+denyMessage = "PDS plugin rule (teach, don't execute): show the student this command, explain it, say how to check and undo it; the student runs it. Do not try another way to run it."
+
+# Files in assignments/ are graded work: explain the change, the student applies it
+[[rule]]
+toolName = ["write_file", "replace"]
+argsPattern = "assignments[\\\\/]"
+decision = "deny"
+priority = 600
+denyMessage = "PDS plugin rule: files in assignments/ are graded work; show the change, the student applies it."
