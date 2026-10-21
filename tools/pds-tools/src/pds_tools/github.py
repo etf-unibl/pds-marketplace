@@ -127,7 +127,14 @@ def pr_status(pr=None, path=".", repository=None):
         if not found:
             return {"ok": False, "message": f"No pull request for branch {branch} yet.", "branch": branch}
         pr = found[0]["number"]
-    data = get(f"/repos/{slug}/pulls/{pr}")
+    try:
+        data = get(f"/repos/{slug}/pulls/{pr}")
+    except RuntimeError as e:
+        if "API 404" not in str(e):
+            raise
+        # an issue number given as pr
+        return {"ok": False, "message": f"No pull request #{pr} in {slug}. pr is the number of the pull request, not of the issue: "
+                                        "leave it out for the pull request of the current branch."}
     m = re.match(r"^Issue #(\d+)", data["title"] or "")
     issue = m.group(1) if m else rules.issue_from_branch(data["head"]["ref"])
     findings = []

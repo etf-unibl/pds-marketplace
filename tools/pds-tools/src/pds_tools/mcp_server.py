@@ -50,7 +50,7 @@ def task_context(issue: int | None = None) -> dict:
 
 
 def pr_status(pr: int | None = None) -> dict:
-    """Pull request of the current branch (or number pr): the course rule checks (title, branch, assignee, files, commits, description) and the CI results with error annotations; when the description does not follow the template, the template itself."""
+    """Pull request of the current branch, or the pull request with number pr (the pull request number, not the issue number; leave it out for the current branch): the course rule checks (title, branch, assignee, files, commits, description) and the CI results with error annotations; when the description does not follow the template, the template itself."""
     result = github.pr_status(pr, base())
     if any(c.get("rule") == "description" and not c.get("ok") for c in result.get("rule_checks", [])):
         # GitHub takes the template from the default branch; task branches start from assignments, which has none
@@ -130,16 +130,34 @@ def run_testbenches(folder: str, testbenches: list[str] | None = None, stop_time
 
 
 def style_report(target: str) -> dict:
-    """Runs the course style check (vhdl-style, never with --fix) on an issue number, folder or file and returns the violations; for a wrong file header (pds_001) the exact header of the course style guide for that file."""
+    """Runs the course style check (vhdl-style, never with --fix) on an issue number, folder or file and returns the violations; for a wrong file header (pds_001) where the student copies the header from and which lines to change."""
     result = hdl.style_report(target, base())
     files = sorted({v["file"] for v in result.get("violations", []) if v["rule"] == "pds_001"})
-    if files:
-        headers = {f: header_template(base_path(f)) for f in files}
-        result["header_templates"] = {f: h for f, h in headers.items() if h}
-        if result["header_templates"]:
-            result["header_note"] = ("The header the check expects (docs/vhdl-code-style.md, unit name and year filled in): give it to the student "
-                                     "exactly as it is, line by line, never retyped or rewrapped. Only the description lines are the student's.")
+    fixes = {f: header_fix(base_path(f)) for f in files}
+    fixes = {f: h for f, h in fixes.items() if h}
+    if fixes:
+        result["header_fix"] = fixes
+        result["header_note"] = ("Do not write the header (or the license) into the answer: retyped, a line gets rewrapped and the check fails "
+                                 "again. The student copies the header block from the course guide (guide, url) and changes only the lines "
+                                 "given here; the vhdl-style message names the first line that differs, with its expected text.")
     return result
+
+
+def header_fix(path):
+    """For a file without the right header: the guide to copy the header from and the lines to change in the copy."""
+    header = header_template(path)
+    if not header:
+        return None
+    lines = header.split("\n")
+    url = None
+    try:
+        url = f"https://github.com/{github._slug(base(), None)}/blob/main/docs/vhdl-code-style.md"
+    except RuntimeError:
+        pass
+    return {"guide": "docs/vhdl-code-style.md (the header block in the section on the file header, branch main)", "url": url,
+            "change": {"unit name": next(l for l in lines if l.startswith("-- unit name:")),
+                       "copyright": next(l for l in lines if l.startswith("-- Copyright (c)")),
+                       "description": "the example description lines become the student's own description, each starting with '--   '"}}
 
 
 HEADER_BLOCK = re.compile(r"```[a-z]*\n(-{20,}\n--\n-- unit name:.*?-- The MIT License.*?\n-{20,})\n```", re.S)

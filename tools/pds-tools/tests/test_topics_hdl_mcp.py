@@ -214,6 +214,11 @@ def test_header_and_pr_template_from_main(tmp_path, monkeypatch):
     assert f"-- Copyright (c) {datetime.date.today().year} Faculty of Electrical Engineering" in lines
     assert "-- LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE," in lines
     assert lines.count("--   <description of the unit, in your own words>") == 1 and "NAND2" not in header
+    # the answer names the lines to change instead of the header itself (agy rewrapped a license line when retyping it)
+    fix = mcp_server.header_fix(str(root / "dec.vhd"))
+    assert fix["change"]["unit name"] == "-- unit name:     decoder_2_4"
+    assert fix["change"]["copyright"].startswith(f"-- Copyright (c) {datetime.date.today().year} ")
+    assert "LIABILITY" not in str(fix) and fix["url"] is None and fix["guide"].startswith("docs/vhdl-code-style.md")
     assert mcp_server.pr_template(str(root)).strip() == "<!-- section:summary -->"
 
 
