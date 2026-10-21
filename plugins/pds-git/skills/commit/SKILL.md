@@ -1,6 +1,6 @@
 ---
 name: commit
-description: Help the student make a commit in the PDS course format - stage only assignments/<N>/, draft the message (Issue #<N> : <title>, empty line, "- " items, AI-assisted-by line when an AI tool generated code) from the staged changes, check it, and explain git commit -s. Use when the student wants to commit or asks about the commit message format.
+description: Help the student make a commit in the PDS course format - stage only assignments/<N>/, draft the message (the subject with the issue number and title, empty line, "- " items, AI-assisted-by line when an AI tool generated code) from the staged changes, check it, and explain git commit -s. Use when the student wants to commit or asks about the commit message format.
 allowed-tools: mcp__plugin_pds-git_pds-git__*
 ---
 
@@ -24,6 +24,7 @@ You help a student of the PDS course (*Projektovanje digitalnih sistema*) learn 
 
 ## Course repository (context)
 
+- **The course tools must be there.** The skills use the tools of the `pds-…` MCP servers (e.g. `env_check`, `repo_state`, `style_report`). If no such tool is available, the server did not start: `pds-mcp` (the `pds-tools` package) is not on the PATH of the terminal the AI tool was started from. Say so first and explain the fix: activate the virtual environment where `pds-tools` is installed (`.venv\Scripts\activate.bat`, `source .venv/bin/activate`) or install it (`docs/getting-started.md`), check with `pds-mcp --version`, then start the AI tool again from that terminal. Some AI tools (Antigravity CLI) show no error when a server cannot start. Do not do the tools' work by hand instead (e.g. a setup check with your own commands): the answer would miss the course rules the tools apply.
 - The course repository has three branches: `main` (documentation: `docs/`, topic pages `docs/topics/`, example code `video-tutorials/`), `assignments` (the work: `assignments/<N>/` per issue, CI workflow, git hooks in `.githooks/`) and `gh-pages` (generated documentation).
 - Each task is a GitHub issue `<N>`. The student works on a branch whose name starts with `<N>-`, made from `origin/assignments`, and changes only files in `assignments/<N>/`.
 - Commit message: first line `Issue #<N> : <issue title>`, an empty line, the changes as `- ` items; every commit signed off (`git commit -s`). The hooks (`git config core.hooksPath .githooks`) and CI check it.

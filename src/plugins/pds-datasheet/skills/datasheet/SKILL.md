@@ -1,6 +1,6 @@
 ---
 name: datasheet
-description: Reads the timing of a component datasheet (PDF) the student provides - finds the timing requirements, switching / AC characteristics and timing diagrams, explains each parameter (clock-to-output, setup, hold, access time, output hold, clock limits), the min/typ/max columns and the test conditions, and helps the student choose the values that match the DE1-SoC board. Strict: every value comes from a datasheet page or the student, a value not found is reported, never invented. The result is a timing card for the timing constraints (pds-quartus constraints skill). Use when the student gives a datasheet, asks where a timing value is in a datasheet, or what a datasheet parameter means.
+description: Reads the timing of a component datasheet (PDF) the student provides - finds the timing requirements, switching / AC characteristics and timing diagrams, explains each parameter (clock-to-output, setup, hold, access time, output hold, clock limits), the min/typ/max columns and the test conditions, and helps the student choose the values that match the DE1-SoC board. Strict - every value comes from a datasheet page or the student, a value not found is reported, never invented. The result is a timing card for the timing constraints (pds-quartus constraints skill). Use when the student gives a datasheet, asks where a timing value is in a datasheet, or what a datasheet parameter means.
 ---
 
 # Timing from a component datasheet

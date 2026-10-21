@@ -1,6 +1,6 @@
 ---
 name: datasheet
-description: Reads the timing of a component datasheet (PDF) the student provides - finds the timing requirements, switching / AC characteristics and timing diagrams, explains each parameter (clock-to-output, setup, hold, access time, output hold, clock limits), the min/typ/max columns and the test conditions, and helps the student choose the values that match the DE1-SoC board. Strict: every value comes from a datasheet page or the student, a value not found is reported, never invented. The result is a timing card for the timing constraints (pds-quartus constraints skill). Use when the student gives a datasheet, asks where a timing value is in a datasheet, or what a datasheet parameter means.
+description: Reads the timing of a component datasheet (PDF) the student provides - finds the timing requirements, switching / AC characteristics and timing diagrams, explains each parameter (clock-to-output, setup, hold, access time, output hold, clock limits), the min/typ/max columns and the test conditions, and helps the student choose the values that match the DE1-SoC board. Strict - every value comes from a datasheet page or the student, a value not found is reported, never invented. The result is a timing card for the timing constraints (pds-quartus constraints skill). Use when the student gives a datasheet, asks where a timing value is in a datasheet, or what a datasheet parameter means.
 allowed-tools: mcp__plugin_pds-datasheet_pds-datasheet__*
 ---
 
@@ -129,6 +129,7 @@ You help a student of the PDS course (*Projektovanje digitalnih sistema*) learn 
 
 ## Course repository (context)
 
+- **The course tools must be there.** The skills use the tools of the `pds-…` MCP servers (e.g. `env_check`, `repo_state`, `style_report`). If no such tool is available, the server did not start: `pds-mcp` (the `pds-tools` package) is not on the PATH of the terminal the AI tool was started from. Say so first and explain the fix: activate the virtual environment where `pds-tools` is installed (`.venv\Scripts\activate.bat`, `source .venv/bin/activate`) or install it (`docs/getting-started.md`), check with `pds-mcp --version`, then start the AI tool again from that terminal. Some AI tools (Antigravity CLI) show no error when a server cannot start. Do not do the tools' work by hand instead (e.g. a setup check with your own commands): the answer would miss the course rules the tools apply.
 - The course repository has three branches: `main` (documentation: `docs/`, topic pages `docs/topics/`, example code `video-tutorials/`), `assignments` (the work: `assignments/<N>/` per issue, CI workflow, git hooks in `.githooks/`) and `gh-pages` (generated documentation).
 - Each task is a GitHub issue `<N>`. The student works on a branch whose name starts with `<N>-`, made from `origin/assignments`, and changes only files in `assignments/<N>/`.
 - Commit message: first line `Issue #<N> : <issue title>`, an empty line, the changes as `- ` items; every commit signed off (`git commit -s`). The hooks (`git config core.hooksPath .githooks`) and CI check it.

@@ -27,7 +27,7 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(ROOT, "src")
-VERSION = "0.1.15"
+VERSION = "0.1.16"
 REPO = "https://github.com/etf-unibl/pds-marketplace"
 AUTHOR = {"name": "Faculty of Electrical Engineering, University of Banja Luka", "url": "https://github.com/etf-unibl"}
 MARKETPLACE = "pds-marketplace"
@@ -46,9 +46,10 @@ DENIED_PREFIXES = [
 # Antigravity CLI: hooks.json in the plugin root, command run in the plugin folder (sh -c / cmd /c)
 AGY_MATCHER = ("run_command|shell_exec|send_command_input|write_to_file|replace_file_content|multi_replace_file_content|"
                "edit_notebook|file_change|write_blob|delete_directory|move|git_commit")
-AGY_GUARD = "python3 scripts/guard.py agy || python scripts/guard.py agy || py scripts/guard.py agy"
+# python first: on Windows python3 is the Microsoft Store stub, which prints an error and fails on every tool call
+AGY_GUARD = "python scripts/guard.py agy || python3 scripts/guard.py agy || py scripts/guard.py agy"
 
-GUARD_CMD = ('for p in python3 python py; do if "$p" -c "" >/dev/null 2>&1; then exec "$p" "${ROOT}/scripts/guard.py" CLIENT; fi; done; exit 0')
+GUARD_CMD = ('for p in python python3 py; do if "$p" -c "" >/dev/null 2>&1; then exec "$p" "${ROOT}/scripts/guard.py" CLIENT; fi; done; exit 0')
 
 
 def read(path):
@@ -60,6 +61,27 @@ def render(text):
     def include(m):
         return read(os.path.join(SRC, "shared", m.group(1) + ".md")).strip()
     return re.sub(r"\{\{include ([\w-]+)\}\}", include, text)
+
+
+# A plain YAML scalar must not contain ": " or " #" and must not start with an indicator character; a stricter
+# YAML parser (Antigravity CLI) skips the whole skill otherwise, while Claude Code and Copilot accept it
+YAML_UNSAFE = re.compile(r": | #|^[-?:,\[\]{}#&*!|>'\"%@`]")
+
+
+def check_frontmatter(path, text):
+    """Stops the build if a frontmatter value of a skill is not a valid plain YAML scalar."""
+    m = re.match(r"^---\n(.*?)\n---\n", text, re.S)
+    if not m:
+        raise SystemExit(f"{path}: no frontmatter")
+    for line in m.group(1).splitlines():
+        key, sep, value = line.partition(": ")
+        if not sep or not re.fullmatch(r"[a-z][a-z-]*", key):
+            raise SystemExit(f"{path}: frontmatter line is not 'key: value': {line[:60]}")
+        bad = YAML_UNSAFE.search(value.strip())
+        if bad:
+            near = value[max(0, bad.start() - 20):bad.end() + 20]
+            raise SystemExit(f"{path}: the value of '{key}' is not valid plain YAML near {near!r} (use ' - ' instead of "
+                             "': ', no ' #'); a strict parser (Antigravity CLI) would skip the skill")
 
 
 def plugins():
@@ -90,6 +112,7 @@ def build_files():
             allowed = (", ".join(f"mcp__plugin_{name}_pds-{p['profile']}__{t}" for t in p["auto_approve"])
                        if p.get("auto_approve") else f"mcp__plugin_{name}_pds-{p['profile']}__*")
             text = text.replace("\n---\n", f"\nallowed-tools: {allowed}\n---\n", 1)
+            check_frontmatter(f"src/plugins/{name}/skills/{skill}/SKILL.md", text)
             files[f"{out}/skills/{skill}/SKILL.md"] = text
             skills.append(skill)
         files[f"{out}/scripts/guard.py"] = read(os.path.join(SRC, "shared", "guard.py"))

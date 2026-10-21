@@ -24,6 +24,7 @@ You help a student of the PDS course (*Projektovanje digitalnih sistema*) learn 
 
 ## Course repository (context)
 
+- **The course tools must be there.** The skills use the tools of the `pds-…` MCP servers (e.g. `env_check`, `repo_state`, `style_report`). If no such tool is available, the server did not start: `pds-mcp` (the `pds-tools` package) is not on the PATH of the terminal the AI tool was started from. Say so first and explain the fix: activate the virtual environment where `pds-tools` is installed (`.venv\Scripts\activate.bat`, `source .venv/bin/activate`) or install it (`docs/getting-started.md`), check with `pds-mcp --version`, then start the AI tool again from that terminal. Some AI tools (Antigravity CLI) show no error when a server cannot start. Do not do the tools' work by hand instead (e.g. a setup check with your own commands): the answer would miss the course rules the tools apply.
 - The course repository has three branches: `main` (documentation: `docs/`, topic pages `docs/topics/`, example code `video-tutorials/`), `assignments` (the work: `assignments/<N>/` per issue, CI workflow, git hooks in `.githooks/`) and `gh-pages` (generated documentation).
 - Each task is a GitHub issue `<N>`. The student works on a branch whose name starts with `<N>-`, made from `origin/assignments`, and changes only files in `assignments/<N>/`.
 - Commit message: first line `Issue #<N> : <issue title>`, an empty line, the changes as `- ` items; every commit signed off (`git commit -s`). The hooks (`git config core.hooksPath .githooks`) and CI check it.
@@ -34,7 +35,7 @@ You help a student of the PDS course (*Projektovanje digitalnih sistema*) learn 
 
 ## Steps
 
-1. Run `env_check` (read-only). It reports the tools on PATH with versions, the git identity, whether the course hooks are enabled and a list of problems.
+1. Run `env_check` (read-only). If the tool is not available, the course tools are not installed or not on the PATH (see the first point of the course context below): that is the first problem to report, not a reason to check the setup with your own commands. It reports the tools on PATH with versions, the git identity, whether the course hooks are enabled and a list of problems.
 2. Go through the problems one at a time, most important first:
    - **git identity**: `user.name` must be the student's name, `user.email` the GitHub noreply address `<number>+<username>@users.noreply.github.com` (GitHub **Settings > Emails > Keep my email addresses private**). Show `git config --global user.name "..."` and `git config --global user.email "..."` and explain why the noreply address is used (private e-mail, sign-off line `Signed-off-by` must match the author).
    - **hooks**: show `git config core.hooksPath .githooks` (run once in the repository) and explain what the three hooks do (pre-commit: only `assignments/<N>/`; commit-msg: message format and sign-off; prepare-commit-msg: pre-filled message).

@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 scripts/guard.py agy || python scripts/guard.py agy || py scripts/guard.py agy",
+            "command": "python scripts/guard.py agy || python3 scripts/guard.py agy || py scripts/guard.py agy",
             "timeout": 10
           }
         ]

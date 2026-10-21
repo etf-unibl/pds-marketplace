@@ -1,6 +1,6 @@
 ---
 name: commit
-description: Help the student make a commit in the PDS course format - stage only assignments/<N>/, draft the message (Issue #<N> : <title>, empty line, "- " items, AI-assisted-by line when an AI tool generated code) from the staged changes, check it, and explain git commit -s. Use when the student wants to commit or asks about the commit message format.
+description: Help the student make a commit in the PDS course format - stage only assignments/<N>/, draft the message (the subject with the issue number and title, empty line, "- " items, AI-assisted-by line when an AI tool generated code) from the staged changes, check it, and explain git commit -s. Use when the student wants to commit or asks about the commit message format.
 ---
 
 # Committing
