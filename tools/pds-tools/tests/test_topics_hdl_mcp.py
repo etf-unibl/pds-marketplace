@@ -182,7 +182,7 @@ def test_relative_paths_resolve_against_the_repository(course, tmp_path, monkeyp
     assert mcp_server.list_testbenches("assignments/12")["ok"]
     if hdl.find_ghdl():
         assert mcp_server.vhdl_analyze(["assignments/12/top.vhd"])["ok"]
-        assert mcp_server.vhdl_analyze(["assignments\\12"])["ok"]
+        assert mcp_server.vhdl_analyze([os.path.join("assignments", "12")])["ok"]
 
 
 STYLE_GUIDE = os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "pds-course-template", "docs", "vhdl-code-style.md")
