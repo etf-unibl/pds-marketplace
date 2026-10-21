@@ -27,7 +27,7 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(ROOT, "src")
-VERSION = "0.1.19"
+VERSION = "0.1.20"
 REPO = "https://github.com/etf-unibl/pds-marketplace"
 AUTHOR = {"name": "Faculty of Electrical Engineering, University of Banja Luka", "url": "https://github.com/etf-unibl"}
 MARKETPLACE = "pds-marketplace"
@@ -142,6 +142,9 @@ def build_files():
         files[f"{out}/mcp_config.json"] = dump({"mcpServers": mcp_servers(p["profile"])})
         files[f"{out}/hooks.json"] = dump({"pds-student-guard": {"PreToolUse": [{
             "matcher": AGY_MATCHER, "hooks": [{"type": "command", "command": AGY_GUARD, "timeout": 10}]}]}})
+        # always-on rule: a request that matches no skill description (e.g. "Analyze x.vhd with GHDL") loads no
+        # skill, so the course rules must reach the model without one (other AI tools ignore rules/)
+        files[f"{out}/rules/pds-course.md"] = read(os.path.join(SRC, "shared", "agy-rule.md"))
         files[f"{out}/README.md"] = plugin_readme(p, skills)
         entries.append({"name": name, "source": f"./plugins/{name}", "description": p["description"],
                         "category": "education", "tags": p["keywords"]})
