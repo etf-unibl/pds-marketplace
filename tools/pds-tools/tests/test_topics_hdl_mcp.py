@@ -218,7 +218,7 @@ def test_header_and_pr_template_from_main(tmp_path, monkeypatch):
     fix = mcp_server.header_fix(str(root / "dec.vhd"))
     assert fix["change"]["unit name"] == "-- unit name:     decoder_2_4"
     assert fix["change"]["copyright"].startswith(f"-- Copyright (c) {datetime.date.today().year} ")
-    assert "LIABILITY" not in str(fix) and fix["url"] is None and fix["guide"].startswith("docs/vhdl-code-style.md")
+    assert "LIABILITY" not in str(fix) and fix["url"] is None and "docs/vhdl-code-style.md" in fix["guide"]
     assert mcp_server.pr_template(str(root)).strip() == "<!-- section:summary -->"
 
 

@@ -138,7 +138,7 @@ def style_report(target: str) -> dict:
     if fixes:
         result["header_fix"] = fixes
         result["header_note"] = ("Do not write the header (or the license) into the answer: retyped, a line gets rewrapped and the check fails "
-                                 "again. The student copies the header block from the course guide (guide, url) and changes only the lines "
+                                 "again. The student copies the header block from the course guide on GitHub (url) and changes only the lines "
                                  "given here; the vhdl-style message names the first line that differs, with its expected text.")
     return result
 
@@ -154,7 +154,9 @@ def header_fix(path):
         url = f"https://github.com/{github._slug(base(), None)}/blob/main/docs/vhdl-code-style.md"
     except RuntimeError:
         pass
-    return {"guide": "docs/vhdl-code-style.md (the header block in the section on the file header, branch main)", "url": url,
+    # the guide is on main only: a task branch (made from assignments) has no docs/, so no local link to it
+    return {"guide": "the header block in the section on the file header of docs/vhdl-code-style.md, branch main: give the url "
+                     "(a task branch has no docs/ folder, so a local link does not work)", "url": url,
             "change": {"unit name": next(l for l in lines if l.startswith("-- unit name:")),
                        "copyright": next(l for l in lines if l.startswith("-- Copyright (c)")),
                        "description": "the example description lines become the student's own description, each starting with '--   '"}}
