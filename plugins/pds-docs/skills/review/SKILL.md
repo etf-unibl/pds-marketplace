@@ -16,7 +16,9 @@ Review the student's documentation and explain how to improve it. Never change t
    - `multi_line_without_brief`: several `--!` lines without `@brief` become only the detailed description, the summary stays empty; show the form `--! @brief ...` / `--! @details ...`;
    - `split_block`: a blank line inside a comment, Doxygen shows `@details` as text ("unknown command" warning);
    - `merged_comment`: a `--!` comment at the end of a line followed by `--!` lines: Doxygen joins them and attaches both to the next element; one style per clause;
-   - `shared_declaration`, `process_without_label`, `orphan_doc`, `long_brief`, a plain `--` comment that should be `--!`.
+   - `shared_declaration`, `process_without_label`, `orphan_doc`, `long_brief`, a plain `--` comment that should be `--!`;
+   - `image_missing`: the file named in `@image` is not in the task folder (or differs in upper/lower case, which matters on the Linux build of the pages): the published page has no image; the student adds the file (e.g. `assignments/<N>/images/`) or corrects the name;
+   - `image_name_prefix`: the image name does not start with the task number (`<N>_`): Doxygen copies the images of all tasks into one folder, so an image of the same name from another task replaces it; the student renames the file and the command.
    For syntax problems you may show the corrected comment form (the student applies it); for content give advice and questions.
 3. **Read the code against the comments** (the tool cannot judge content). Point out:
    - a description that does not match the code: wrong direction, width, active level, clock edge, synchronous vs. asynchronous reset, a comment left from an earlier version or copied from another signal;

@@ -452,6 +452,55 @@ def _orphans(lines, elements):
     return found
 
 
+IMAGE = re.compile(r"[@\\]image(?:\{[^}]*\})?\s+(\w+)\s+(\"[^\"]+\"|\S+)")
+
+
+def _task_files(folder):
+    """The files of a task folder and its subfolders (e.g. assignments/55/images/), by name."""
+    names = set()
+    for root, dirs, files in os.walk(folder):
+        dirs[:] = [d for d in dirs if not d.startswith(".")]
+        names.update(files)
+    return names
+
+
+def _images(path, lines):
+    """Findings for the @image commands: the file must be in the task folder (Doxygen's IMAGE_PATH is the
+    assignments/ folder, searched recursively; the published pages are built on Linux, so names are
+    case-sensitive) and its name must start with the task number (Doxygen copies the images of all tasks
+    flat into html/, so an image of the same name from another task replaces it without a warning)."""
+    folder = os.path.dirname(os.path.abspath(path))
+    task = os.path.basename(folder)
+    task = task if task.isdigit() else None
+    files = None
+    found = []
+    for i, text in enumerate(lines):
+        if not DOC.match(text):
+            continue
+        for fmt, name in IMAGE.findall(text):
+            name = name.strip('"')
+            if re.match(r"^[a-z]+://", name, re.I):
+                continue  # an image from the web: nothing to find in the repository
+            base = re.split(r"[\\/]", name)[-1]
+            if files is None:
+                files = _task_files(folder)
+            if base not in files:
+                other = next((f for f in files if f.lower() == base.lower()), None)
+                if other:
+                    msg = (f"The image `{base}` is `{other}` in the folder: the pages are built on Linux, where the case "
+                           "of a file name matters, so the image would be missing. Use the same name in the command and the file.")
+                else:
+                    msg = (f"No image `{base}` in the task folder: Doxygen prints 'image file ... is not found in IMAGE_PATH' "
+                           f"and the page has no image. Add the file (e.g. `images/{base}`) or correct the name.")
+                found.append((i + 1, "image_missing", msg))
+            if task and not base.startswith(f"{task}_"):
+                found.append((i + 1, "image_name_prefix",
+                              f"The image name `{base}` does not start with the task number: Doxygen copies the images of all "
+                              f"tasks into one folder, so an image with the same name from another task would replace it "
+                              f"without a warning. Rename the file and the command to `{task}_{base}`."))
+    return found
+
+
 def _check_text(path, text):
     lines, _, _ = _split(text)
     elements = _elements(lines)
@@ -459,6 +508,9 @@ def _check_text(path, text):
 
     def add(line, rule, level, message, key=None):
         findings.append({"line": line, "rule": rule, "level": level, "message": message, **({"key": key} if key else {})})
+
+    for line, rule, message in _images(path, lines):
+        add(line, rule, "required", message)
 
     fd = _file_doc(lines)
     if not fd:

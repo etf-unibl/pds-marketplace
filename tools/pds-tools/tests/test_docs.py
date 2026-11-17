@@ -132,3 +132,44 @@ def test_preview_builds_outside_the_repository(tmp_path):
     assert result["ok"], result
     assert not result["index"].startswith(str(tmp_path) + os.sep) and "-docs" in result["index"]
     assert [p["design_unit"] for p in result["pages"]] == ["counter_mod"]
+
+
+IMAGES_VHD = """--! @file light.vhd
+--! @brief Traffic light controller
+library ieee;
+use ieee.std_logic_1164.all;
+
+--! @brief Traffic light controller
+--! @details Moore state machine.
+--! @image html 55_fsm.svg "State diagram" width=600
+--! @image html 55_missing.png "Not in the folder"
+--! @image html fsm.png "No task number"
+--! @image html 55_Block.png "Wrong case"
+--! @image html https://example.org/55_web.png "From the web"
+entity light is
+  port (
+    clk_i : in std_logic --! Clock
+  );
+end entity light;
+"""
+
+
+def test_check_images(tmp_path):
+    folder = tmp_path / "assignments" / "55"
+    (folder / "images").mkdir(parents=True)
+    for name in ("55_fsm.svg", "fsm.png", "55_block.png"):
+        (folder / "images" / name).write_bytes(b"")
+    (folder / "light.vhd").write_text(IMAGES_VHD)
+    found = [(f["line"], f["rule"]) for f in docs.check(str(folder))["files"][0]["findings"]
+             if f["rule"].startswith("image_")]
+    assert found == [(9, "image_missing"),          # not in assignments/55/ (or its subfolders)
+                     (10, "image_name_prefix"),     # fsm.png: no 55_ prefix
+                     (11, "image_missing")]         # 55_Block.png is 55_block.png: missing on Linux
+    case = next(f for f in docs.check(str(folder))["files"][0]["findings"] if f["line"] == 11)
+    assert "55_block.png" in case["message"] and case["level"] == "required"
+
+
+def test_check_images_outside_a_task_folder():
+    # The fixtures folder is not assignments/<N>: no task number, so only the existence is checked
+    found = rules(docs.check(os.path.join(FIXTURES, "pitfalls.vhd")))
+    assert not any(rule.startswith("image_") for _, rule in found)
